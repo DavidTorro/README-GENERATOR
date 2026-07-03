@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import pkg from "../package.json" with { type: "json" };
-import { buildProjectInfo } from "./domain/project/build-project-info.js";
+import { buildProjectInfo } from "./domain/project/project.builder.js";
 import { FsProjectScanner } from "./infrastructure/fs/fs-project-scanner.js";
-import { HELP, parseCliArgs } from "./presentation/cli/args.js";
+import { HELP, parseCliArgs } from "./presentation/cli/cli.parser.js";
 
 try {
   // slice(2) para ignorar "node" y la ruta del script

@@ -3,7 +3,7 @@
 // los argumentos recibidos y devuelve un objeto con las opciones configuradas
 
 import { parseArgs } from "node:util"; // parseArgs es una función nativa de Node.js que permite parsear argumentos de línea de comandos de manera sencilla y robusta
-import type { Lang } from "../../domain/readme/i18n.js";
+import type { Lang } from "../../domain/readme/readme.i18n.js";
 
 // Interfaz que define las opciones de línea de comandos disponibles para el usuario
 export interface CliOptions {
