@@ -8,7 +8,8 @@
     "noEmit": true, // noEmit es una opción que indica a TypeScript que no genere archivos de salida (como archivos JavaScript) al compilar el código fuente. Esto es útil cuando solo se desea realizar la verificación de tipos sin generar código adicional.
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node"],
+    "resolveJsonModule": true // permite importar archivos JSON como módulos en TypeScript, lo que facilita la carga de datos de configuración u otros recursos en formato JSON directamente en el código
   },
   "include": ["src"]
 }
