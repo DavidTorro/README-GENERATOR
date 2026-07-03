@@ -13,3 +13,9 @@ dist/
 
 # Logs
 *.log
+
+# Editor
+.vscode/
+
+# Otros
+Idea.md
