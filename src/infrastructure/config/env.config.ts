@@ -19,7 +19,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     new URL(ollamaUrl);
   } catch {
     throw new Error(
-      `OLLAMA_URL no es una URL válida: "${ollamaUrl}". Ejemplo: http://localhost:11434`,
+      `OLLAMA_URL is not a valid URL: "${ollamaUrl}". Example: http://localhost:11434`,
     );
   }
 

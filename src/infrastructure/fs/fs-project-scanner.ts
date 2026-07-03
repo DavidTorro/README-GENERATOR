@@ -15,7 +15,7 @@ export class FsProjectScanner implements ProjectScannerPort {
     try {
       return JSON.parse(readFileSync(path, "utf8")) as PkgJson;
     } catch {
-      console.warn("⚠️  package.json ilegible (JSON inválido), se ignora.");
+        console.warn("⚠️  Unreadable package.json (invalid JSON), skipping it.");
       return {};
     }
   }

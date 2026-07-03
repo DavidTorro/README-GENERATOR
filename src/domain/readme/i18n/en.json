@@ -1,0 +1,13 @@
+{
+  "defaultDescription": "_Project description._",
+  "installation": "Installation",
+  "requirements": "Requirements",
+  "scripts": "Scripts",
+  "techStack": "Tech Stack",
+  "features": "Features",
+  "projectStructure": "Project Structure",
+  "docker": "Docker",
+  "dockerText": "This project ships with Docker configuration.",
+  "license": "License",
+  "noLicense": "No license specified."
+}

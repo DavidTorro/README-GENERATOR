@@ -3,7 +3,7 @@
 // los argumentos recibidos y devuelve un objeto con las opciones configuradas
 
 import { parseArgs } from "node:util"; // parseArgs es una función nativa de Node.js que permite parsear argumentos de línea de comandos de manera sencilla y robusta
-import type { Lang } from "../../domain/readme/readme.i18n.js";
+import type { Lang } from "../../domain/readme/i18n/index.js";
 
 // Interfaz que define las opciones de línea de comandos disponibles para el usuario
 export interface CliOptions {
@@ -18,28 +18,29 @@ export interface CliOptions {
 
 // Mensaje para el argumento --help
 export const HELP = `
-readme-gen — genera un README.md profesional analizando tu proyecto
+readme-gen — generate a professional README.md by analyzing your project
 
-Uso:
-  readme-gen [idioma] [opciones]
+Usage:
+  readme-gen [language] [options]
 
-Idioma:
-  es (defecto) | en          también como: --lang en
+Language:
+  en (default) | es          also available as flag: --lang es
 
-Opciones:
-  --ai                usar IA local (Ollama) para enriquecer el contenido
-  -l, --lang <es|en>  idioma del README generado
-  -o, --output <ruta> fichero de salida (defecto: README.md)
-      --dry-run       imprime el resultado sin escribir ningún fichero
-  -f, --force         sobrescribe el README existente sin preguntar
-  -h, --help          muestra esta ayuda
-  -v, --version       muestra la versión
+Options:
+  --ai                use local AI (Ollama) to enrich the content
+  -l, --lang <en|es>  language of the generated README
+  -o, --output <path> output file (default: README.md)
+      --dry-run       print the result without writing any file
+  -f, --force         overwrite an existing README without asking
+  -h, --help          show this help
+  -v, --version       show version
 
-Ejemplos:
-  npx @davidtorro/readme-gen.             genera un README.md en español
-  npx @davidtorro/readme-gen en           genera un README.md en inglés
-  npx @davidtorro/readme-gen --ai.        genera un README.md en español usando IA local (Ollama)
-  npx @davidtorro/readme-gen --dry-run    genera un README.md en español y lo imprime por consola sin escribir ningún fichero
+Examples:
+  npx @davidtorro/readme-gen             Generate the README in English (default)
+  npx @davidtorro/readme-gen --ai        Generate the README using local AI (Ollama)
+  npx @davidtorro/readme-gen es --ai     Generate the README in Spanish using local AI (Ollama)
+  npx @davidtorro/readme-gen --lang es   Generate the README in Spanish using the --lang flag
+  npx @davidtorro/readme-gen --dry-run   Generate the README and print it to the console without writing any file
 `;
 
 // Función PURA: recibe argv, devuelve opciones (o lanza con mensaje claro)
@@ -58,10 +59,10 @@ export function parseCliArgs(argv: string[]): CliOptions {
     },
   });
 
-  // Prioridad del idioma: --lang gana al posicional; defecto "es"
-  const rawLang = values.lang ?? positionals[0] ?? "es";
-  if (rawLang !== "es" && rawLang !== "en") {
-    throw new Error(`Idioma no soportado: "${rawLang}". Usa "es" o "en".`);
+  // Prioridad del idioma: --lang gana al posicional; defecto "en"
+  const rawLang = values.lang ?? positionals[0] ?? "en";
+  if (rawLang !== "en" && rawLang !== "es") {
+    throw new Error(`Unsupported language: "${rawLang}". Use "en" or "es".`);
   }
 
   // Devuelve un objeto con las opciones configuradas

@@ -25,10 +25,10 @@ try {
 
   // PRUEBAS
   console.log(`📦 ${info.name} v${info.version} (${info.packageManager})`);
-  console.log(`🔍 Stack detectado: ${info.stack.join(", ") || "nada"}`);
-  console.log(`📄 ${info.files.length} ficheros analizados`);
+  console.log(`🔍 Detected stack: ${info.stack.join(", ") || "none"}`);
+  console.log(`📄 ${info.files.length} files analyzed`);
 } catch (err) {
   console.error(`❌ ${err instanceof Error ? err.message : err}`);
-  console.error(`   Prueba con --help`);
+  console.error(`   Try --help`);
   process.exit(1);
 }
