@@ -6,6 +6,10 @@ import pkg from "../package.json" with { type: "json" };
 try {
   // Parseo de argumentos de línea de comandos slice(2) para ignorar "node" y "src/cli.ts"
   const opts = parseCliArgs(process.argv.slice(2));
+ 
+  // Análisis del proyecto actual
+  const { analyzeProject } = await import("./core/analyze/index.js");
+  const info = analyzeProject(process.cwd());
 
   // Manejo de flags --help y --version
   if (opts.help) {
@@ -18,7 +22,9 @@ try {
   }
 
   // Pruebas
-  console.log("Opciones parseadas:", opts);
+  console.log(`📦 ${info.name} v${info.version} (${info.packageManager})`);
+  console.log(`🔍 Stack detectado: ${info.stack.join(", ") || "nada"}`);
+  console.log(`📄 ${info.files.length} ficheros analizados`);
 } catch (err) {
   console.error(`❌ ${err instanceof Error ? err.message : err}`);
   console.error(`   Prueba con --help`);
