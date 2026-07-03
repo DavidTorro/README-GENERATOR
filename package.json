@@ -9,7 +9,7 @@
     "ollama",
     "documentation"
   ],
-  "license": "",
+  "license": "Apache-2.0",
   "author": {
     "name": "David Torró",
     "url": "https://davidtorro.es"
