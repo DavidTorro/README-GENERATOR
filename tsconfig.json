@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true, // strict es un conjunto de opciones que habilitan comprobaciones estrictas de tipos en TypeScript, lo que ayuda a detectar errores potenciales en tiempo de compilación y mejora la calidad del código.
+    "noUncheckedIndexedAccess": true, // es una opción que hace que TypeScript sea más estricto al acceder a propiedades de objetos mediante índices, lo que ayuda a evitar errores en tiempo de ejecución.
+    "noEmit": true, // noEmit es una opción que indica a TypeScript que no genere archivos de salida (como archivos JavaScript) al compilar el código fuente. Esto es útil cuando solo se desea realizar la verificación de tipos sin generar código adicional.
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["src"]
+}
