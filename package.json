@@ -16,7 +16,7 @@
   },
   "type": "module",
   "bin": {
-    "readme-gen": "dist/cli.js"
+    "readme-gen": "dist/main.js"
   },
   "files": [
     "dist"
