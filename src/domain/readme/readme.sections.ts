@@ -5,13 +5,13 @@ import { buildBadgeLine } from "./readme.badges.js";
 const title: Section = (info) => `# 📝 ${info.name}`;
 
 const badges: Section = (info) =>
-  info.stack.length === 0 ? null : buildBadgeLine(info.stack);
+  info.stack.length === 0 ? null : buildBadgeLine(info.stack.map((tech) => tech.name));
 
 const description: Section = (info, t) => info.description || t.defaultDescription;
 
 const techStack: Section = (info, t) => {
   if (info.stack.length === 0) return null;
-  const items = info.stack.map((tech) => `- ${tech}`).join("\n");
+  const items = info.stack.map((tech) => `- ${tech.name}`).join("\n");
   return `## ⚙️ ${t.techStack}\n\n${items}`;
 };
 
