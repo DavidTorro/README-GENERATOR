@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+import { existsSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import pkg from "../package.json" with { type: "json" };
-import { buildProjectInfo } from "./domain/project/project.builder.js";
+import { GenerateReadmeUseCase } from "./application/use-cases/generate-readme.use-case.js";
 import { FsProjectScanner } from "./infrastructure/fs/fs-project-scanner.js";
 import { HELP, parseCliArgs } from "./presentation/cli/cli.parser.js";
 
@@ -17,16 +19,29 @@ try {
     process.exit(0);
   }
 
-  // scanner para leer el disco y obtener datos crudos del proyecto
+  // Composition root: el ÚNICO sitio donde se enchufan las capas
   const scanner = new FsProjectScanner();
+  const generateReadme = new GenerateReadmeUseCase(scanner);
 
-  // Construye un objeto ProjectInfo a partir de los datos crudos del proyecto
-  const info = buildProjectInfo(scanner.scan(process.cwd()), process.cwd());
+  const root = process.cwd();
+  const markdown = generateReadme.execute(root, opts.lang);
 
-  // PRUEBAS
-  console.log(`📦 ${info.name} v${info.version} (${info.packageManager})`);
-  console.log(`🔍 Detected stack: ${info.stack.join(", ") || "none"}`);
-  console.log(`📄 ${info.files.length} files analyzed`);
+  // --dry-run: el resultado va por stdout y no se toca el disco
+  if (opts.dryRun) {
+    console.log(markdown);
+    process.exit(0);
+  }
+
+  const outputPath = resolve(root, opts.output);
+
+  // Red de seguridad: no pisar un README existente salvo --force
+  if (existsSync(outputPath) && !opts.force) {
+    console.error(`❌ ${opts.output} already exists. Use --force to overwrite.`);
+    process.exit(1);
+  }
+
+  writeFileSync(outputPath, markdown, "utf8");
+  console.error(`✅ ${opts.output} generated (lang: ${opts.lang})`);
 } catch (err) {
   console.error(`❌ ${err instanceof Error ? err.message : err}`);
   console.error(`   Try --help`);
