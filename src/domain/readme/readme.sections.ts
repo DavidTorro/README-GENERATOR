@@ -1,7 +1,11 @@
 import type { Section } from "./readme.interfaces.js";
 import { INSTALL_COMMANDS, RUN_COMMANDS } from "./readme.commands.js";
+import { buildBadgeLine } from "./readme.badges.js";
 
 const title: Section = (info) => `# 📝 ${info.name}`;
+
+const badges: Section = (info) =>
+  info.stack.length === 0 ? null : buildBadgeLine(info.stack);
 
 const description: Section = (info, t) => info.description || t.defaultDescription;
 
@@ -34,6 +38,7 @@ const license: Section = (info, t) =>
 export const sections: Section[] = [
   title,
   description,
+  badges,
   techStack,
   installation,
   scripts,
