@@ -2,6 +2,7 @@ import type { Section } from "./readme.interfaces.js";
 import { INSTALL_COMMANDS, RUN_COMMANDS } from "./readme.commands.js";
 import { CATEGORY_ORDER, CATEGORY_EMOJI } from "./readme.categories.js";
 import { buildBadgeLine } from "./readme.badges.js";
+import { buildTree } from "./readme.tree.js";
 
 const title: Section = (info) => `# 📝 ${info.name}`;
 
@@ -19,6 +20,11 @@ const techStack: Section = (info, t) => {
     return `- ${CATEGORY_EMOJI[category]} **${t.categories[category]}**: ${names}`;
   }).filter((line): line is string => line !== null);
   return `## ⚙️ ${t.techStack}\n\n${groups.join("\n")}`;
+};
+
+const projectStructure: Section = (info, t) => {
+  if (info.files.length === 0) return null;
+  return `## 🗂️ ${t.projectStructure}\n\n\`\`\`\n${buildTree(info.name, info.files)}\n\`\`\``;
 };
 
 const installation: Section = (info, t) =>
@@ -46,6 +52,7 @@ export const sections: Section[] = [
   badges,
   description,
   techStack,
+  projectStructure,
   installation,
   scripts,
   docker,
