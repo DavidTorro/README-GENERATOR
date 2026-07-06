@@ -37,8 +37,8 @@ const license: Section = (info, t) =>
 // El orden de esta lista es el orden del README
 export const sections: Section[] = [
   title,
-  description,
   badges,
+  description,
   techStack,
   installation,
   scripts,
