@@ -2,11 +2,11 @@
 
 Generador de README.md para tus proyectos. Crea un README.md profesional y atractivo para tu proyecto de manera rápida y sencilla.
 
-## ⚙️ Tech Stack
+## ⚙️ Stack técnico
 
 - TypeScript
 
-## 📦 Installation
+## 📦 Instalación
 
 ```bash
 npm install
@@ -19,6 +19,6 @@ npm install
 - `npm run typecheck` — `tsc`
 - `npm run prepublishOnly` — `npm run build`
 
-## 📄 License
+## 📄 Licencia
 
 Apache-2.0
