@@ -1,10 +1,5 @@
-import type { ProjectInfo } from "../project/project.interfaces.js";
+import type { Section } from "./readme.interfaces.js";
 import { INSTALL_COMMANDS, RUN_COMMANDS } from "./readme.commands.js";
-import type { Translations } from "./i18n/index.js";
-
-// Una sección es una función pura: recibe los datos y las traducciones,
-// y devuelve su bloque de markdown — o null si no aplica a este proyecto
-export type Section = (info: ProjectInfo, t: Translations) => string | null;
 
 const title: Section = (info) => `# 📝 ${info.name}`;
 
