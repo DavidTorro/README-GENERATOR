@@ -6,7 +6,54 @@ Generador de README.md para tus proyectos. Crea un README.md profesional y atrac
 
 ## ⚙️ Stack técnico
 
-- TypeScript
+- 🔤 **Lenguajes**: TypeScript
+
+## 🗂️ Estructura del proyecto
+
+```
+@davidtorro/readme-gen/
+├── src/
+│   ├── application/
+│   │   └── use-cases/
+│   │       └── generate-readme.use-case.ts
+│   ├── domain/
+│   │   ├── ports/
+│   │   │   └── project-scanner.port.ts
+│   │   ├── project/
+│   │   │   ├── project.builder.ts
+│   │   │   ├── project.detectors.ts
+│   │   │   └── project.interfaces.ts
+│   │   └── readme/
+│   │       ├── i18n/
+│   │       │   ├── en.json
+│   │       │   ├── es.json
+│   │       │   └── index.ts
+│   │       ├── readme.badges.ts
+│   │       ├── readme.categories.ts
+│   │       ├── readme.commands.ts
+│   │       ├── readme.interfaces.ts
+│   │       ├── readme.render.ts
+│   │       ├── readme.sections.ts
+│   │       └── readme.tree.ts
+│   ├── infrastructure/
+│   │   ├── config/
+│   │   │   └── env.config.ts
+│   │   └── fs/
+│   │       └── fs-project-scanner.ts
+│   ├── presentation/
+│   │   └── cli/
+│   │       └── cli.parser.ts
+│   └── main.ts
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── NOTICE
+├── package-lock.json
+├── package.json
+├── README.md
+├── tsconfig.json
+└── tsup.config.ts
+```
 
 ## 📦 Instalación
 
