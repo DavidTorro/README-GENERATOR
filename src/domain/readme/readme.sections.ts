@@ -1,4 +1,4 @@
-import type { PackageManager, ProjectInfo } from "../project/project.interfaces.js";
+import type { ProjectInfo } from "../project/project.interfaces.js";
 import { INSTALL_COMMANDS, RUN_COMMANDS } from "./readme.commands.js";
 import type { Translations } from "./i18n/index.js";
 
