@@ -9,5 +9,13 @@
   "docker": "Docker",
   "dockerText": "Este proyecto incluye configuración de Docker.",
   "license": "Licencia",
-  "noLicense": "Sin licencia especificada."
+  "noLicense": "Sin licencia especificada.",
+  "categories": {
+    "language": "Lenguajes",
+    "frontend": "Frontend",
+    "backend": "Backend",
+    "testing": "Testing",
+    "infra": "Infraestructura",
+    "tooling": "Tooling"
+  }
 }

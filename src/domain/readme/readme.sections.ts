@@ -1,5 +1,6 @@
 import type { Section } from "./readme.interfaces.js";
 import { INSTALL_COMMANDS, RUN_COMMANDS } from "./readme.commands.js";
+import { CATEGORY_ORDER, CATEGORY_EMOJI } from "./readme.categories.js";
 import { buildBadgeLine } from "./readme.badges.js";
 
 const title: Section = (info) => `# 📝 ${info.name}`;
@@ -11,8 +12,13 @@ const description: Section = (info, t) => info.description || t.defaultDescripti
 
 const techStack: Section = (info, t) => {
   if (info.stack.length === 0) return null;
-  const items = info.stack.map((tech) => `- ${tech.name}`).join("\n");
-  return `## ⚙️ ${t.techStack}\n\n${items}`;
+  const groups = CATEGORY_ORDER.map((category) => {
+    const techs = info.stack.filter((tech) => tech.category === category);
+    if (techs.length === 0) return null;
+    const names = techs.map((tech) => tech.name).join(", ");
+    return `- ${CATEGORY_EMOJI[category]} **${t.categories[category]}**: ${names}`;
+  }).filter((line): line is string => line !== null);
+  return `## ⚙️ ${t.techStack}\n\n${groups.join("\n")}`;
 };
 
 const installation: Section = (info, t) =>
