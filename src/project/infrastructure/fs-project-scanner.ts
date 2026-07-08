@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import fg from "fast-glob";
-import type { PkgJson, ProjectScannerPort, RawProject } from "../../domain/ports/project-scanner.port.js";
+import type { PkgJson, ProjectScannerPort, RawProject } from "../domain/project-scanner.port.js";
 
 // Ignorados siempre, tenga .gitignore o no el proyecto analizado
 const DEFAULT_IGNORE = ["**/node_modules/**", "**/dist/**", "**/build/**", "**/.git/**"];

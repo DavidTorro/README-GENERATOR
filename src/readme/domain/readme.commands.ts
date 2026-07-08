@@ -1,4 +1,4 @@
-import type { PackageManager } from "../project/project.interfaces.js";
+import type { PackageManager } from "../../project/domain/project.interfaces.js";
 
 // Comando de instalación según el gestor de paquetes detectado
 export const INSTALL_COMMANDS: Record<PackageManager, string> = {

@@ -1,7 +1,7 @@
-import type { ProjectScannerPort } from "../../domain/ports/project-scanner.port.js";
-import { buildProjectInfo } from "../../domain/project/project.builder.js";
-import type { Lang } from "../../domain/readme/i18n/index.js";
-import { renderReadme } from "../../domain/readme/readme.render.js";
+import type { ProjectScannerPort } from "../../project/domain/project-scanner.port.js";
+import { buildProjectInfo } from "../../project/domain/project.builder.js";
+import type { Lang } from "../domain/i18n/index.js";
+import { renderReadme } from "../domain/readme.render.js";
 
 // Flujo completo: escanear → construir el modelo → renderizar
 export class GenerateReadmeUseCase {

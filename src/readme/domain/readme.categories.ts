@@ -1,4 +1,4 @@
-import type { TechCategory } from "../project/project.interfaces.js";
+import type { TechCategory } from "../../project/domain/project.interfaces.js";
 
 // Orden de aparición de las categorías en el stack técnico
 export const CATEGORY_ORDER: TechCategory[] = [

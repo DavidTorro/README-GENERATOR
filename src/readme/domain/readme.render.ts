@@ -1,4 +1,4 @@
-import type { ProjectInfo } from "../project/project.interfaces.js";
+import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
 import { getTranslations, type Lang } from "./i18n/index.js";
 import { sections } from "./readme.sections.js";
 

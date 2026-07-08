@@ -1,4 +1,4 @@
-import type { ProjectInfo } from "../project/project.interfaces.js";
+import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
 import type { Translations } from "./i18n/index.js";
 
 // Una sección es una función pura: recibe los datos y las traducciones,

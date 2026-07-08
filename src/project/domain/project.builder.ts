@@ -1,5 +1,5 @@
 import { runDetectors } from "./project.detectors.js";
-import type { RawProject } from "../ports/project-scanner.port.js";
+import type { RawProject } from "./project-scanner.port.js";
 import type { PackageManager, ProjectInfo } from "./project.interfaces.js";
 
 // Detección por lockfile del gestor de paquetes usado en el proyecto

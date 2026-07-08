@@ -2,9 +2,9 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import pkg from "../package.json" with { type: "json" };
-import { GenerateReadmeUseCase } from "./application/use-cases/generate-readme.use-case.js";
-import { FsProjectScanner } from "./infrastructure/fs/fs-project-scanner.js";
-import { HELP, parseCliArgs } from "./presentation/cli/cli.parser.js";
+import { GenerateReadmeUseCase } from "./readme/application/generate-readme.use-case.js";
+import { FsProjectScanner } from "./project/infrastructure/fs-project-scanner.js";
+import { HELP, parseCliArgs } from "./cli/cli.parser.js";
 
 try {
   // slice(2) para ignorar "node" y la ruta del script
