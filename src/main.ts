@@ -5,6 +5,8 @@ import pkg from "../package.json" with { type: "json" };
 import { GenerateReadmeUseCase } from "./readme/application/generate-readme.use-case.js";
 import { FsProjectScanner } from "./project/infrastructure/fs-project-scanner.js";
 import { HELP, parseCliArgs } from "./cli/cli.parser.js";
+import { loadConfig } from "./ai/infrastructure/ai.config.js";
+import { OllamaClient } from "./ai/infrastructure/ollama.client.js";
 
 try {
   // slice(2) para ignorar "node" y la ruta del script
@@ -21,10 +23,13 @@ try {
 
   // Composition root: el ÚNICO sitio donde se enchufan las capas
   const scanner = new FsProjectScanner();
-  const generateReadme = new GenerateReadmeUseCase(scanner);
+  const ai = opts.ai ? new OllamaClient(loadConfig()) : undefined;
+  const generateReadme = new GenerateReadmeUseCase(scanner, ai);
+
+  if (opts.ai) console.error("🤖 Enriching with local AI (this may take a while)...");
 
   const root = process.cwd();
-  const markdown = generateReadme.execute(root, opts.lang);
+  const markdown = await generateReadme.execute(root, opts.lang);
 
   // --dry-run: el resultado va por stdout y no se toca el disco
   if (opts.dryRun) {
