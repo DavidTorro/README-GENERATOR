@@ -22,6 +22,12 @@ const techStack: Section = (info, t) => {
   return `## ⚙️ ${t.techStack}\n\n${groups.join("\n")}`;
 };
 
+const features: Section = (info, t) => {
+  if (info.features.length === 0) return null;
+  const items = info.features.map((f) => `- ${f}`).join("\n");
+  return `## ✨ ${t.features}\n\n${items}`;
+};
+
 const projectStructure: Section = (info, t) => {
   if (info.files.length === 0) return null;
   return `## 🗂️ ${t.projectStructure}\n\n\`\`\`\n${buildTree(info.name, info.files)}\n\`\`\``;
@@ -52,6 +58,7 @@ export const sections: Section[] = [
   badges,
   description,
   techStack,
+  features,
   projectStructure,
   installation,
   scripts,

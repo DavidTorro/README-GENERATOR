@@ -33,4 +33,6 @@ export interface ProjectInfo {
   root: string;
   // Tecnologías detectadas (React, NestJS, Vite, etc.) con su categoría
   stack: DetectedTech[];
+  // Características del proyecto (las rellena la IA; vacío sin --ai)
+  features: string[];
 }

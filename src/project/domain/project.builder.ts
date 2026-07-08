@@ -37,5 +37,6 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
     files,
     root,
     stack,
+    features: [],
   };
 }
