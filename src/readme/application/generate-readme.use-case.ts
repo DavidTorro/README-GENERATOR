@@ -22,6 +22,7 @@ export class GenerateReadmeUseCase {
         ...info,
         description: extra.description ?? info.description,
         features: extra.features ?? info.features,
+        blockquote: extra.blockquote ?? info.blockquote,
       };
     }
 

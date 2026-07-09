@@ -19,6 +19,9 @@ const badges: Section = (info) =>
 
 const description: Section = (info, t) => info.description || t.defaultDescription;
 
+// Nota destacada del proyecto (solo existe en modo --ai)
+const blockquote: Section = (info) => (info.blockquote ? `> ${info.blockquote}` : null);
+
 const techStack: Section = (info, t) => {
   if (info.stack.length === 0) return null;
   const groups = CATEGORY_ORDER.map((category) => {
@@ -66,6 +69,7 @@ export const sections: Section[] = [
   title,
   badges,
   description,
+  blockquote,
   techStack,
   features,
   projectStructure,

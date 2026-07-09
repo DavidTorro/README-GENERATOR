@@ -35,4 +35,6 @@ export interface ProjectInfo {
   stack: DetectedTech[];
   // Características del proyecto (las rellena la IA; vacío sin --ai)
   features: string[];
+  // Frase destacada del proyecto (la rellena la IA; ausente sin --ai)
+  blockquote?: string;
 }

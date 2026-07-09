@@ -36,7 +36,7 @@ export class OllamaClient implements AiGeneratorPort {
       `npm scripts: ${Object.keys(info.scripts).join(", ") || "(none)"}`,
       "",
       "Reply ONLY with a JSON object with this exact shape:",
-      '{"description": "2-3 engaging sentences describing the project", "features": ["4 to 6 bullet points, each starting with a fitting emoji"]}',
+      '{"description": "2-3 engaging sentences describing the project", "features": ["4 to 6 bullet points, each starting with a fitting emoji"], "blockquote": "one punchy sentence highlighting the key selling point of the project (privacy, speed, simplicity...), starting with a fitting emoji"}',
     ].join("\n");
   }
 
@@ -73,6 +73,10 @@ export class OllamaClient implements AiGeneratorPort {
       );
       if (features.length > 0) enrichment.features = features;
     }
+    if (typeof obj.blockquote === "string" && obj.blockquote.trim() !== "") {
+      enrichment.blockquote = obj.blockquote.trim();
+    }
+
     return enrichment;
   }
 }

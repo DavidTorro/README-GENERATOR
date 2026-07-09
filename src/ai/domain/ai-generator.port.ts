@@ -6,6 +6,7 @@ import type { Lang } from "../../readme/domain/i18n/index.js";
 export interface AiEnrichment {
   description?: string;
   features?: string[];
+  blockquote?: string;
 }
 
 // Contrato del generador con IA. Nadie fuera de este módulo sabrá que hay Ollama
