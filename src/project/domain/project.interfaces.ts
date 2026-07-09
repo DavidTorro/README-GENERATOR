@@ -39,4 +39,6 @@ export interface ProjectInfo {
   features: string[];
   // Frase destacada del proyecto (la rellena la IA; ausente sin --ai)
   blockquote?: string;
+  // Comentario por ruta para el árbol de estructura (lo rellena la IA)
+  treeComments?: Record<string, string>;
 }

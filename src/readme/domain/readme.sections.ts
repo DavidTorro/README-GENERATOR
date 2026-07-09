@@ -41,7 +41,7 @@ const features: Section = (info, t) => {
 
 const projectStructure: Section = (info, t) => {
   if (info.files.length === 0) return null;
-  return `## 🗂️ ${t.projectStructure}\n\n\`\`\`\n${buildTree(info.name, info.files)}\n\`\`\``;
+  return `## 🗂️ ${t.projectStructure}\n\n\`\`\`\n${buildTree(info.name, info.files, info.treeComments)}\n\`\`\``;
 };
 
 const installation: Section = (info, t) =>

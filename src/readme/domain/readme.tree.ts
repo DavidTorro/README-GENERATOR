@@ -16,8 +16,14 @@ function insertPath(root: TreeNode, path: string): void {
   }
 }
 
+// Una línea dibujada + la ruta del nodo (para buscar su comentario)
+interface TreeLine {
+  text: string;
+  path: string;
+}
+
 // Dibuja un nivel del árbol y recursa en los hijos
-function renderNode(node: TreeNode, prefix: string): string[] {
+function renderNode(node: TreeNode, prefix: string, parentPath: string): TreeLine[] {
   const entries = [...node.entries()].sort(([aName, aChildren], [bName, bChildren]) => {
     const aIsDir = aChildren.size > 0;
     const bIsDir = bChildren.size > 0;
@@ -28,14 +34,31 @@ function renderNode(node: TreeNode, prefix: string): string[] {
     const isLast = i === entries.length - 1;
     const connector = isLast ? "└── " : "├── ";
     const childPrefix = prefix + (isLast ? "    " : "│   ");
+    const path = parentPath === "" ? name : `${parentPath}/${name}`;
     const label = children.size > 0 ? `${name}/` : name;
-    return [prefix + connector + label, ...renderNode(children, childPrefix)];
+    return [{ text: prefix + connector + label, path }, ...renderNode(children, childPrefix, path)];
   });
 }
 
-// API pública: nombre del proyecto + rutas relativas → árbol en texto
-export function buildTree(rootName: string, files: string[]): string {
+// API pública: nombre + rutas → árbol en texto
+// Con comments (ruta → comentario), añade "# ..." alineado en columna
+export function buildTree(
+  rootName: string,
+  files: string[],
+  comments: Record<string, string> = {},
+): string {
   const root: TreeNode = new Map();
   for (const file of files) insertPath(root, file);
-  return [`${rootName}/`, ...renderNode(root, "")].join("\n");
+  const lines: TreeLine[] = [{ text: `${rootName}/`, path: "" }, ...renderNode(root, "", "")];
+
+  if (!lines.some((line) => comments[line.path])) {
+    return lines.map((line) => line.text).join("\n");
+  }
+  const width = Math.max(...lines.map((line) => line.text.length));
+  return lines
+    .map((line) => {
+      const comment = comments[line.path];
+      return comment ? `${line.text.padEnd(width)}  # ${comment}` : line.text;
+    })
+    .join("\n");
 }

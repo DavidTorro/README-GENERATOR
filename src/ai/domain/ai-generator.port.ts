@@ -7,6 +7,7 @@ export interface AiEnrichment {
   description?: string;
   features?: string[];
   blockquote?: string;
+  treeComments?: Record<string, string>;
 }
 
 // Contrato del generador con IA. Nadie fuera de este módulo sabrá que hay Ollama
