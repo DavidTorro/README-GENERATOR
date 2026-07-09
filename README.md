@@ -1,26 +1,21 @@
+![Banner](./assets/Banner.png)
+
 # 📝 @davidtorro/readme-gen
 
 ![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
 
-Crea un README.md profesional y atractivo para tu proyecto de manera rápida y sencilla. @davidtorro/readme-gen es la solución ideal para desarrolladores que desean automatizar la generación de documentación de proyectos. Con su interfaz intuitiva y funcionalidad robusta, transforma la creación de README.md en un proceso eficiente y sencillo.
+Generador de README.md para tus proyectos. Crea un README.md profesional y atractivo para tu proyecto de manera rápida y sencilla.
 
-## ⚙️ Stack técnico
+## ⚙️ Tech Stack
 
-- 🔤 **Lenguajes**: TypeScript
+- 🔤 **Languages**: TypeScript
 
-## ✨ Características
-
-- 🚀 Genera README.md en segundos con un enfoque en la productividad
-- 📝 Soporta múltiples lenguajes y formatos de documentación
-- 🔧 Integración sencilla con herramientas de desarrollo modernas
-- 📊 Proporciona una estructura clara y organizada para tu proyecto
-- 🎨 Personaliza el estilo y el contenido según tus necesidades
-- 📦 Incluye scripts de npm para facilitar el desarrollo y la publicación
-
-## 🗂️ Estructura del proyecto
+## 🗂️ Project Structure
 
 ```
 @davidtorro/readme-gen/
+├── assets/
+│   └── Banner.png
 ├── src/
 │   ├── ai/
 │   │   ├── domain/
@@ -65,7 +60,7 @@ Crea un README.md profesional y atractivo para tu proyecto de manera rápida y s
 └── tsup.config.ts
 ```
 
-## 📦 Instalación
+## 📦 Installation
 
 ```bash
 npm install
@@ -78,6 +73,6 @@ npm install
 - `npm run typecheck` — `tsc`
 - `npm run prepublishOnly` — `npm run build`
 
-## 📄 Licencia
+## 📄 License
 
 Apache-2.0

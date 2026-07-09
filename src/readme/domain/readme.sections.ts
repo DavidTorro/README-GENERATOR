@@ -4,6 +4,14 @@ import { CATEGORY_ORDER, CATEGORY_EMOJI } from "./readme.categories.js";
 import { buildBadgeLine } from "./readme.badges.js";
 import { buildTree } from "./readme.tree.js";
 
+// Banner del proyecto: solo si existe un assets/banner.(png|jpg|...) real
+const BANNER_PATTERN = /^assets\/banner\.(png|jpe?g|webp|svg)$/i;
+
+const banner: Section = (info) => {
+  const file = info.files.find((f) => BANNER_PATTERN.test(f));
+  return file ? `![Banner](./${file})` : null;
+};
+
 const title: Section = (info) => `# 📝 ${info.name}`;
 
 const badges: Section = (info) =>
@@ -54,6 +62,7 @@ const license: Section = (info, t) =>
 
 // El orden de esta lista es el orden del README
 export const sections: Section[] = [
+  banner,
   title,
   badges,
   description,
