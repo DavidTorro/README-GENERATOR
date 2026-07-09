@@ -2,6 +2,7 @@ import type { AiEnrichment, AiGeneratorPort } from "../domain/ai-generator.port.
 import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
 import type { Lang } from "../../readme/domain/i18n/index.js";
 import type { Config } from "./ai.config.js";
+import { buildMermaid } from "../../readme/domain/readme.mermaid.js";
 
 // Modelos locales tardan en generar; para un Ollama apagado falla en ms igualmente
 const TIMEOUT_MS = 60_000;
@@ -23,6 +24,10 @@ export class OllamaClient implements AiGeneratorPort {
     const tree = await this.tryTask("tree comments", async () =>
       this.parseTreeEnrichment(await this.generate(this.buildTreePrompt(info, lang))),
     );
+    const architecture = await this.tryTask("architecture", async () =>
+      this.parseArchitectureEnrichment(await this.generate(this.buildArchitecturePrompt(info, lang))),
+    );
+    return { ...text, ...tree, ...architecture };
     return { ...text, ...tree };
   }
 
@@ -139,6 +144,70 @@ export class OllamaClient implements AiGeneratorPort {
       }
     }
     return Object.keys(comments).length > 0 ? { treeComments: comments } : {};
+  }
+    
+  // ---- Tarea 3: diagrama de arquitectura + tabla de componentes ----
+
+  private buildArchitecturePrompt(info: ProjectInfo, lang: Lang): string {
+    const language = lang === "es" ? "Spanish" : "English";
+    return [
+      `You are documenting the architecture of the project "${info.name}" (${info.description || "a software project"}) for its README.md, in ${language}.`,
+      `Tech stack: ${info.stack.map((t) => t.name).join(", ") || "(unknown)"}`,
+      `Project files: ${info.files.slice(0, 60).join(", ")}`,
+      "",
+      "Describe the architecture as a graph plus a table of components:",
+      '- "subgraphs": 2 to 4 groups (layers or modules), each with 1 to 4 nodes. Each node has an "id" (short, lowercase letters only) and a "label" (short name, an emoji is welcome).',
+      '- "edges": connections between node ids, with an optional short "label".',
+      '- "components": 2 to 6 rows describing the main components: name, technology, one-line detail.',
+      "- Base everything STRICTLY on the facts above. Do not invent components.",
+      "",
+      "Reply ONLY with a JSON object with this exact shape:",
+      '{"subgraphs": [{"title": "🧠 Core", "nodes": [{"id": "cli", "label": "🖥️ CLI parser"}]}], "edges": [{"from": "cli", "to": "usecase", "label": "options"}], "components": [{"name": "cli", "tech": "TypeScript", "detail": "Parses arguments"}]}',
+    ].join("\n");
+  }
+
+  // La IA aporta DATOS del grafo; el mermaid lo dibuja buildMermaid (sintaxis garantizada)
+  private parseArchitectureEnrichment(raw: string): AiEnrichment {
+    const isRecord = (v: unknown): v is Record<string, unknown> =>
+      typeof v === "object" && v !== null;
+
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return {};
+
+    const subgraphs = (Array.isArray(parsed.subgraphs) ? parsed.subgraphs : [])
+      .filter(isRecord)
+      .flatMap((sg) => {
+        if (typeof sg.title !== "string") return [];
+        const nodes = (Array.isArray(sg.nodes) ? sg.nodes : [])
+          .filter(isRecord)
+          .flatMap((n) =>
+            typeof n.id === "string" && typeof n.label === "string"
+              ? [{ id: n.id, label: n.label }]
+              : [],
+          );
+        return nodes.length > 0 ? [{ title: sg.title, nodes }] : [];
+      });
+
+    const edges = (Array.isArray(parsed.edges) ? parsed.edges : [])
+      .filter(isRecord)
+      .flatMap((e) =>
+        typeof e.from === "string" && typeof e.to === "string"
+          ? [{ from: e.from, to: e.to, ...(typeof e.label === "string" ? { label: e.label } : {}) }]
+          : [],
+      );
+
+    // Sin grafo con chicha no hay sección: mejor omitir que enseñar un diagrama vacío
+    if (subgraphs.length === 0 || edges.length === 0) return {};
+
+    const components = (Array.isArray(parsed.components) ? parsed.components : [])
+      .filter(isRecord)
+      .flatMap((c) =>
+        typeof c.name === "string" && typeof c.tech === "string" && typeof c.detail === "string"
+          ? [{ name: c.name.trim(), tech: c.tech.trim(), detail: c.detail.trim() }]
+          : [],
+      );
+
+    return { architecture: { mermaid: buildMermaid({ subgraphs, edges }), components } };
   }
 
   // ---- Transporte común ----

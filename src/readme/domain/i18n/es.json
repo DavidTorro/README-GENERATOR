@@ -10,6 +10,10 @@
   "dockerText": "Este proyecto incluye configuración de Docker.",
   "license": "Licencia",
   "noLicense": "Sin licencia especificada.",
+  "architecture": "Arquitectura",
+  "archComponent": "Componente",
+  "archTech": "Tecnología",
+  "archDetail": "Detalle",
   "categories": {
     "language": "Lenguajes",
     "frontend": "Frontend",

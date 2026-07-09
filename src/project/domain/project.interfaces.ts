@@ -18,6 +18,19 @@ export interface DetectedTech {
   category: TechCategory;
 }
 
+// Fila de la tabla de componentes de la sección de arquitectura
+export interface ArchitectureComponent {
+  name: string;
+  tech: string;
+  detail: string;
+}
+
+// Diagrama + tabla de componentes (lo rellena la IA)
+export interface Architecture {
+  mermaid: string;
+  components: ArchitectureComponent[];
+}
+
 // ProjectInfo es el contrato central del proyecto
 export interface ProjectInfo {
   name: string;
@@ -41,4 +54,6 @@ export interface ProjectInfo {
   blockquote?: string;
   // Comentario por ruta para el árbol de estructura (lo rellena la IA)
   treeComments?: Record<string, string>;
+  // Sección de arquitectura (la rellena la IA; ausente sin --ai)
+  architecture?: Architecture;
 }

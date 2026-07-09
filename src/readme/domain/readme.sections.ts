@@ -39,6 +39,25 @@ const features: Section = (info, t) => {
   return `## ✨ ${t.features}\n\n${items}`;
 };
 
+// Diagrama mermaid + tabla de componentes (solo existe en modo --ai)
+const architecture: Section = (info, t) => {
+  if (!info.architecture) return null;
+  const lines = [`## 🏗️ ${t.architecture}`, "", "```mermaid", info.architecture.mermaid, "```"];
+  if (info.architecture.components.length > 0) {
+    // '|' dentro de una celda rompería la tabla markdown: se escapa
+    const cell = (s: string) => s.replaceAll("|", "\\|");
+    lines.push(
+      "",
+      `| ${t.archComponent} | ${t.archTech} | ${t.archDetail} |`,
+      "| --- | --- | --- |",
+      ...info.architecture.components.map(
+        (c) => `| \`${cell(c.name)}\` | ${cell(c.tech)} | ${cell(c.detail)} |`,
+      ),
+    );
+  }
+  return lines.join("\n");
+};
+
 const projectStructure: Section = (info, t) => {
   if (info.files.length === 0) return null;
   return `## 🗂️ ${t.projectStructure}\n\n\`\`\`\n${buildTree(info.name, info.files, info.treeComments)}\n\`\`\``;
@@ -72,6 +91,7 @@ export const sections: Section[] = [
   blockquote,
   techStack,
   features,
+  architecture,
   projectStructure,
   installation,
   scripts,

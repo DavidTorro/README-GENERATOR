@@ -1,4 +1,4 @@
-import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
+import type { Architecture, ProjectInfo } from "../../project/domain/project.interfaces.js";
 import type { Lang } from "../../readme/domain/i18n/index.js";
 
 // Lo que la IA puede aportar al README. Todo opcional a propósito:
@@ -8,6 +8,7 @@ export interface AiEnrichment {
   features?: string[];
   blockquote?: string;
   treeComments?: Record<string, string>;
+  architecture?: Architecture;
 }
 
 // Contrato del generador con IA. Nadie fuera de este módulo sabrá que hay Ollama
