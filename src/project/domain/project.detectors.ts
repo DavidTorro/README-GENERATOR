@@ -33,6 +33,21 @@ export const DETECTORS: Detector[] = [
   { tech: "Prettier", category: "tooling", detect: (c) => c.deps.has("prettier") },
   { tech: "Docker", category: "infra", detect: (c) => c.hasFile("Dockerfile") || c.hasFile("docker-compose.yml") || c.hasFile("docker-compose.yaml") },
   { tech: "GitHub Actions", category: "infra", detect: (c) => c.files.some((f) => f.startsWith(".github/workflows/")) },
+  { tech: "Vue", category: "frontend", detect: (c) => c.deps.has("vue") },
+  { tech: "Angular", category: "frontend", detect: (c) => c.deps.has("@angular/core") },
+  { tech: "Svelte", category: "frontend", detect: (c) => c.deps.has("svelte") },
+  { tech: "Sass", category: "frontend", detect: (c) => c.deps.has("sass") },
+  { tech: "Fastify", category: "backend", detect: (c) => c.deps.has("fastify") },
+  { tech: "Prisma", category: "database", detect: (c) => c.deps.has("prisma") || c.deps.has("@prisma/client") },
+  { tech: "MongoDB", category: "database", detect: (c) => c.deps.has("mongodb") || c.deps.has("mongoose") },
+  { tech: "PostgreSQL", category: "database", detect: (c) => c.deps.has("pg") },
+  { tech: "Redis", category: "database", detect: (c) => c.deps.has("redis") || c.deps.has("ioredis") },
+  { tech: "Playwright", category: "testing", detect: (c) => c.deps.has("@playwright/test") },
+  { tech: "Cypress", category: "testing", detect: (c) => c.deps.has("cypress") },
+  { tech: "Supertest", category: "testing", detect: (c) => c.deps.has("supertest") },
+  { tech: "tsup", category: "tooling", detect: (c) => c.deps.has("tsup") },
+  { tech: "esbuild", category: "tooling", detect: (c) => c.deps.has("esbuild") && !c.deps.has("tsup") && !c.deps.has("vite") },
+  { tech: "Ollama", category: "ai", detect: (c) => c.deps.has("ollama") || c.files.some((f) => f.toLowerCase().includes("ollama")) },
 ];
 
 // Ejecuta todos los detectores y devuelve las tecnologías detectadas con su categoría

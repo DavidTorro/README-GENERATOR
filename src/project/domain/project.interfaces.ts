@@ -6,8 +6,10 @@ export type TechCategory =
   | "language"
   | "frontend"
   | "backend"
+  | "database"
   | "testing"
   | "infra"
+  | "ai"
   | "tooling";
 
 // Una tecnología detectada: nombre + categoría a la que pertenece

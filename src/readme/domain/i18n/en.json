@@ -14,8 +14,10 @@
     "language": "Languages",
     "frontend": "Frontend",
     "backend": "Backend",
+    "database": "Database",
     "testing": "Testing",
     "infra": "Infrastructure",
+    "ai": "AI",
     "tooling": "Tooling"
   }
 }

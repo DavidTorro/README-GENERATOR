@@ -5,8 +5,10 @@ export const CATEGORY_ORDER: TechCategory[] = [
   "language",
   "frontend",
   "backend",
+  "database",
   "testing",
   "infra",
+  "ai",
   "tooling",
 ];
 
@@ -14,8 +16,10 @@ export const CATEGORY_ORDER: TechCategory[] = [
 export const CATEGORY_EMOJI: Record<TechCategory, string> = {
   language: "🔤",
   frontend: "🎨",
-  backend: "🧩",
+  backend: "⚙️",
+  database: "🗄️",
   testing: "🧪",
   infra: "🐳",
+  ai: "🤖",
   tooling: "🔧",
 };

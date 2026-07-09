@@ -16,6 +16,19 @@ const BADGE_CATALOG: Record<string, BadgeStyle> = {
   Prettier: { color: "f7b93e", logo: "prettier", logoColor: "black" },
   Docker: { color: "2496ed", logo: "docker", logoColor: "white" },
   "GitHub Actions": { color: "2088ff", logo: "githubactions", logoColor: "white" },
+    Vue: { color: "4fc08d", logo: "vuedotjs", logoColor: "white" },
+  Angular: { color: "dd0031", logo: "angular", logoColor: "white" },
+  Svelte: { color: "ff3e00", logo: "svelte", logoColor: "white" },
+  Sass: { color: "cc6699", logo: "sass", logoColor: "white" },
+  Fastify: { color: "000000", logo: "fastify", logoColor: "white" },
+  Prisma: { color: "2d3748", logo: "prisma", logoColor: "white" },
+  MongoDB: { color: "47a248", logo: "mongodb", logoColor: "white" },
+  PostgreSQL: { color: "4169e1", logo: "postgresql", logoColor: "white" },
+  Redis: { color: "ff4438", logo: "redis", logoColor: "white" },
+  Cypress: { color: "69d3a7", logo: "cypress", logoColor: "black" },
+  esbuild: { color: "ffcf00", logo: "esbuild", logoColor: "black" },
+  tsup: { color: "0f172a" },
+  Ollama: { color: "000000", logo: "ollama", logoColor: "white" },
 };
 
 // Fallback para tecnologías sin entrada en el catálogo
