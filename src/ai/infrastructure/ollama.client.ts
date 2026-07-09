@@ -26,17 +26,34 @@ export class OllamaClient implements AiGeneratorPort {
     }
   }
 
-  private buildPrompt(info: ProjectInfo, lang: Lang): string {
+    private buildPrompt(info: ProjectInfo, lang: Lang): string {
     const language = lang === "es" ? "Spanish" : "English";
+    const scripts =
+      Object.entries(info.scripts)
+        .map(([name, cmd]) => `"${name}" runs \`${cmd}\``)
+        .join("; ") || "(none)";
     return [
       `You are writing content for the README.md of a software project, in ${language}.`,
-      `Project name: ${info.name}`,
-      `Current description: ${info.description || "(none)"}`,
-      `Detected tech stack: ${info.stack.map((t) => t.name).join(", ") || "(unknown)"}`,
-      `npm scripts: ${Object.keys(info.scripts).join(", ") || "(none)"}`,
+      "",
+      "FACTS about the project (your ONLY source of truth):",
+      `- Name: ${info.name}`,
+      `- Current description: ${info.description || "(none)"}`,
+      `- License: ${info.license ?? "(none)"}`,
+      `- Package manager: ${info.packageManager}`,
+      `- Detected tech stack: ${info.stack.map((t) => t.name).join(", ") || "(unknown)"}`,
+      `- Dependencies: ${info.dependencies.join(", ") || "(none)"}`,
+      `- Dev dependencies: ${info.devDependencies.join(", ") || "(none)"}`,
+      `- npm scripts: ${scripts}`,
+      `- Uses Docker: ${info.hasDocker ? "yes" : "no"}`,
+      `- Project files: ${info.files.slice(0, 60).join(", ")}`,
+      "",
+      "RULES:",
+      "- Base everything STRICTLY on the facts above. Do NOT invent features, integrations or capabilities they do not support.",
+      "- Prefer fewer accurate features over many generic ones.",
+      "- No marketing fluff: every sentence must say something concrete about THIS project.",
       "",
       "Reply ONLY with a JSON object with this exact shape:",
-      '{"description": "2-3 engaging sentences describing the project", "features": ["4 to 6 bullet points, each starting with a fitting emoji"], "blockquote": "one punchy sentence highlighting the key selling point of the project (privacy, speed, simplicity...), starting with a fitting emoji"}',
+      '{"description": "2-3 engaging sentences describing the project", "features": ["3 to 6 bullet points, each starting with a fitting emoji"], "blockquote": "one punchy sentence highlighting the key selling point of the project (privacy, speed, simplicity...), starting with a fitting emoji"}',
     ].join("\n");
   }
 
