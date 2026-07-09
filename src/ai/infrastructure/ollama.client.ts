@@ -5,7 +5,7 @@ import { buildMermaid } from "../../readme/domain/readme.mermaid.js";
 import type { Config } from "./ai.config.js";
 
 // Modelos locales tardan en generar; para un Ollama apagado falla en ms igualmente
-const TIMEOUT_MS = 60_000;
+const TIMEOUT_MS = 120_000;
 
 // Forma de la respuesta de POST /api/generate con stream: false
 interface OllamaResponse {
@@ -175,7 +175,7 @@ export class OllamaClient implements AiGeneratorPort {
       "- Base everything STRICTLY on the facts above. Do not invent components.",
       "",
       "Reply ONLY with a JSON object with this exact shape:",
-      '{"subgraphs": [{"title": "🧠 Core", "nodes": [{"id": "cli", "label": "🖥️ CLI parser"}]}], "nodes": [{"id": "user", "label": "👤 User"}], "edges": [{"from": "user", "to": "cli"}, {"from": "cli", "to": "usecase", "label": "options"}], "components": [{"name": "cli", "tech": "TypeScript", "detail": "Parses arguments"}]}',
+      '{"subgraphs": [{"title": "🖥️ CLI", "nodes": [{"id": "parser", "label": "🖥️ Arg parser"}, {"id": "usecase", "label": "⚙️ Use case"}]}, {"title": "🧠 Services", "nodes": [{"id": "scanner", "label": "📂 File scanner"}, {"id": "renderer", "label": "📝 Renderer"}]}], "nodes": [{"id": "user", "label": "👤 User"}], "edges": [{"from": "user", "to": "parser"}, {"from": "parser", "to": "usecase", "label": "options"}, {"from": "usecase", "to": "scanner"}, {"from": "usecase", "to": "renderer"}], "components": [{"name": "cli", "tech": "TypeScript", "detail": "Parses arguments"}, {"name": "scanner", "tech": "Node.js", "detail": "Reads project files"}]}',
     ].join("\n");
   }
 
@@ -255,7 +255,11 @@ export class OllamaClient implements AiGeneratorPort {
         prompt,
         stream: false,
         format: "json", // Ollama fuerza al modelo a emitir JSON válido
-        options: { temperature: 0.4 }, // tareas estructuradas: obediencia > creatividad
+        options: { 
+          temperature: 0.4,
+          num_ctx: 8192, // holgura para prompts largos (60 ficheros + instrucciones)
+          num_predict: 1500, // ninguna tarea necesita más; corta los bucles de whitespace
+        }, // tareas estructuradas: obediencia > creatividad
       }),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
