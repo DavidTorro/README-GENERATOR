@@ -19,6 +19,8 @@ export interface MermaidEdge {
 
 export interface MermaidSpec {
   subgraphs: MermaidSubgraph[];
+  // Nodos fuera de cualquier grupo (actores: usuario, navegador...)
+  nodes?: MermaidNode[];
   edges: MermaidEdge[];
 }
 
@@ -41,6 +43,9 @@ export function buildMermaid(spec: MermaidSpec): string {
     }
     lines.push("    end");
   });
+  for (const node of spec.nodes ?? []) {
+    lines.push(`    ${toId(node.id)}[${quote(node.label)}]`);
+  }
   for (const edge of spec.edges) {
     const arrow = edge.label ? `-- ${quote(edge.label)} -->` : "-->";
     lines.push(`    ${toId(edge.from)} ${arrow} ${toId(edge.to)}`);

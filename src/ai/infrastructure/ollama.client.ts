@@ -1,8 +1,8 @@
 import type { AiEnrichment, AiGeneratorPort } from "../domain/ai-generator.port.js";
 import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
 import type { Lang } from "../../readme/domain/i18n/index.js";
-import type { Config } from "./ai.config.js";
 import { buildMermaid } from "../../readme/domain/readme.mermaid.js";
+import type { Config } from "./ai.config.js";
 
 // Modelos locales tardan en generar; para un Ollama apagado falla en ms igualmente
 const TIMEOUT_MS = 60_000;
@@ -25,24 +25,30 @@ export class OllamaClient implements AiGeneratorPort {
       this.parseTreeEnrichment(await this.generate(this.buildTreePrompt(info, lang))),
     );
     const architecture = await this.tryTask("architecture", async () =>
-      this.parseArchitectureEnrichment(await this.generate(this.buildArchitecturePrompt(info, lang))),
+      this.parseArchitectureEnrichment(
+        await this.generate(this.buildArchitecturePrompt(info, lang)),
+      ),
     );
     return { ...text, ...tree, ...architecture };
-    return { ...text, ...tree };
   }
 
-  // Ejecuta una tarea de IA; si falla, avisa por stderr y aporta {}
+  // Ejecuta una tarea de IA con un reintento; si falla dos veces, aporta {}
   private async tryTask(
     name: string,
     task: () => Promise<AiEnrichment>,
   ): Promise<AiEnrichment> {
-    try {
-      return await task();
-    } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
-      console.error(`⚠️  AI ${name} failed (${reason}). Continuing without it.`);
-      return {};
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        return await task();
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        console.error(
+          `⚠️  AI ${name} attempt ${attempt} failed (${reason}).` +
+            (attempt === 1 ? " Retrying..." : " Continuing without it."),
+        );
+      }
     }
+    return {};
   }
 
   // ---- Tarea 1: descripción + features + blockquote ----
@@ -97,6 +103,9 @@ export class OllamaClient implements AiGeneratorPort {
     if (typeof obj.blockquote === "string" && obj.blockquote.trim() !== "") {
       enrichment.blockquote = obj.blockquote.trim();
     }
+
+    // Listón de calidad: sin descripción la tarea no vale (dispara el reintento)
+    if (!enrichment.description) throw new Error("reply had no usable description");
     return enrichment;
   }
 
@@ -143,9 +152,12 @@ export class OllamaClient implements AiGeneratorPort {
         comments[path.replace(/\/+$/, "")] = value.trim().replace(/\s+/g, " ");
       }
     }
-    return Object.keys(comments).length > 0 ? { treeComments: comments } : {};
+
+    // Listón de calidad: sin comentarios la tarea no vale (dispara el reintento)
+    if (Object.keys(comments).length === 0) throw new Error("reply had no usable comments");
+    return { treeComments: comments };
   }
-    
+
   // ---- Tarea 3: diagrama de arquitectura + tabla de componentes ----
 
   private buildArchitecturePrompt(info: ProjectInfo, lang: Lang): string {
@@ -156,13 +168,14 @@ export class OllamaClient implements AiGeneratorPort {
       `Project files: ${info.files.slice(0, 60).join(", ")}`,
       "",
       "Describe the architecture as a graph plus a table of components:",
-      '- "subgraphs": 2 to 4 groups (layers or modules), each with 1 to 4 nodes. Each node has an "id" (short, lowercase letters only) and a "label" (short name, an emoji is welcome).',
-      '- "edges": connections between node ids, with an optional short "label".',
-      '- "components": 2 to 6 rows describing the main components: name, technology, one-line detail.',
+      '- "subgraphs": 2 to 4 groups (layers or modules), each with 1 to 4 nodes. Cover ALL the main modules you can see in the project files. Each node has an "id" (short, lowercase letters only) and a "label" (short name, an emoji is welcome).',
+      '- "nodes": 0 to 2 standalone actor nodes outside any group (e.g. the user, an external service).',
+      '- "edges": at least 3 connections between declared node ids, with an optional short "label". Every edge must reference ids you declared.',
+      '- "components": one row per main component (aim for 4 to 7): name, technology, one-line detail.',
       "- Base everything STRICTLY on the facts above. Do not invent components.",
       "",
       "Reply ONLY with a JSON object with this exact shape:",
-      '{"subgraphs": [{"title": "🧠 Core", "nodes": [{"id": "cli", "label": "🖥️ CLI parser"}]}], "edges": [{"from": "cli", "to": "usecase", "label": "options"}], "components": [{"name": "cli", "tech": "TypeScript", "detail": "Parses arguments"}]}',
+      '{"subgraphs": [{"title": "🧠 Core", "nodes": [{"id": "cli", "label": "🖥️ CLI parser"}]}], "nodes": [{"id": "user", "label": "👤 User"}], "edges": [{"from": "user", "to": "cli"}, {"from": "cli", "to": "usecase", "label": "options"}], "components": [{"name": "cli", "tech": "TypeScript", "detail": "Parses arguments"}]}',
     ].join("\n");
   }
 
@@ -188,16 +201,37 @@ export class OllamaClient implements AiGeneratorPort {
         return nodes.length > 0 ? [{ title: sg.title, nodes }] : [];
       });
 
+    const nodes = (Array.isArray(parsed.nodes) ? parsed.nodes : [])
+      .filter(isRecord)
+      .flatMap((n) =>
+        typeof n.id === "string" && typeof n.label === "string"
+          ? [{ id: n.id, label: n.label }]
+          : [],
+      );
+
+    // Solo aceptamos flechas entre nodos DECLARADOS: un id fantasma
+    // saldría como caja pelada en el diagrama
+    const declared = new Set(
+      [...subgraphs.flatMap((sg) => sg.nodes), ...nodes].map((n) => n.id),
+    );
     const edges = (Array.isArray(parsed.edges) ? parsed.edges : [])
       .filter(isRecord)
       .flatMap((e) =>
-        typeof e.from === "string" && typeof e.to === "string"
+        typeof e.from === "string" &&
+        typeof e.to === "string" &&
+        declared.has(e.from) &&
+        declared.has(e.to)
           ? [{ from: e.from, to: e.to, ...(typeof e.label === "string" ? { label: e.label } : {}) }]
           : [],
       );
 
-    // Sin grafo con chicha no hay sección: mejor omitir que enseñar un diagrama vacío
-    if (subgraphs.length === 0 || edges.length === 0) return {};
+    // Listón de calidad: menos que esto no es un diagrama de arquitectura
+    const totalNodes = subgraphs.reduce((sum, sg) => sum + sg.nodes.length, 0) + nodes.length;
+    if (subgraphs.length < 2 || totalNodes < 4 || edges.length < 2) {
+      throw new Error(
+        `graph too thin (${subgraphs.length} groups, ${totalNodes} nodes, ${edges.length} edges)`,
+      );
+    }
 
     const components = (Array.isArray(parsed.components) ? parsed.components : [])
       .filter(isRecord)
@@ -207,7 +241,7 @@ export class OllamaClient implements AiGeneratorPort {
           : [],
       );
 
-    return { architecture: { mermaid: buildMermaid({ subgraphs, edges }), components } };
+    return { architecture: { mermaid: buildMermaid({ subgraphs, nodes, edges }), components } };
   }
 
   // ---- Transporte común ----
@@ -221,6 +255,7 @@ export class OllamaClient implements AiGeneratorPort {
         prompt,
         stream: false,
         format: "json", // Ollama fuerza al modelo a emitir JSON válido
+        options: { temperature: 0.4 }, // tareas estructuradas: obediencia > creatividad
       }),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
