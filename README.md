@@ -1,23 +1,23 @@
 # 📝 @davidtorro/readme-gen
 
-![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white) ![tsup](https://img.shields.io/badge/-tsup-0f172a?style=for-the-badge) ![Ollama](https://img.shields.io/badge/-Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
 
-Create professional and attractive README.md files for your projects quickly and easily. @davidtorro/readme-gen streamlines the process of generating READMEs with minimal effort, ensuring your projects have a polished and appealing presence. Perfect for developers looking to save time while maintaining high-quality documentation.
+A CLI tool to generate professional README.md files for your projects quickly. It leverages AI to create attractive, well-structured documentation with minimal input.
 
-> 🚀 Generate stunning README.md files in seconds with minimal effort.
+> 🤖 Generate beautiful, professional README.md files in seconds with AI-powered assistance and zero configuration.
 
 ## ⚙️ Tech Stack
 
 - 🔤 **Languages**: TypeScript
+- 🤖 **AI**: Ollama
+- 🔧 **Tooling**: tsup
 
 ## ✨ Features
 
-- 📄 Generate beautiful README.md files in seconds
-- ⚙️ Built with TypeScript for performance and type safety
-- 💡 Automatically suggests project structure and content
-- 🎨 Customizable templates for branding and style
-- 📈 Includes metadata for GitHub and package visibility
-- 💾 Easy to integrate into your development workflow
+- 📦 **TypeScript-powered** with TypeScript, tsup, and Ollama for modern, type-safe development
+- 📄 **AI-assisted generation** using Ollama to create engaging README content
+- 🔍 **Project analysis** to automatically detect project structure and content
+- ⚙️ **Customizable output** with i18n support for multiple languages
 
 ## 🗂️ Project Structure
 
