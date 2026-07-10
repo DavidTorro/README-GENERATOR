@@ -20,6 +20,10 @@ try {
     console.log(pkg.version);
     process.exit(0);
   }
+  if (opts.command === "banner") {
+    console.error("🎨 banner: not implemented yet");
+    process.exit(0);
+  }
 
   // Composition root: el ÚNICO sitio donde se enchufan las capas
   const scanner = new FsProjectScanner();

@@ -5,8 +5,13 @@
 import { parseArgs } from "node:util"; // parseArgs es una función nativa de Node.js que permite parsear argumentos de línea de comandos de manera sencilla y robusta
 import type { Lang } from "../readme/domain/i18n/index.js";
 
+// Comandos disponibles: generar el README (defecto) o generar el banner con IA de imagen
+export type Command = "readme" | "banner";
+const COMMANDS: Command[] = ["readme", "banner"];
+
 // Interfaz que define las opciones de línea de comandos disponibles para el usuario
 export interface CliOptions {
+  command: Command; // qué hace la CLI: "readme" (defecto) o "banner"
   ai: boolean; // uso de IA local (Ollama)
   lang: Lang; // idioma del README generado
   output: string; // ruta del fichero de salida
@@ -21,7 +26,11 @@ export const HELP = `
 readme-gen — generate a professional README.md by analyzing your project
 
 Usage:
-  readme-gen [language] [options]
+  readme-gen [command] [language] [options]
+
+Commands:
+  readme (default)    generate README.md by analyzing the project
+  banner              generate assets/banner.png with local image AI (Ollama)
 
 Language:
   en (default) | es          also available as flag: --lang es
@@ -59,14 +68,20 @@ export function parseCliArgs(argv: string[]): CliOptions {
     },
   });
 
+  // Si el primer posicional es un comando conocido, lo consumimos; si no, es el idioma
+  const isCommand = (v: string | undefined): v is Command => COMMANDS.includes(v as Command);
+  const command: Command = isCommand(positionals[0]) ? positionals[0] : "readme";
+  const langPositional = isCommand(positionals[0]) ? positionals[1] : positionals[0];
+
   // Prioridad del idioma: --lang gana al posicional; defecto "en"
-  const rawLang = values.lang ?? positionals[0] ?? "en";
+  const rawLang = values.lang ?? langPositional ?? "en";
   if (rawLang !== "en" && rawLang !== "es") {
     throw new Error(`Unsupported language: "${rawLang}". Use "en" or "es".`);
   }
 
   // Devuelve un objeto con las opciones configuradas
   return {
+    command,
     ai: values.ai,
     lang: rawLang,
     output: values.output,
