@@ -1,12 +1,15 @@
 #!/usr/bin/env node
-import { existsSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import pkg from "../package.json" with { type: "json" };
 import { GenerateReadmeUseCase } from "./readme/application/generate-readme.use-case.js";
 import { FsProjectScanner } from "./project/infrastructure/fs-project-scanner.js";
 import { HELP, parseCliArgs } from "./cli/cli.parser.js";
 import { loadConfig } from "./ai/infrastructure/ai.config.js";
 import { OllamaClient } from "./ai/infrastructure/ollama.client.js";
+import { buildProjectInfo } from "./project/domain/project.builder.js";
+import { buildBannerPrompt } from "./ai/domain/banner.prompt.js";
+import { OllamaImageClient } from "./ai/infrastructure/ollama-image.client.js";
 
 try {
   // slice(2) para ignorar "node" y la ruta del script
@@ -21,7 +24,25 @@ try {
     process.exit(0);
   }
   if (opts.command === "banner") {
-    console.error("🎨 banner: not implemented yet");
+    console.error("🎨 Generating banner with local AI (this may take a while)...");
+
+    const bannerPath = resolve(process.cwd(), "assets/banner.png");
+    // Red de seguridad: no pisar un banner existente salvo --force
+    if (existsSync(bannerPath) && !opts.force) {
+      console.error("❌ assets/banner.png already exists. Use --force to overwrite.");
+      process.exit(1);
+    }
+
+    const raw = new FsProjectScanner().scan(process.cwd());
+    const info = buildProjectInfo(raw, process.cwd());
+    const image = await new OllamaImageClient(loadConfig()).generateImage(
+      buildBannerPrompt(info),
+    );
+    if (!image) process.exit(1); // el cliente ya avisó por stderr
+
+    mkdirSync(dirname(bannerPath), { recursive: true });
+    writeFileSync(bannerPath, image);
+    console.error("✅ assets/banner.png generated");
     process.exit(0);
   }
 

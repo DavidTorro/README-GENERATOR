@@ -9,7 +9,7 @@ export interface Config {
 const DEFAULTS = {
   ollamaUrl: "http://localhost:11434",
   ollamaModel: "qwen3:8b",
-  ollamaImageModel: "x/flux2-klein:4b",
+  ollamaImageModel: "x/flux2-klein:9b",
 } as const;
 
 // Recibe env como parámetro (con default) en vez de leer process.env directo
