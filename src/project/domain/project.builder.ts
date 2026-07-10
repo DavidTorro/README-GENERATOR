@@ -10,6 +10,16 @@ function detectPackageManager(files: Set<string>): PackageManager {
   return "npm";
 }
 
+// "bin" como string usa el nombre del paquete (sin scope); como objeto, su primera clave
+function detectBinName(pkg: RawProject["pkg"]): string | undefined {
+  if (!pkg.bin) return undefined;
+  if (typeof pkg.bin === "string") {
+    const name = pkg.name ?? "";
+    return (name.includes("/") ? name.split("/").pop() : name) || undefined;
+  }
+  return Object.keys(pkg.bin)[0];
+}
+
 // Construye un objeto ProjectInfo a partir de los datos crudos del proyecto
 export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
   const { pkg, files } = raw;
@@ -34,6 +44,7 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
       fileSet.has("Dockerfile") ||
       fileSet.has("docker-compose.yml") ||
       fileSet.has("docker-compose.yaml"),
+    binName: detectBinName(pkg),
     files,
     root,
     stack,

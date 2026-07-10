@@ -7,6 +7,7 @@ export interface PkgJson {
   scripts?: Record<string, string>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  bin?: string | Record<string, string>;
 }
 
 // Datos CRUDOS del proyecto

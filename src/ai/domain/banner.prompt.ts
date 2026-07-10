@@ -1,15 +1,25 @@
 import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
 
-// Prompt para el modelo de imagen: describe la ESCENA, no el proyecto
-export function buildBannerPrompt(info: ProjectInfo): string {
-  const stack = info.stack.map((t) => t.name).slice(0, 5).join(", ");
+// El tono del hash, en palabras que un modelo de imagen entiende
+export function hueToColorWord(hue: number): string {
+  const h = ((hue % 360) + 360) % 360;
+  if (h < 15 || h >= 345) return "red";
+  if (h < 45) return "orange";
+  if (h < 70) return "yellow";
+  if (h < 160) return "green";
+  if (h < 200) return "teal";
+  if (h < 250) return "blue";
+  if (h < 290) return "purple";
+  return "pink";
+}
+
+// Marca abstracta pequeña: lo único que la difusión hace decentemente.
+// Prohibido el texto: a 30px las letras de IA son ruido
+export function buildLogoPrompt(info: ProjectInfo, colorWord: string): string {
   return [
-    `Wide horizontal banner illustration for a software project called "${info.name}".`,
-    info.description ? `The project: ${info.description}.` : "",
-    stack ? `Themes to evoke: ${stack}.` : "",
-    "Modern flat design, abstract geometric shapes, dark background with vibrant accent colors, clean tech aesthetic.",
-    "No text, no letters, no words.", // de momento no se le ponemos el nombre por que Ollama no lo hace bien
-  ]
-    .filter(Boolean)
-    .join(" ");
+    `Minimal flat logo mark for a software project called "${info.name}".`,
+    `Abstract geometric symbol in ${colorWord} tones on a clean white background,`,
+    "centered, simple bold shapes, modern vector style, high contrast.",
+    "No text, no letters, no words.",
+  ].join(" ");
 }

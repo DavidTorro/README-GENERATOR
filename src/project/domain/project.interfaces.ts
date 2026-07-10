@@ -42,6 +42,8 @@ export interface ProjectInfo {
   devDependencies: string[];
   packageManager: PackageManager;
   hasDocker: boolean;
+  // Nombre del comando si el package expone un bin (⇒ el proyecto es una CLI)
+  binName?: string;
   // Rutas de todos los ficheros del proyecto (relativas a root)
   files: string[];
   // Directorio raíz analizado

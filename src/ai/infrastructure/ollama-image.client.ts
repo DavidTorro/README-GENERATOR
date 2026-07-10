@@ -13,7 +13,7 @@ export class OllamaImageClient implements ImageGeneratorPort {
   constructor(private readonly config: Config) {}
 
   // Contrato: NUNCA revienta — degrada a undefined con aviso por stderr
-  async generateImage(prompt: string): Promise<Uint8Array | undefined> {
+  async generateImage(prompt: string, width: number, height: number): Promise<Uint8Array | undefined> {
     try {
       const res = await fetch(`${this.config.ollamaUrl}/api/generate`, {
         method: "POST",
@@ -22,8 +22,8 @@ export class OllamaImageClient implements ImageGeneratorPort {
           model: this.config.ollamaImageModel,
           prompt,
           stream: false,
-          width: 1280, // proporción banner (~4:1), tamaño típico de cabecera de GitHub
-          height: 320,
+          width,
+          height,
           steps: 4, // flux2-klein está destilado para pocos pasos
         }),
         signal: AbortSignal.timeout(TIMEOUT_MS),

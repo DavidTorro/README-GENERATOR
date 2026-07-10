@@ -8,8 +8,9 @@ import { HELP, parseCliArgs } from "./cli/cli.parser.js";
 import { loadConfig } from "./ai/infrastructure/ai.config.js";
 import { OllamaClient } from "./ai/infrastructure/ollama.client.js";
 import { buildProjectInfo } from "./project/domain/project.builder.js";
-import { buildBannerPrompt } from "./ai/domain/banner.prompt.js";
+import { buildBannerSvg, hashHue } from "./readme/domain/readme.banner.js";
 import { OllamaImageClient } from "./ai/infrastructure/ollama-image.client.js";
+import { buildLogoPrompt, hueToColorWord } from "./ai/domain/banner.prompt.js";
 
 try {
   // slice(2) para ignorar "node" y la ruta del script
@@ -23,26 +24,44 @@ try {
     console.log(pkg.version);
     process.exit(0);
   }
-  if (opts.command === "banner") {
-    console.error("🎨 Generating banner with local AI (this may take a while)...");
-
-    const bannerPath = resolve(process.cwd(), "assets/banner.png");
+    if (opts.command === "banner") {
+    const bannerPath = resolve(process.cwd(), "assets/banner.svg");
     // Red de seguridad: no pisar un banner existente salvo --force
     if (existsSync(bannerPath) && !opts.force) {
-      console.error("❌ assets/banner.png already exists. Use --force to overwrite.");
+      console.error("❌ assets/banner.svg already exists. Use --force to overwrite.");
       process.exit(1);
     }
 
     const raw = new FsProjectScanner().scan(process.cwd());
     const info = buildProjectInfo(raw, process.cwd());
-    const image = await new OllamaImageClient(loadConfig()).generateImage(
-      buildBannerPrompt(info),
-    );
-    if (!image) process.exit(1); // el cliente ya avisó por stderr
+
+    // Con --ai el diseño lo decide la IA y el logo lo pinta la IA de imagen;
+    // sin --ai (o si degradan): defaultDesign + iniciales
+    let design;
+    let logoPngBase64;
+    if (opts.ai) {
+      console.error("🤖 Designing banner with local AI...");
+      design = await new OllamaClient(loadConfig()).bannerDesign(info, opts.lang);
+      console.error("🎨 Generating logo with local image AI (this may take a while)...");
+      const logo = await new OllamaImageClient(loadConfig()).generateImage(
+        buildLogoPrompt(info, hueToColorWord(hashHue(info.name))),
+        256,
+        256,
+      );
+      if (logo) logoPngBase64 = Buffer.from(logo).toString("base64");
+    }
+
+    const svg = buildBannerSvg({
+      title: info.name,
+      description: info.description,
+      design,
+      logoPngBase64,
+      seed: Math.floor(Math.random() * 1_000_000_000), // cada corrida, un banner distinto
+    });
 
     mkdirSync(dirname(bannerPath), { recursive: true });
-    writeFileSync(bannerPath, image);
-    console.error("✅ assets/banner.png generated");
+    writeFileSync(bannerPath, svg, "utf8");
+    console.error(`✅ assets/banner.svg generated${design ? " (AI design)" : " (default design)"}`);
     process.exit(0);
   }
 
