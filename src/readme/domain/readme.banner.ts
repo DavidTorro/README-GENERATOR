@@ -1,6 +1,7 @@
 // Banner animado 100% vectorial, dibujado desde datos (patrón readme.mermaid.ts).
 // Una SEMILLA por corrida abre el espacio de diseño (tono, tema claro/oscuro,
-// layout); la IA decide motivo/densidad/tagline y la IA de imagen pinta el logo.
+// degradado, geometría de los motivos, partículas); la IA decide motivo/densidad/
+// tagline y la IA de imagen pinta el logo.
 // Solo CSS dentro del SVG: GitHub lo anima aunque lo sirva como <img>
 
 const W = 1280;
@@ -146,14 +147,15 @@ function wrapTagline(text: string, maxChars = 84): string[] {
   return [lines[0] ?? "", `${second.slice(0, maxChars - 1).trimEnd()}…`];
 }
 
-// Puntitos de color suaves latiendo (decoración de fondo)
+// Puntitos de color latiendo a tres ritmos, tamaño y posición por semilla
 function dots(count: number, rand: () => number, p: Palette): string {
+  const classes = ["dot-a", "dot-b", "dot-c"];
   let out = "";
   for (let i = 0; i < count; i++) {
     const cx = Math.round(40 + rand() * (W - 80));
     const cy = Math.round(30 + rand() * (H - 60));
-    const r = (1.5 + rand() * 1.5).toFixed(1);
-    out += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${p.soft}" class="${i % 2 ? "dot-a" : "dot-b"}"/>`;
+    const r = (1 + rand() * 2.2).toFixed(1);
+    out += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${p.soft}" class="${classes[i % 3]}"/>`;
   }
   return out;
 }
@@ -161,8 +163,10 @@ function dots(count: number, rand: () => number, p: Palette): string {
 const CSS = `
       .fade-1 { opacity: 0; animation: fadeIn 1.1s ease 0.1s forwards; }
       .fade-2 { opacity: 0; animation: fadeIn 1.1s ease 0.4s forwards; }
+      .float-title { animation: floatTitle 7s ease-in-out 1.4s infinite; }
       .dot-a { animation: breathe 5s ease-in-out infinite; }
       .dot-b { animation: breathe 7s ease-in-out 2s infinite; }
+      .dot-c { animation: breathe 6s ease-in-out 3.5s infinite; }
       .blob-a { animation: driftA 26s ease-in-out infinite; }
       .blob-b { animation: driftB 32s ease-in-out infinite; }
       .blob-c { animation: driftC 22s ease-in-out infinite; }
@@ -171,6 +175,7 @@ const CSS = `
       .wave-a { animation: waveSlide 20s linear infinite; }
       .wave-b { animation: waveSlide 30s linear infinite reverse; }
       @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes floatTitle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
       @keyframes breathe { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.5; } }
       @keyframes driftA { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(70px,30px) scale(1.12); } }
       @keyframes driftB { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px,-20px) scale(0.9); } }
@@ -182,21 +187,28 @@ const CSS = `
         * { animation: none !important; opacity: 1 !important; }
       }`;
 
-// ---- Motivos de fondo (capas detrás del texto) ----
+// ---- Motivos de fondo (capas detrás del texto, geometría por semilla) ----
 
-function motifAurora(p: Palette, lively: boolean): string {
+function motifAurora(p: Palette, lively: boolean, rand: () => number): string {
   const o = (v: number) => Math.min(v * p.boost, 0.45).toFixed(2);
+  // Cada corrida coloca los blobs en sitios y tamaños distintos
+  const blob = (color: string, base: number, cls: string) => {
+    const cx = Math.round(rand() * W);
+    const cy = Math.round(rand() * H);
+    const r = Math.round(130 + rand() * 110);
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" opacity="${o(base)}" class="${cls}"/>`;
+  };
   return [
     `<g filter="url(#blur)">`,
-    `<circle cx="260" cy="70" r="180" fill="${p.accent}" opacity="${o(0.16)}" class="blob-a"/>`,
-    `<circle cx="1030" cy="250" r="200" fill="${p.accent2}" opacity="${o(0.14)}" class="blob-b"/>`,
-    `<circle cx="680" cy="10" r="150" fill="${p.accent3}" opacity="${o(0.12)}" class="blob-c"/>`,
-    lively ? `<circle cx="420" cy="310" r="140" fill="${p.accent2}" opacity="${o(0.12)}" class="blob-b"/>` : "",
+    blob(p.accent, 0.16, "blob-a"),
+    blob(p.accent2, 0.14, "blob-b"),
+    blob(p.accent3, 0.12, "blob-c"),
+    lively ? blob(p.accent2, 0.12, "blob-b") : "",
     `</g>`,
   ].filter(Boolean).join("\n  ");
 }
 
-function motifOrbits(p: Palette, lively: boolean): string {
+function motifOrbits(p: Palette, lively: boolean, rand: () => number): string {
   const o = (v: number) => Math.min(v * p.boost, 0.5).toFixed(2);
   const system = (cx: number, cy: number, scale: number) =>
     [
@@ -208,11 +220,21 @@ function motifOrbits(p: Palette, lively: boolean): string {
       `<g class="spin-b" style="transform-origin: 0px 0px"><circle cx="-98" cy="0" r="4" fill="${p.accent2}" fill-opacity="0.7"/></g>`,
       `</g>`,
     ].join("");
-  return system(1110, 265, 1) + (lively ? system(150, 55, 0.7) : "");
+  // Sistema principal en la zona derecha, cada corrida en un punto y escala distintos
+  const cx = Math.round(920 + rand() * 260);
+  const cy = Math.round(120 + rand() * 160);
+  const scale = +(0.8 + rand() * 0.4).toFixed(2);
+  const secondary = lively
+    ? system(Math.round(80 + rand() * 180), Math.round(40 + rand() * 80), +(0.5 + rand() * 0.3).toFixed(2))
+    : "";
+  return system(cx, cy, scale) + secondary;
 }
 
-function motifWaves(p: Palette, lively: boolean): string {
+function motifWaves(p: Palette, lively: boolean, rand: () => number): string {
   const o = (v: number) => Math.min(v * p.boost, 0.3).toFixed(2);
+  // Altura y amplitud de las olas distintas en cada corrida
+  const yBase = Math.round(225 + rand() * 40);
+  const ampBase = Math.round(30 + rand() * 26);
   // Onda periódica de 640px: al deslizar 640px el bucle es perfecto
   const wave = (y: number, amp: number, color: string, opacity: string, cls: string) => {
     let d = `M0 ${y}`;
@@ -223,9 +245,9 @@ function motifWaves(p: Palette, lively: boolean): string {
     return `<path d="${d}" fill="${color}" opacity="${opacity}" class="${cls}"/>`;
   };
   return [
-    wave(245, 42, p.accent, o(0.10), "wave-a"),
-    wave(262, 30, p.accent2, o(0.08), "wave-b"),
-    lively ? wave(228, 54, p.accent3, o(0.06), "wave-a") : "",
+    wave(yBase + 20, ampBase + 12, p.accent, o(0.10), "wave-a"),
+    wave(yBase + 37, ampBase, p.accent2, o(0.08), "wave-b"),
+    lively ? wave(yBase, ampBase + 24, p.accent3, o(0.06), "wave-a") : "",
   ].filter(Boolean).join("\n  ");
 }
 
@@ -244,35 +266,42 @@ function pill(x: number, y: number, width: number, p: Palette, content: string):
 export function buildBannerSvg(data: BannerData): string {
   const design = data.design ?? defaultDesign();
 
-  // La semilla reparte el espacio de diseño: tono, tema y layout
+  // La semilla reparte el espacio de diseño: tono, tema, degradado y geometría
   const rand = seededRand(data.seed ?? hashHue(data.title));
   const hue = Math.floor(rand() * 360);
   const theme: "light" | "dark" = rand() < 0.5 ? "light" : "dark";
-  const layout: "center" | "left" = rand() < 0.5 ? "center" : "left";
 
   const p = makePalette(hue, theme);
+
+  // Dirección del degradado de fondo: 4 diagonales posibles
+  const dir = [
+    { x1: 0, y1: 0, x2: 1, y2: 1 },
+    { x1: 1, y1: 0, x2: 0, y2: 1 },
+    { x1: 0, y1: 1, x2: 1, y2: 0 },
+    { x1: 0, y1: 0, x2: 1, y2: 0 },
+  ][Math.floor(rand() * 4)] ?? { x1: 0, y1: 0, x2: 1, y2: 1 };
+
   const { author, short } = splitName(data.title);
   const [dark, accent] = twoTone(short);
   // Iniciales para el mini-logo: "README GEN" → "RG"
   const initials = (dark.charAt(0) + (accent.trim().charAt(0) || dark.charAt(1))).toUpperCase();
   const lively = design.density === "lively";
-  const centered = layout === "center";
-  const tag = wrapTagline(design.tagline ?? data.description, centered ? 84 : 66);
+  const tag = wrapTagline(design.tagline ?? data.description, 84);
 
   const motifSvg =
     design.motif === "orbits"
-      ? motifOrbits(p, lively)
+      ? motifOrbits(p, lively, rand)
       : design.motif === "waves"
-        ? motifWaves(p, lively)
-        : motifAurora(p, lively);
+        ? motifWaves(p, lively, rand)
+        : motifAurora(p, lively, rand);
 
-  // Pastilla del logo: centrada arriba o arriba a la izquierda, según layout.
+  // Pastilla del logo SIEMPRE a la izquierda (espejo del autor a la derecha).
   // El chip (30px) se centra en la pastilla (44px): 40 + (44-30)/2 = 47
   const nameText = short
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
   const leftW = Math.round(nameText.length * 9.5) + 88;
-  const leftX = centered ? Math.round((W - leftW) / 2) : 48;
+  const leftX = 48;
   const chipInner = data.logoPngBase64
     ? `<image href="data:image/png;base64,${data.logoPngBase64}" x="${leftX + 14}" y="47" width="30" height="30" clip-path="url(#logoClip)" preserveAspectRatio="xMidYMid slice"/>`
     : `<text x="${leftX + 29}" y="67" text-anchor="middle" font-size="14" font-weight="800" fill="${p.ink}">${escapeXml(initials.charAt(0))}<tspan fill="${p.accent}">${escapeXml(initials.charAt(1))}</tspan></text>`;
@@ -304,15 +333,10 @@ export function buildBannerSvg(data: BannerData): string {
       })()
     : "";
 
-  // Título y tagline: centrados, o alineados a la izquierda
-  const anchor = centered ? "middle" : "start";
-  const textX = centered ? W / 2 : 64;
-  const titleSize = centered ? 84 : 76;
-
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="${FONT}">`,
     `  <defs>`,
-    `    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">`,
+    `    <linearGradient id="bg" x1="${dir.x1}" y1="${dir.y1}" x2="${dir.x2}" y2="${dir.y2}">`,
     `      <stop offset="0" stop-color="${p.bgA}"/><stop offset="1" stop-color="${p.bgB}"/>`,
     `    </linearGradient>`,
     `    <filter id="blur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="70"/></filter>`,
@@ -324,15 +348,15 @@ export function buildBannerSvg(data: BannerData): string {
     `  </defs>`,
     `  <rect width="${W}" height="${H}" fill="url(#bg)"/>`,
     `  ${motifSvg}`,
-    `  <g>${dots(lively ? 16 : 8, rand, p)}</g>`,
+    `  <g>${dots((lively ? 18 : 10) + Math.floor(rand() * 14), rand, p)}</g>`,
     `  ${leftPill}`,
     `  ${authorPill}`,
     `  <g filter="url(#softShadow)" class="fade-1">`,
-    `    <text x="${textX}" y="${tag.length > 0 ? 186 : 202}" text-anchor="${anchor}" font-size="${titleSize}" font-weight="800" letter-spacing="-3" fill="${p.ink}">${escapeXml(dark)}<tspan fill="${p.accent}">${escapeXml(accent)}</tspan></text>`,
+    `    <text x="${W / 2}" y="${tag.length > 0 ? 186 : 202}" text-anchor="middle" font-size="84" font-weight="800" letter-spacing="-3" fill="${p.ink}" class="float-title">${escapeXml(dark)}<tspan fill="${p.accent}">${escapeXml(accent)}</tspan></text>`,
     `  </g>`,
     ...tag.map(
       (line, i) =>
-        `  <text x="${textX}" y="${232 + i * 27}" text-anchor="${anchor}" font-size="19" fill="${p.textSoft}" class="fade-2">${escapeXml(line)}</text>`,
+        `  <text x="${W / 2}" y="${232 + i * 27}" text-anchor="middle" font-size="19" fill="${p.textSoft}" class="fade-2">${escapeXml(line)}</text>`,
     ),
     `</svg>`,
   ]
