@@ -26,7 +26,11 @@ export class OllamaClient implements AiGeneratorPort {
       )) ?? {};
     const tree =
       (await this.tryTask("tree comments", async () =>
-        this.parseTreeEnrichment(await this.generate(this.buildTreePrompt(info, lang))),
+        this.parseTreeEnrichment(
+          // la respuesta más larga de todas: un comentario por cada ruta
+          await this.generate(this.buildTreePrompt(info, lang), 3000),
+          info,
+        ),
       )) ?? {};
     const architecture =
       (await this.tryTask("architecture", async () =>
@@ -144,20 +148,27 @@ export class OllamaClient implements AiGeneratorPort {
     ].join("\n");
   }
 
-  private parseTreeEnrichment(raw: string): AiEnrichment {
+  private parseTreeEnrichment(raw: string, info: ProjectInfo): AiEnrichment {
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) return {};
 
+    // Solo aceptamos claves que sean rutas reales del proyecto: qwen3 a veces
+    // devuelve {"user": "<eco del prompt>"} o rutas inventadas
+    const known = new Set(this.treePaths(info));
     const comments: Record<string, string> = {};
     for (const [path, value] of Object.entries(parsed)) {
-      if (typeof value === "string" && value.trim() !== "") {
-        // El modelo a veces devuelve "src/cli/": normalizamos sin slash final
-        comments[path.replace(/\/+$/, "")] = value.trim().replace(/\s+/g, " ");
+      const clean = path.replace(/\/+$/, "");
+      if (known.has(clean) && typeof value === "string" && value.trim() !== "") {
+        comments[clean] = value.trim().replace(/\s+/g, " ");
       }
     }
 
-    // Listón de calidad: sin comentarios la tarea no vale (dispara el reintento)
-    if (Object.keys(comments).length === 0) throw new Error("reply had no usable comments");
+    // Listón de calidad: si casi nada casa con rutas reales, la tarea no vale.
+    // min() para no exigir 5 a un proyecto diminuto de 3 ficheros
+    const minimum = Math.min(5, known.size);
+    if (Object.keys(comments).length < minimum) {
+      throw new Error(`only ${Object.keys(comments).length} comments matched real paths`);
+    }
     return { treeComments: comments };
   }
 
@@ -300,7 +311,7 @@ export class OllamaClient implements AiGeneratorPort {
 
   // ---- Transporte común ----
 
-  private async generate(prompt: string): Promise<string> {
+  private async generate(prompt: string, numPredict = 1500): Promise<string> {
     const res = await fetch(`${this.config.ollamaUrl}/api/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -309,10 +320,12 @@ export class OllamaClient implements AiGeneratorPort {
         prompt,
         stream: false,
         format: "json", // Ollama fuerza al modelo a emitir JSON válido
-        options: { 
+        think: false, // sin esto, qwen3 "quiere pensar", format json no le deja, y a veces vomita el prompt como eco {"user": ...}
+        options: {
           temperature: 0.4,
           num_ctx: 8192, // holgura para prompts largos (60 ficheros + instrucciones)
-          num_predict: 1500, // ninguna tarea necesita más; corta los bucles de whitespace
+          num_predict: numPredict, // 1500 corta bucles de whitespace; tareas largas piden más
+          seed: Math.trunc(Math.random() * 2_147_483_647), // sin seed, Ollama casi repite la respuesta: el reintento repetía el MISMO error
         }, // tareas estructuradas: obediencia > creatividad
       }),
       signal: AbortSignal.timeout(TIMEOUT_MS),

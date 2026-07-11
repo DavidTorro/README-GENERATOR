@@ -29,7 +29,8 @@
     "dev": "tsup --watch",
     "typecheck": "tsc",
     "prepublishOnly": "npm run build",
-    "gen": "npm run build && node dist/main.js"
+    "gen": "npm run build && node dist/main.js",
+    "gen:all": "npm run build && node dist/main.js banner --ai --force && node dist/main.js --ai --force"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",
