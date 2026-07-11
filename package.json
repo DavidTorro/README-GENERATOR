@@ -1,7 +1,7 @@
 {
   "name": "@davidtorro/readme-gen",
   "version": "0.1.0",
-  "description": "Generador de README.md para tus proyectos. Crea un README.md profesional y atractivo para tu proyecto de manera rápida y sencilla.",
+  "description": "README.md generator for your projects. Creates a professional and attractive README quickly with optional local AI enrichment.",
   "keywords": [
     "readme",
     "generator",

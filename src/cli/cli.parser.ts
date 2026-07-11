@@ -30,7 +30,7 @@ Usage:
 
 Commands:
   readme (default)    generate README.md by analyzing the project
-  banner              generate assets/banner.png with local image AI (Ollama)
+  banner              generate assets/banner.svg with animated design and local AI logo (Ollama)
 
 Language:
   en (default) | es          also available as flag: --lang es
