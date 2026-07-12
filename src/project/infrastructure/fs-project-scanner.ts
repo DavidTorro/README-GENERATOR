@@ -6,36 +6,48 @@ import type { PkgJson, ProjectScannerPort, RawProject } from "../domain/project-
 // Ignorados siempre, tenga .gitignore o no el proyecto analizado
 const DEFAULT_IGNORE = ["**/node_modules/**", "**/dist/**", "**/build/**", "**/.git/**"];
 
-// Extensiones cuyos imports nos interesan para el grafo de arquitectura
+// Extensiones que consideramos "código fuente" (para imports y para dar código a la IA)
 const SOURCE_RE = /\.(?:ts|tsx|js|jsx|mjs|cjs)$/;
+// Ficheros de infraestructura: definen la arquitectura de RUNTIME (servicios, puertos, BBDD)
+const INFRA_RE = /(?:^|\/)(?:docker-compose\.ya?ml|compose\.ya?ml|Dockerfile|\.env\.(?:example|sample))$/;
 // Captura el especificador de `import/export ... from "X"`, `import "X"` e `import("X")`
 const IMPORT_RE = /(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g;
+
+// Especificadores de import por fichero de CÓDIGO, extraídos del texto ya leído (sin volver a disco)
+function extractImports(sources: Record<string, string>): Record<string, string[]> {
+  const imports: Record<string, string[]> = {};
+  for (const [file, text] of Object.entries(sources)) {
+    if (!SOURCE_RE.test(file)) continue; // los infra (yaml, Dockerfile) no tienen imports ESM
+    const specs = new Set<string>();
+    for (const match of text.matchAll(IMPORT_RE)) {
+      if (match[1]) specs.add(match[1]);
+    }
+    if (specs.size > 0) imports[file] = [...specs];
+  }
+  return imports;
+}
 
 // Única pieza del proyecto que lee el disco del proyecto analizado
 export class FsProjectScanner implements ProjectScannerPort {
   scan(root: string): RawProject {
     const files = this.listFiles(root);
-    return { pkg: this.readPackageJson(root), files, imports: this.readImports(root, files) };
+    const sources = this.readSources(root, files);
+    return { pkg: this.readPackageJson(root), files, sources, imports: extractImports(sources) };
   }
 
-  // Por cada fichero fuente, extrae los especificadores de sus imports (crudos, sin resolver)
-  private readImports(root: string, files: string[]): Record<string, string[]> {
-    const imports: Record<string, string[]> = {};
+  // Texto de cada fichero fuente: alimenta el grafo de imports Y los extractos que lee la IA
+  private readSources(root: string, files: string[]): Record<string, string> {
+    const sources: Record<string, string> = {};
     for (const file of files) {
-      if (file.endsWith(".d.ts") || !SOURCE_RE.test(file)) continue;
-      let text: string;
+      if (file.endsWith(".d.ts")) continue;
+      if (!SOURCE_RE.test(file) && !INFRA_RE.test(file)) continue;
       try {
-        text = readFileSync(join(root, file), "utf8");
+        sources[file] = readFileSync(join(root, file), "utf8");
       } catch {
-        continue; // fichero ilegible: lo saltamos, no reventamos el escaneo
+        // fichero ilegible: lo saltamos, no reventamos el escaneo
       }
-      const specs = new Set<string>();
-      for (const match of text.matchAll(IMPORT_RE)) {
-        if (match[1]) specs.add(match[1]);
-      }
-      if (specs.size > 0) imports[file] = [...specs];
     }
-    return imports;
+    return sources;
   }
 
   private readPackageJson(root: string): PkgJson {

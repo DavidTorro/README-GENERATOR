@@ -69,6 +69,39 @@ function resolveInternalImports(
   return internal;
 }
 
+const MAX_KEY_SOURCES = 7;
+const MAX_CHARS_PER_SOURCE = 1200;
+// Infra: docker-compose/.env/Dockerfile — DEFINEN la arquitectura de runtime (servicios, puertos)
+const INFRA_RE = /(?:^|\/)(?:docker-compose\.ya?ml|compose\.ya?ml|Dockerfile|\.env\.(?:example|sample))$/;
+// Entrypoints típicos: valen más que un fichero cualquiera para entender qué HACE el proyecto
+const ENTRY_RE = /(?:^|\/)(?:main|index|cli|app|server)\.[cm]?[jt]sx?$/;
+
+// Elige los ficheros más informativos para enseñárselos a la IA. Prioridad: infra (define la
+// arquitectura) → entrypoints → más importados (in-degree = más centrales). Cada extracto, acotado.
+function selectKeySources(
+  sources: Record<string, string>,
+  imports: Record<string, string[]>,
+): ProjectInfo["keySources"] {
+  const inDegree = new Map<string, number>();
+  for (const targets of Object.values(imports)) {
+    for (const target of targets) inDegree.set(target, (inDegree.get(target) ?? 0) + 1);
+  }
+  // Puntuación por fichero: [infra, entrypoint, in-degree] — se comparan en ese orden
+  const score = (p: string): [number, number, number] => [
+    INFRA_RE.test(p) ? 1 : 0,
+    ENTRY_RE.test(p) ? 1 : 0,
+    inDegree.get(p) ?? 0,
+  ];
+  return Object.keys(sources)
+    .sort((a, b) => {
+      const [ia, ea, da] = score(a);
+      const [ib, eb, db] = score(b);
+      return ib - ia || eb - ea || db - da || a.localeCompare(b);
+    })
+    .slice(0, MAX_KEY_SOURCES)
+    .map((path) => ({ path, code: (sources[path] ?? "").slice(0, MAX_CHARS_PER_SOURCE) }));
+}
+
 // Construye un objeto ProjectInfo a partir de los datos crudos del proyecto
 export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
   const { pkg, files } = raw;
@@ -79,6 +112,7 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
   ]);
 
   const stack = runDetectors({ deps, files, hasFile: (p) => fileSet.has(p) });
+  const internalImports = resolveInternalImports(raw.imports, fileSet);
 
   return {
     name: pkg.name ?? "proyecto",
@@ -96,7 +130,8 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
       fileSet.has("docker-compose.yaml"),
     binName: detectBinName(pkg),
     files,
-    imports: resolveInternalImports(raw.imports, fileSet),
+    imports: internalImports,
+    keySources: selectKeySources(raw.sources, internalImports),
     root,
     stack,
     features: [],

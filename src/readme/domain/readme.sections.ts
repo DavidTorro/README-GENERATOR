@@ -40,10 +40,10 @@ const features: Section = (info, t) => {
   return `## ✨ ${t.features}\n\n${items}`;
 };
 
-// Diagrama mermaid + tabla de componentes, derivados de los imports REALES del proyecto
-// (readme.architecture.ts). Funciona con o sin --ai; null si el proyecto es demasiado plano.
+// Con --ai: flujo de runtime rico (info.architecture). Sin IA (o si degrada): grafo
+// determinista de imports (readme.architecture.ts). null si el proyecto es demasiado plano.
 const architecture: Section = (info, t) => {
-  const arch = buildArchitecture(info);
+  const arch = info.architecture ?? buildArchitecture(info);
   if (!arch) return null;
   const lines = [`## 🏗️ ${t.architecture}`, "", "```mermaid", arch.mermaid, "```"];
   if (arch.components.length > 0) {

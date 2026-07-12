@@ -1,6 +1,7 @@
 import type { AiEnrichment, AiGeneratorPort } from "../domain/ai-generator.port.js";
 import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
 import type { Lang } from "../../readme/domain/i18n/index.js";
+import { buildMermaid } from "../../readme/domain/readme.mermaid.js";
 import { BANNER_MOTIFS } from "../../readme/domain/readme.banner.js";
 import type { BannerDesign, BannerMotif } from "../../readme/domain/readme.banner.js";
 import type { Config } from "./ai.config.js";
@@ -31,7 +32,13 @@ export class OllamaClient implements AiGeneratorPort {
           info,
         ),
       )) ?? {};
-    return { ...text, ...tree };
+    const architecture =
+      (await this.tryTask("architecture", async () =>
+        this.parseArchitectureEnrichment(
+          await this.generate(this.buildArchitecturePrompt(info, lang), 2000),
+        ),
+      )) ?? {};
+    return { ...text, ...tree, ...architecture };
   }
 
   // Ejecuta una tarea de IA con un reintento; si falla dos veces, undefined.
@@ -74,8 +81,12 @@ export class OllamaClient implements AiGeneratorPort {
       `- Uses Docker: ${info.hasDocker ? "yes" : "no"}`,
       `- Project files: ${info.files.slice(0, 60).join(", ")}`,
       "",
+      "KEY SOURCE FILES (real code from this project — read it to see what it ACTUALLY does):",
+      ...info.keySources.flatMap((s) => [`----- ${s.path} -----`, "```", s.code, "```"]),
+      "",
       "RULES:",
-      "- Base everything STRICTLY on the facts above. Do NOT invent features, integrations or capabilities they do not support.",
+      "- Ground the description and features in what the SOURCE CODE above actually does (its flags, commands, behaviours), NOT in file names.",
+      "- Base everything STRICTLY on the facts and code above. Do NOT invent features, integrations or capabilities they do not support.",
       "- Prefer fewer accurate features over many generic ones.",
       "- No marketing fluff: every sentence must say something concrete about THIS project.",
       "",
@@ -165,7 +176,115 @@ export class OllamaClient implements AiGeneratorPort {
     return { treeComments: comments };
   }
 
-  // ---- Tarea 3: diseño del banner ----
+  // ---- Tarea 3: arquitectura como FLUJO de runtime ----
+  // La IA da el grafo como DATOS (nodos ricos + flechas); buildMermaid lo dibuja con
+  // sintaxis garantizada. Anclada a docker-compose/.env/entrypoint (keySources).
+
+  private buildArchitecturePrompt(info: ProjectInfo, lang: Lang): string {
+    const language = lang === "es" ? "Spanish" : "English";
+    // Ejemplo RICO (el modelo imita la forma): app web con front/back/db. Adaptar al proyecto real.
+    const example = JSON.stringify({
+      subgraphs: [
+        { title: "🌐 Frontend", nodes: [{ id: "web", label: "🖥️ React + TS<br/>Vite" }] },
+        { title: "🧠 Backend", nodes: [{ id: "api", label: "🔌 REST API<br/>:3000" }] },
+        { title: "🗄️ Database", nodes: [{ id: "db", label: "🐘 PostgreSQL" }] },
+      ],
+      nodes: [{ id: "user", label: "👤 User" }],
+      edges: [
+        { from: "user", to: "web" },
+        { from: "web", to: "api", label: "/api" },
+        { from: "api", to: "db", label: "SQL" },
+      ],
+      components: [{ name: "backend", tech: "NestJS", detail: "REST API on port 3000" }],
+    });
+    return [
+      `You are a software architect drawing the RUNTIME architecture of the project "${info.name}" for its README, with labels in ${language}.`,
+      "Draw HOW THE SYSTEM WORKS AT RUN TIME (services, processes, data flow) — NOT the source folder tree.",
+      "",
+      `Tech stack detected: ${info.stack.map((t) => t.name).join(", ") || "(unknown)"}`,
+      `Dependencies: ${info.dependencies.join(", ") || "(none)"}`,
+      `Is a CLI tool: ${info.binName ? "yes" : "no"}`,
+      "",
+      "KEY FILES (docker-compose, .env, entrypoints, core code — the architecture lives HERE):",
+      ...info.keySources.flatMap((s) => [`----- ${s.path} -----`, "```", s.code, "```"]),
+      "",
+      "Build the graph:",
+      '- "subgraphs": runtime tiers/services (e.g. "🌐 Frontend", "🧠 Backend", "🗄️ Database", "🤖 AI"). For a CLI/library with no services, model the DATA PIPELINE as ordered stages (e.g. "Scan", "Build", "Render").',
+      '- Each node "label" is RICH and multi-line with <br/>: technology + port/detail, starting with a fitting emoji. Example: "🔌 REST API<br/>:3000".',
+      '- "nodes": 1 to 2 standalone actors outside any tier (👤 user, 🌐 browser, external client).',
+      '- "edges": the data flow between declared node ids, each with a short "label" when meaningful ("/api", "HTTP", "SQL", "httpx"). Only reference ids you declared.',
+      '- "components": one row per main component: name, technology, one-line detail.',
+      "",
+      "RULES:",
+      "- Infer services, PORTS and databases ONLY from the files above (docker-compose/.env/code). NEVER invent ports or services that are not there.",
+      "- 2 to 5 tiers, 4 to 9 nodes total. Keep it clean and readable.",
+      "",
+      "Reply ONLY with a JSON object of EXACTLY this shape, adapting the CONTENT to THIS project:",
+      example,
+    ].join("\n");
+  }
+
+  // La IA aporta DATOS del grafo; buildMermaid garantiza la sintaxis del mermaid
+  private parseArchitectureEnrichment(raw: string): AiEnrichment {
+    const isRecord = (v: unknown): v is Record<string, unknown> =>
+      typeof v === "object" && v !== null;
+    const toNodes = (arr: unknown): { id: string; label: string }[] =>
+      (Array.isArray(arr) ? arr : [])
+        .filter(isRecord)
+        .flatMap((n) =>
+          typeof n.id === "string" && typeof n.label === "string"
+            ? [{ id: n.id, label: n.label }]
+            : [],
+        );
+
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return {};
+
+    const subgraphs = (Array.isArray(parsed.subgraphs) ? parsed.subgraphs : [])
+      .filter(isRecord)
+      .flatMap((sg) => {
+        const nodes = toNodes(sg.nodes);
+        return typeof sg.title === "string" && nodes.length > 0 ? [{ title: sg.title, nodes }] : [];
+      });
+    const nodes = toNodes(parsed.nodes);
+
+    // Solo aceptamos flechas entre nodos DECLARADOS: un id fantasma saldría como caja pelada
+    const declared = new Set([...subgraphs.flatMap((sg) => sg.nodes), ...nodes].map((n) => n.id));
+    const edges = (Array.isArray(parsed.edges) ? parsed.edges : [])
+      .filter(isRecord)
+      .flatMap((e) =>
+        typeof e.from === "string" &&
+        typeof e.to === "string" &&
+        declared.has(e.from) &&
+        declared.has(e.to)
+          ? [
+              {
+                from: e.from,
+                to: e.to,
+                ...(typeof e.label === "string" && e.label.trim() ? { label: e.label.trim() } : {}),
+              },
+            ]
+          : [],
+      );
+
+    // Listón de calidad: menos que esto no es un diagrama de arquitectura (dispara el reintento)
+    const totalNodes = subgraphs.reduce((sum, sg) => sum + sg.nodes.length, 0) + nodes.length;
+    if (totalNodes < 4 || edges.length < 3) {
+      throw new Error(`graph too thin (${totalNodes} nodes, ${edges.length} edges)`);
+    }
+
+    const components = (Array.isArray(parsed.components) ? parsed.components : [])
+      .filter(isRecord)
+      .flatMap((c) =>
+        typeof c.name === "string" && typeof c.tech === "string" && typeof c.detail === "string"
+          ? [{ name: c.name.trim(), tech: c.tech.trim(), detail: c.detail.trim() }]
+          : [],
+      );
+
+    return { architecture: { mermaid: buildMermaid({ subgraphs, nodes, edges }), components } };
+  }
+
+  // ---- Tarea 4: diseño del banner ----
   // La IA solo TOMA DECISIONES (tono, motivo, densidad, tagline);
   // el SVG lo dibuja readme.banner.ts con sintaxis garantizada
 

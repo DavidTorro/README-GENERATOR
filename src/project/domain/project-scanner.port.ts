@@ -21,6 +21,8 @@ export interface RawProject {
   // Por cada fichero fuente, los especificadores de módulo que importa (sin resolver):
   // "src/main.ts" → ["./cli/cli.parser.js", "node:fs", ...]
   imports: Record<string, string[]>;
+  // Texto de cada fichero fuente (ruta → contenido); base de imports y de keySources
+  sources: Record<string, string>;
 }
 
 // Contrato para un escáner de proyectos, su función principal es escanear un proyecto y devolver sus datos crudos

@@ -65,16 +65,19 @@ export function buildArchitecture(info: ProjectInfo): Architecture | null {
     }
   }
 
-  // Listón: sin varios componentes y varias conexiones no hay arquitectura que contar
-  if (groupOf.size < 3 || edges.length < 2) return null;
+  // Del diagrama omitimos los actores (composition root: main): cablea con TODO y solo
+  // aporta un enredo de flechas cruzadas. Sigue documentado en la tabla de abajo.
+  const diagramEdges = edges.filter((e) => !actors.has(e.from) && !actors.has(e.to));
 
-  // 3. MermaidSpec: un subgrafo por módulo; los actores, sueltos
+  // Listón: sin varios componentes y varias conexiones no hay arquitectura que contar
+  if (groupOf.size < 3 || diagramEdges.length < 2) return null;
+
+  // 3. MermaidSpec: un subgrafo por módulo (sin nodos actores sueltos)
   const subgraphs = [...groups.entries()].map(([group, comps]) => ({
     title: group,
     nodes: [...comps].sort().map((comp): MermaidNode => ({ id: comp, label: labelOf(comp) })),
   }));
-  const standalone = [...actors].sort().map((comp): MermaidNode => ({ id: comp, label: comp }));
-  const spec: MermaidSpec = { subgraphs, nodes: standalone, edges };
+  const spec: MermaidSpec = { subgraphs, edges: diagramEdges };
 
   // 4. Tabla: un componente por fila, con su módulo y su rol estructural
   const components: ArchitectureComponent[] = [...groupOf.keys()].sort().map((comp) => ({

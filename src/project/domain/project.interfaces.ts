@@ -31,6 +31,12 @@ export interface Architecture {
   components: ArchitectureComponent[];
 }
 
+// Extracto (acotado) de un fichero clave, para que la IA se base en código REAL
+export interface KeySource {
+  path: string;
+  code: string;
+}
+
 // ProjectInfo es el contrato central del proyecto
 export interface ProjectInfo {
   name: string;
@@ -52,6 +58,8 @@ export interface ProjectInfo {
   files: string[];
   // Grafo de dependencias interno: fichero → ficheros del proyecto que importa
   imports: Record<string, string[]>;
+  // Extractos de los ficheros más informativos, para anclar la IA a código real
+  keySources: KeySource[];
   // Directorio raíz analizado
   root: string;
   // Tecnologías detectadas (React, NestJS, Vite, etc.) con su categoría
@@ -62,4 +70,6 @@ export interface ProjectInfo {
   blockquote?: string;
   // Comentario por ruta para el árbol de estructura (lo rellena la IA)
   treeComments?: Record<string, string>;
+  // Sección de arquitectura: la rellena la IA (flujo de runtime); si no, se deriva de imports
+  architecture?: Architecture;
 }
