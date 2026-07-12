@@ -14,6 +14,8 @@
   "archComponent": "Componente",
   "archTech": "Tecnología",
   "archDetail": "Detalle",
+  "testing": "Testing",
+  "testingText": "Este proyecto incluye configuración de testing con",
   "categories": {
     "language": "Lenguajes",
     "frontend": "Frontend",

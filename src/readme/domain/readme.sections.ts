@@ -76,6 +76,23 @@ const scripts: Section = (info, t) => {
   return `## 🛠️ ${t.scripts}\n\n${items}`;
 };
 
+const testing: Section = (info, t) => {
+  const runners = info.stack
+    .filter((tech) => tech.category === "testing")
+    .map((tech) => tech.name);
+  const testScript = info.scripts.test;
+  // Sin runner detectado y sin script de test, el proyecto no documenta testing
+  if (runners.length === 0 && !testScript) return null;
+
+  const body: string[] = [];
+  if (runners.length > 0) body.push(`${t.testingText} ${runners.join(", ")}.`);
+  if (testScript) {
+    const run = RUN_COMMANDS[info.packageManager];
+    body.push(`\`\`\`bash\n${run} test\n\`\`\``);
+  }
+  return `## 🧪 ${t.testing}\n\n${body.join("\n\n")}`;
+};
+
 const docker: Section = (info, t) =>
   info.hasDocker ? `## 🐳 ${t.docker}\n\n${t.dockerText}` : null;
 
@@ -95,6 +112,7 @@ export const sections: Section[] = [
   projectStructure,
   installation,
   scripts,
+  testing,
   docker,
   license,
 ];
