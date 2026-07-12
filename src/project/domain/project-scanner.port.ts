@@ -18,6 +18,9 @@ export interface PkgJson {
 export interface RawProject {
   pkg: PkgJson;
   files: string[];
+  // Por cada fichero fuente, los especificadores de módulo que importa (sin resolver):
+  // "src/main.ts" → ["./cli/cli.parser.js", "node:fs", ...]
+  imports: Record<string, string[]>;
 }
 
 // Contrato para un escáner de proyectos, su función principal es escanear un proyecto y devolver sus datos crudos

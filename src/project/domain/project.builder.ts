@@ -37,6 +37,38 @@ function detectRepositoryUrl(repository: PkgJson["repository"]): string | undefi
   return raw.replace(/^git\+/, "").replace(/\.git$/, "");
 }
 
+// Resuelve un import RELATIVO a la ruta real del fichero destino dentro del proyecto.
+// Los imports ESM llevan extensión .js aunque el fuente sea .ts: probamos .ts/.tsx/index.
+function resolveImport(fromFile: string, spec: string, fileSet: Set<string>): string | undefined {
+  if (!spec.startsWith(".")) return undefined; // paquete externo o node:, no es interno
+  const stack = fromFile.split("/").slice(0, -1); // directorio del importador
+  for (const part of spec.split("/")) {
+    if (part === "" || part === ".") continue;
+    else if (part === "..") stack.pop();
+    else stack.push(part);
+  }
+  const base = stack.join("/").replace(/\.(?:js|jsx|mjs|cjs)$/, "");
+  for (const candidate of [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, base]) {
+    if (fileSet.has(candidate)) return candidate;
+  }
+  return undefined;
+}
+
+// Grafo interno: por cada fichero, solo los imports que apuntan a otro fichero del proyecto
+function resolveInternalImports(
+  raw: Record<string, string[]>,
+  fileSet: Set<string>,
+): Record<string, string[]> {
+  const internal: Record<string, string[]> = {};
+  for (const [file, specs] of Object.entries(raw)) {
+    const resolved = specs
+      .map((spec) => resolveImport(file, spec, fileSet))
+      .filter((target): target is string => target !== undefined);
+    if (resolved.length > 0) internal[file] = resolved;
+  }
+  return internal;
+}
+
 // Construye un objeto ProjectInfo a partir de los datos crudos del proyecto
 export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
   const { pkg, files } = raw;
@@ -64,6 +96,7 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
       fileSet.has("docker-compose.yaml"),
     binName: detectBinName(pkg),
     files,
+    imports: resolveInternalImports(raw.imports, fileSet),
     root,
     stack,
     features: [],

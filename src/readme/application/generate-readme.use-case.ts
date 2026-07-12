@@ -24,7 +24,6 @@ export class GenerateReadmeUseCase {
         features: extra.features ?? info.features,
         blockquote: extra.blockquote ?? info.blockquote,
         treeComments: extra.treeComments ?? info.treeComments,
-        architecture: extra.architecture ?? info.architecture,
       };
     }
 

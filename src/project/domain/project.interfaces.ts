@@ -25,7 +25,7 @@ export interface ArchitectureComponent {
   detail: string;
 }
 
-// Diagrama + tabla de componentes (lo rellena la IA)
+// Diagrama + tabla de componentes (derivado de los imports reales; ver readme.architecture.ts)
 export interface Architecture {
   mermaid: string;
   components: ArchitectureComponent[];
@@ -50,6 +50,8 @@ export interface ProjectInfo {
   binName?: string;
   // Rutas de todos los ficheros del proyecto (relativas a root)
   files: string[];
+  // Grafo de dependencias interno: fichero → ficheros del proyecto que importa
+  imports: Record<string, string[]>;
   // Directorio raíz analizado
   root: string;
   // Tecnologías detectadas (React, NestJS, Vite, etc.) con su categoría
@@ -60,6 +62,4 @@ export interface ProjectInfo {
   blockquote?: string;
   // Comentario por ruta para el árbol de estructura (lo rellena la IA)
   treeComments?: Record<string, string>;
-  // Sección de arquitectura (la rellena la IA; ausente sin --ai)
-  architecture?: Architecture;
 }
