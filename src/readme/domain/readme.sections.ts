@@ -64,10 +64,21 @@ const projectStructure: Section = (info, t) => {
 };
 
 const installation: Section = (info, t) =>
-  `## 📦 ${t.installation}\n\n\`\`\`bash\n${INSTALL_COMMANDS[info.packageManager]}\n\`\`\``;
+  info.binName
+    ? null // es una CLI: la sección Usage ya cubre cómo instalarla/ejecutarla (npx / -g)
+    : `## 📦 ${t.installation}\n\n\`\`\`bash\n${INSTALL_COMMANDS[info.packageManager]}\n\`\`\``;
+
+// npm ejecuta solo los hooks de ciclo de vida (prepublishOnly, prepare, postinstall...):
+// nadie los lanza a mano, no pintan en una lista de "scripts que puedes correr"
+const LIFECYCLE_SCRIPTS = new Set([
+  "prepare", "prepublish", "prepublishonly", "prepack", "postpack",
+  "preinstall", "install", "postinstall", "preuninstall", "postuninstall",
+]);
 
 const scripts: Section = (info, t) => {
-  const entries = Object.entries(info.scripts);
+  const entries = Object.entries(info.scripts).filter(
+    ([name]) => !LIFECYCLE_SCRIPTS.has(name.toLowerCase()),
+  );
   if (entries.length === 0) return null;
   const run = RUN_COMMANDS[info.packageManager];
   const items = entries
