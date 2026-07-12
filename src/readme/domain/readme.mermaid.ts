@@ -28,8 +28,9 @@ export interface MermaidSpec {
 const INIT_BLOCK = [
   "%%{init: {",
   '    "theme": "base",',
-  // curve linear = flechas rectas (no las curvas serpenteantes de mermaid); más aire entre cajas
-  '    "flowchart": { "curve": "linear", "nodeSpacing": 60, "rankSpacing": 90 },',
+  // curve basis = flechas con curva suave al doblar (como los READMEs gold); más aire entre cajas.
+  // Se ve limpio porque el grafo ya es un DAG saneado (ver sanitizeSpec), no una telaraña
+  '    "flowchart": { "curve": "basis", "nodeSpacing": 60, "rankSpacing": 90 },',
   '    "themeVariables": {',
   '        "primaryColor": "#1f2937",',
   '        "primaryTextColor": "#f9fafb",',
