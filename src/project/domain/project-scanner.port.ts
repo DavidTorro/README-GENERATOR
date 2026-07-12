@@ -9,6 +9,9 @@ export interface PkgJson {
   devDependencies?: Record<string, string>;
   bin?: string | Record<string, string>;
   engines?: Record<string, string>;
+  author?: string | { name?: string; url?: string };
+  repository?: string | { url?: string };
+  homepage?: string;
 }
 
 // Datos CRUDOS del proyecto

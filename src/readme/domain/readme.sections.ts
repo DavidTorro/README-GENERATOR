@@ -124,6 +124,18 @@ const requirements: Section = (info, t) => {
   return `## 📋 ${t.requirements}\n\n${items}`;
 };
 
+const author: Section = (info, t) => {
+  const links: string[] = [];
+  if (info.repositoryUrl) links.push(`[${t.authorRepo}](${info.repositoryUrl})`);
+  if (info.homepage) links.push(`[${t.authorHomepage}](${info.homepage})`);
+  if (!info.author && links.length === 0) return null;
+
+  const body: string[] = [];
+  if (info.author) body.push(`${t.authorBy} **${info.author}**`);
+  if (links.length > 0) body.push(links.join(" · "));
+  return `## 👤 ${t.author}\n\n${body.join("\n\n")}`;
+};
+
 const docker: Section = (info, t) =>
   info.hasDocker ? `## 🐳 ${t.docker}\n\n${t.dockerText}` : null;
 
@@ -147,5 +159,6 @@ export const sections: Section[] = [
   usage,
   requirements,
   docker,
+  author,
   license,
 ];

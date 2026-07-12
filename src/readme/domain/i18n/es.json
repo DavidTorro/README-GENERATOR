@@ -19,6 +19,10 @@
   "usage": "Uso",
   "usageNpx": "Ejecútalo sin instalar, usando npx:",
   "usageGlobal": "O instálalo de forma global:",
+  "author": "Autor",
+  "authorBy": "Hecho por",
+  "authorRepo": "Repositorio",
+  "authorHomepage": "Web",
   "categories": {
     "language": "Lenguajes",
     "frontend": "Frontend",

@@ -39,6 +39,9 @@ export interface ProjectInfo {
   license?: string;
   scripts: Record<string, string>;
   engines: Record<string, string>;
+  author?: string;
+  repositoryUrl?: string;
+  homepage?: string;
   dependencies: string[];
   devDependencies: string[];
   packageManager: PackageManager;

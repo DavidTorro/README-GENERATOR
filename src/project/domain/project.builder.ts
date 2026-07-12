@@ -1,5 +1,5 @@
 import { runDetectors } from "./project.detectors.js";
-import type { RawProject } from "./project-scanner.port.js";
+import type { PkgJson, RawProject } from "./project-scanner.port.js";
 import type { PackageManager, ProjectInfo } from "./project.interfaces.js";
 
 // Detección por lockfile del gestor de paquetes usado en el proyecto
@@ -18,6 +18,23 @@ function detectBinName(pkg: RawProject["pkg"]): string | undefined {
     return (name.includes("/") ? name.split("/").pop() : name) || undefined;
   }
   return Object.keys(pkg.bin)[0];
+}
+
+// author puede ser "Name <email> (url)" u objeto; nos quedamos solo con el nombre
+function detectAuthor(author: PkgJson["author"]): string | undefined {
+  if (!author) return undefined;
+  if (typeof author === "string") {
+    return author.replace(/<[^>]*>/g, "").replace(/\([^)]*\)/g, "").trim() || undefined;
+  }
+  return author.name;
+}
+
+// repository puede ser "github:u/r", "git+https://...git" u objeto {url}; lo dejamos navegable
+function detectRepositoryUrl(repository: PkgJson["repository"]): string | undefined {
+  const raw = typeof repository === "string" ? repository : repository?.url;
+  if (!raw) return undefined;
+  if (raw.startsWith("github:")) return `https://github.com/${raw.slice("github:".length)}`;
+  return raw.replace(/^git\+/, "").replace(/\.git$/, "");
 }
 
 // Construye un objeto ProjectInfo a partir de los datos crudos del proyecto
