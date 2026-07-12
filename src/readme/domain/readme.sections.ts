@@ -113,6 +113,17 @@ const usage: Section = (info, t) => {
   ].join("\n");
 };
 
+const requirements: Section = (info, t) => {
+  const entries = Object.entries(info.engines);
+  if (entries.length === 0) return null;
+  // "node" se muestra como "Node.js"; el resto (npm, pnpm...) tal cual
+  const label = (name: string) => (name === "node" ? "Node.js" : name);
+  const items = entries
+    .map(([name, range]) => `- ${label(name)} \`${range}\``)
+    .join("\n");
+  return `## 📋 ${t.requirements}\n\n${items}`;
+};
+
 const docker: Section = (info, t) =>
   info.hasDocker ? `## 🐳 ${t.docker}\n\n${t.dockerText}` : null;
 
@@ -134,6 +145,7 @@ export const sections: Section[] = [
   scripts,
   testing,
   usage,
+  requirements,
   docker,
   license,
 ];

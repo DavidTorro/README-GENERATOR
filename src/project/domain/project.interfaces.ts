@@ -38,6 +38,7 @@ export interface ProjectInfo {
   version: string;
   license?: string;
   scripts: Record<string, string>;
+  engines: Record<string, string>;
   dependencies: string[];
   devDependencies: string[];
   packageManager: PackageManager;

@@ -37,6 +37,7 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
     version: pkg.version ?? "0.0.0",
     license: pkg.license,
     scripts: pkg.scripts ?? {},
+    engines: pkg.engines ?? {},
     dependencies: Object.keys(pkg.dependencies ?? {}),
     devDependencies: Object.keys(pkg.devDependencies ?? {}),
     packageManager: detectPackageManager(fileSet),
