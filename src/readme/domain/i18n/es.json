@@ -16,6 +16,9 @@
   "archDetail": "Detalle",
   "testing": "Testing",
   "testingText": "Este proyecto incluye configuración de testing con",
+  "usage": "Uso",
+  "usageNpx": "Ejecútalo sin instalar, usando npx:",
+  "usageGlobal": "O instálalo de forma global:",
   "categories": {
     "language": "Lenguajes",
     "frontend": "Frontend",

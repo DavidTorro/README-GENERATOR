@@ -4,9 +4,9 @@
 
 ![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white) ![tsup](https://img.shields.io/badge/-tsup-0f172a?style=for-the-badge) ![Ollama](https://img.shields.io/badge/-Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
 
-A README.md generator that creates professional and attractive documentation for your projects with optional AI-powered enhancements. It leverages TypeScript, Ollama, and a modular architecture to streamline the README creation process.
+A README.md generator that creates professional and attractive README files for your projects, with optional local AI enrichment for enhanced content.
 
-> 🤖 Generate professional READMEs quickly with AI enrichment, all while keeping your data private and your workflow simple.
+> 🤖 Generate professional READMEs with local AI enrichment, ensuring speed, simplicity, and privacy.
 
 ## ⚙️ Tech Stack
 
@@ -16,12 +16,12 @@ A README.md generator that creates professional and attractive documentation for
 
 ## ✨ Features
 
-- 🤖 AI-powered content generation for README sections using Ollama
-- 📁 Automatic project scanning and metadata extraction from your codebase
-- 🎨 Customizable README layout with badges, categories, and Mermaid diagrams
-- 🖼️ Optional banner image generation using AI-based image prompts
-- 📦 Modular architecture with clear separation of concerns for easy extension
-- ⚙️ Built with TypeScript, tsup, and supports i18n for multiple languages
+- 🚀 Generates README.md files quickly using TypeScript and tsup for efficient builds
+- 🤖 Integrates with Ollama for local AI-powered content generation and image creation
+- 📁 Scans project files to automatically detect and structure README sections
+- 🎨 Supports customizable banners and Mermaid diagrams for visual appeal
+- 🌍 Includes multilingual support with English and Spanish localization options
+- ⚙️ Offers command-line interface (CLI) for easy project README generation
 
 ## 🏗️ Architecture
 
@@ -39,36 +39,40 @@ A README.md generator that creates professional and attractive documentation for
 
 flowchart LR
     subgraph SG0["🧠 AI Services"]
-        ai_config["⚙️ AI config"]
-        image_client["🖼️ Image client"]
+        ai_config["🧠 AI config"]
         ollama_client["🤖 Ollama client"]
+        image_generator["🖼️ Image generator"]
+        ai_generator["📝 AI generator"]
     end
     subgraph SG1["📁 Project Processing"]
-        scanner["📂 File scanner"]
-        builder["🧱 Project builder"]
-        detectors["🔍 Detectors"]
+        project_scanner["📂 Project scanner"]
+        project_builder["🧱 Project builder"]
+        project_detectors["🔍 Project detectors"]
     end
     subgraph SG2["📝 README Generation"]
-        badges["📌 Badges"]
-        renderer["📝 Renderer"]
-        tree["🌳 Tree"]
+        readme_render["📝 README renderer"]
+        readme_sections["📄 README sections"]
+        readme_badges["📌 README badges"]
+        readme_mermaid["📊 README mermaid"]
     end
     user["👤 User"]
-    user -- "trigger" --> scanner
-    scanner -- "data" --> builder
-    builder -- "process" --> detectors
-    detectors -- "output" --> renderer
-    user -- "configure" --> ai_config
+    user -- "input" --> project_scanner
+    project_scanner -- "data" --> project_builder
+    project_builder -- "project" --> readme_render
+    user -- "config" --> ai_config
     ai_config -- "setup" --> ollama_client
-    ollama_client -- "generate" --> image_client
-    image_client -- "enrich" --> renderer
+    ollama_client -- "prompt" --> ai_generator
+    ai_generator -- "content" --> readme_render
+    readme_render -- "structure" --> readme_sections
+    readme_sections -- "badges" --> readme_badges
+    readme_sections -- "charts" --> readme_mermaid
 
     classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
-    class ai_config,image_client,ollama_client g0;
+    class ai_config,ollama_client,image_generator,ai_generator g0;
     classDef g1 fill:#111827,stroke:#c084fc,color:#f8fafc,stroke-width:2px;
-    class scanner,builder,detectors g1;
+    class project_scanner,project_builder,project_detectors g1;
     classDef g2 fill:#08111f,stroke:#34d399,color:#f8fafc,stroke-width:2px;
-    class badges,renderer,tree g2;
+    class readme_render,readme_sections,readme_badges,readme_mermaid g2;
     classDef actor fill:#1f2937,stroke:#f59e0b,color:#fff7ed,stroke-width:2px,stroke-dasharray: 5 3;
     class user actor;
     style SG0 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
@@ -79,47 +83,51 @@ flowchart LR
 | Component | Technology | Details |
 | --- | --- | --- |
 | `cli` | TypeScript | Parses command-line arguments |
-| `scanner` | Node.js | Scans project files for metadata |
-| `builder` | TypeScript | Constructs project structure |
-| `ai_config` | TypeScript | Manages AI service configuration |
-| `ollama_client` | TypeScript | Communicates with Ollama for text generation |
-| `image_client` | TypeScript | Generates images using AI |
-| `renderer` | TypeScript | Generates and formats the README.md |
+| `project-scanner` | Node.js | Scans the project directory for files |
+| `project-builder` | TypeScript | Constructs the project metadata |
+| `ai-config` | TypeScript | Stores AI configuration settings |
+| `ollama-client` | TypeScript | Communicates with Ollama for AI generation |
+| `image-generator` | TypeScript | Generates images using AI |
+| `ai-generator` | TypeScript | Generates content using AI prompts |
+| `readme-render` | TypeScript | Renders the final README content |
+| `readme-sections` | TypeScript | Organizes README sections |
+| `readme-badges` | TypeScript | Adds badges to the README |
+| `readme-mermaid` | TypeScript | Generates Mermaid diagrams for README |
 
 ## 🗂️ Project Structure
 
 ```
 @davidtorro/readme-gen/
-├── assets/                                  # Static assets like banner
-│   └── banner.svg                           # Banner image asset
+├── assets/                                  # Static assets like banner image
+│   └── banner.svg                           # Banner image for README
 ├── src/                                     # Source code directory
 │   ├── ai/                                  # AI-related functionality
 │   │   ├── domain/                          # AI domain models and ports
 │   │   │   ├── ai-generator.port.ts         # AI generator interface
-│   │   │   ├── banner.prompt.ts             # Banner prompt definitions
+│   │   │   ├── banner.prompt.ts             # Banner generation prompt
 │   │   │   └── image-generator.port.ts      # Image generator interface
-│   │   └── infrastructure/                  # AI implementation details
+│   │   └── infrastructure/                  # AI infrastructure implementations
 │   │       ├── ai.config.ts                 # AI configuration
 │   │       ├── ollama-image.client.ts       # Ollama image client
-│   │       └── ollama.client.ts             # Ollama API client
+│   │       └── ollama.client.ts             # Ollama client
 │   ├── cli/                                 # Command line interface
 │   │   └── cli.parser.ts                    # CLI argument parsing
-│   ├── project/                             # Project structure handling
+│   ├── project/                             # Project structure and metadata
 │   │   ├── domain/
 │   │   │   ├── project-scanner.port.ts      # Project scanner interface
-│   │   │   ├── project.builder.ts           # Project builder logic
+│   │   │   ├── project.builder.ts           # Project builder
 │   │   │   ├── project.detectors.ts         # Project detectors
 │   │   │   └── project.interfaces.ts        # Project interfaces
 │   │   └── infrastructure/
 │   │       └── fs-project-scanner.ts        # File system project scanner
 │   ├── readme/                              # README generation logic
-│   │   ├── application/
-│   │   │   └── generate-readme.use-case.ts  # README generation use case
-│   │   └── domain/
-│   │       ├── i18n/
+│   │   ├── application/                     # README application layer
+│   │   │   └── generate-readme.use-case.ts  # Generate README use case
+│   │   └── domain/                          # README domain models
+│   │       ├── i18n/                        # Internationalization files
 │   │       │   ├── en.json                  # English i18n strings
 │   │       │   ├── es.json                  # Spanish i18n strings
-│   │       │   └── index.ts                 # i18n string management
+│   │       │   └── index.ts                 # i18n file index
 │   │       ├── readme.badges.ts             # README badges logic
 │   │       ├── readme.banner.ts             # README banner logic
 │   │       ├── readme.categories.ts         # README categories logic
@@ -132,13 +140,13 @@ flowchart LR
 │   └── main.ts                              # Main application entry point
 ├── .env.example                             # Environment variables example
 ├── .gitignore                               # Git ignore configuration
-├── LICENSE                                  # Project license file
-├── NOTICE                                   # Project notice file
+├── LICENSE                                  # License file
+├── NOTICE                                   # Notice file
 ├── package-lock.json                        # Node package lock
 ├── package.json                             # Node package config
-├── README.md                                # Project root README
-├── tsconfig.json                            # TypeScript config
-└── tsup.config.ts                           # Tsup bundler config
+├── README.md                                # Project README
+├── tsconfig.json                            # TypeScript configuration
+└── tsup.config.ts                           # Tsup build configuration
 ```
 
 ## 📦 Installation
@@ -155,6 +163,21 @@ npm install
 - `npm run prepublishOnly` — `npm run build`
 - `npm run gen` — `npm run build && node dist/main.js`
 - `npm run gen:all` — `npm run build && node dist/main.js banner --ai --force && node dist/main.js --ai --force`
+
+## 🚀 Usage
+
+Run it without installing, using npx:
+
+```bash
+npx @davidtorro/readme-gen
+```
+
+Or install it globally:
+
+```bash
+npm install -g @davidtorro/readme-gen
+readme-gen
+```
 
 ## 📄 License
 

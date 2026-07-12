@@ -93,6 +93,26 @@ const testing: Section = (info, t) => {
   return `## 🧪 ${t.testing}\n\n${body.join("\n\n")}`;
 };
 
+const usage: Section = (info, t) => {
+  if (!info.binName) return null;
+  return [
+    `## 🚀 ${t.usage}`,
+    "",
+    t.usageNpx,
+    "",
+    "```bash",
+    `npx ${info.name}`,
+    "```",
+    "",
+    t.usageGlobal,
+    "",
+    "```bash",
+    `npm install -g ${info.name}`,
+    info.binName,
+    "```",
+  ].join("\n");
+};
+
 const docker: Section = (info, t) =>
   info.hasDocker ? `## 🐳 ${t.docker}\n\n${t.dockerText}` : null;
 
@@ -113,6 +133,7 @@ export const sections: Section[] = [
   installation,
   scripts,
   testing,
+  usage,
   docker,
   license,
 ];
