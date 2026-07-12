@@ -57,29 +57,60 @@ function quote(raw: string): string {
   return `"${raw.trim().replace(/"/g, "'")}"`;
 }
 
+// Deja el grafo LIMPIO para que dagre lo dibuje sin líos, dé lo que dé la IA:
+// (1) los actores (usuario/cliente) son FUENTES → fuera las flechas que ENTRAN en ellos
+//     (si no, el actor acaba tirado en medio del diagrama);
+// (2) rompe ciclos → un DAG se dibuja de izquierda a derecha, sin flechas hacia atrás.
+function sanitizeSpec(spec: MermaidSpec): MermaidSpec {
+  const actorIds = new Set((spec.nodes ?? []).map((n) => n.id));
+  const candidate = spec.edges.filter((e) => e.from !== e.to && !actorIds.has(e.to));
+
+  const kept: MermaidEdge[] = [];
+  // ¿existe ya un camino from→to usando las aristas aceptadas? (⇒ añadir to→from haría ciclo)
+  const reaches = (from: string, to: string): boolean => {
+    const stack = [from];
+    const seen = new Set<string>();
+    while (stack.length > 0) {
+      const cur = stack.pop();
+      if (cur === undefined || seen.has(cur)) continue;
+      if (cur === to) return true;
+      seen.add(cur);
+      for (const e of kept) if (e.from === cur) stack.push(e.to);
+    }
+    return false;
+  };
+  for (const e of candidate) {
+    if (reaches(e.to, e.from)) continue; // crearía un ciclo → se descarta
+    kept.push(e);
+  }
+  return { ...spec, edges: kept };
+}
+
 export function buildMermaid(spec: MermaidSpec): string {
+  const clean = sanitizeSpec(spec);
   const lines = [INIT_BLOCK, "", "flowchart LR"];
 
-  spec.subgraphs.forEach((sg, i) => {
+  clean.subgraphs.forEach((sg, i) => {
     lines.push(`    subgraph SG${i}[${quote(sg.title)}]`);
+    lines.push("        direction LR"); // flujo interno de izquierda a derecha, como los gold
     for (const node of sg.nodes) {
       lines.push(`        ${toId(node.id)}[${quote(node.label)}]`);
     }
     lines.push("    end");
   });
 
-  for (const node of spec.nodes ?? []) {
+  for (const node of clean.nodes ?? []) {
     lines.push(`    ${toId(node.id)}[${quote(node.label)}]`);
   }
 
-  for (const edge of spec.edges) {
+  for (const edge of clean.edges) {
     const arrow = edge.label ? `-- ${quote(edge.label)} -->` : "-->";
     lines.push(`    ${toId(edge.from)} ${arrow} ${toId(edge.to)}`);
   }
 
   // Estilo: un classDef por grupo aplicado a sus nodos...
   lines.push("");
-  spec.subgraphs.forEach((sg, i) => {
+  clean.subgraphs.forEach((sg, i) => {
     lines.push(
       `    classDef g${i} fill:${nodeFill(i)},stroke:${groupColor(i)},color:#f8fafc,stroke-width:2px;`,
     );
@@ -87,7 +118,7 @@ export function buildMermaid(spec: MermaidSpec): string {
   });
 
   // ...los actores con borde discontinuo ámbar...
-  const actors = spec.nodes ?? [];
+  const actors = clean.nodes ?? [];
   if (actors.length > 0) {
     lines.push(
       "    classDef actor fill:#1f2937,stroke:#f59e0b,color:#fff7ed,stroke-width:2px,stroke-dasharray: 5 3;",
@@ -96,7 +127,7 @@ export function buildMermaid(spec: MermaidSpec): string {
   }
 
   // ...y cada caja de grupo con su acento, punteada
-  spec.subgraphs.forEach((_, i) => {
+  clean.subgraphs.forEach((_, i) => {
     lines.push(
       `    style SG${i} fill:#0b1220,stroke:${groupColor(i)},stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0`,
     );
