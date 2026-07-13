@@ -8,6 +8,7 @@ const rawProject: RawProject = {
   files: [],
   imports: {},
   sources: {},
+  envExamples: {},
 };
 
 const scanner: ProjectScannerPort = {

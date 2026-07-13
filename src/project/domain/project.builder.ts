@@ -1,6 +1,6 @@
 import { runDetectors } from "./project.detectors.js";
 import type { PkgJson, RawProject } from "./project-scanner.port.js";
-import type { PackageManager, ProjectInfo } from "./project.interfaces.js";
+import type { EnvironmentVariable, PackageManager, ProjectInfo } from "./project.interfaces.js";
 
 // Detección por lockfile del gestor de paquetes usado en el proyecto
 function detectPackageManager(files: Set<string>): PackageManager {
@@ -35,6 +35,41 @@ function detectRepositoryUrl(repository: PkgJson["repository"]): string | undefi
   if (!raw) return undefined;
   if (raw.startsWith("github:")) return `https://github.com/${raw.slice("github:".length)}`;
   return raw.replace(/^git\+/, "").replace(/\.git$/, "");
+}
+
+function parseEnvironmentVariables(envExamples: RawProject["envExamples"]): EnvironmentVariable[] {
+  const variables: EnvironmentVariable[] = [];
+  for (const [source, content] of Object.entries(envExamples)) {
+    let comments: string[] = [];
+    for (const line of content.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (trimmed === "") {
+        comments = [];
+        continue;
+      }
+      if (trimmed.startsWith("#")) {
+        const comment = trimmed.slice(1).trim();
+        if (comment) comments.push(comment);
+        continue;
+      }
+
+      const match = trimmed.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=/);
+      if (!match) {
+        comments = [];
+        continue;
+      }
+      const name = match[1];
+      if (name) {
+        variables.push({
+          source,
+          name,
+          description: comments.length > 0 ? comments.join(" ") : undefined,
+        });
+      }
+      comments = [];
+    }
+  }
+  return variables.sort((a, b) => a.source.localeCompare(b.source) || a.name.localeCompare(b.name));
 }
 
 // Resuelve un import RELATIVO a la ruta real del fichero destino dentro del proyecto.
@@ -140,6 +175,7 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
       fileSet.has("docker-compose.yaml"),
     binName: detectBinName(pkg),
     files,
+    environment: parseEnvironmentVariables(raw.envExamples),
     imports: internalImports,
     keySources: selectKeySources(raw.sources, internalImports),
     root,

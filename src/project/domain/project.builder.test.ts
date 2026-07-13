@@ -21,6 +21,10 @@ const rawProject: RawProject = {
     "src/lib/util.js": "export const util = true;",
     "src/components/index.jsx": "export const Component = () => null;",
   },
+  envExamples: {
+    ".env.example": "# Database connection\nDATABASE_URL=postgres://example\n\n# Enable detailed logs\nDEBUG=true",
+    "backend/.env.example": "# API access token\nAPI_TOKEN=example-token",
+  },
 };
 
 describe("buildProjectInfo", () => {
@@ -33,6 +37,11 @@ describe("buildProjectInfo", () => {
     expect(info.imports).toEqual({
       "src/main.js": ["src/lib/util.js", "src/components/index.jsx"],
     });
+    expect(info.environment).toEqual([
+      { source: ".env.example", name: "DATABASE_URL", description: "Database connection" },
+      { source: ".env.example", name: "DEBUG", description: "Enable detailed logs" },
+      { source: "backend/.env.example", name: "API_TOKEN", description: "API access token" },
+    ]);
   });
 
   it("renders the detected author and links", () => {
@@ -41,5 +50,8 @@ describe("buildProjectInfo", () => {
     expect(markdown).toContain("**Ada Lovelace**");
     expect(markdown).toContain("https://github.com/acme/demo");
     expect(markdown).toContain("https://acme.example.com");
+    expect(markdown).toContain("DATABASE_URL");
+    expect(markdown).toContain("backend/.env.example");
+    expect(markdown).not.toContain("postgres://example");
   });
 });

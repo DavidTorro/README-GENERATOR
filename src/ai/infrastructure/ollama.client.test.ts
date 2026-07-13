@@ -24,7 +24,7 @@ describe("OllamaClient", () => {
       ollamaImageModel: "test-image-model",
     });
     const info = buildProjectInfo(
-      { pkg: { name: "demo" }, files: [], imports: {}, sources: {} },
+      { pkg: { name: "demo" }, files: [], imports: {}, sources: {}, envExamples: {} },
       "/project",
     );
 

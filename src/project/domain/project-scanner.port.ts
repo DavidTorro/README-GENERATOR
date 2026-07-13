@@ -23,6 +23,8 @@ export interface RawProject {
   imports: Record<string, string[]>;
   // Texto de cada fichero fuente (ruta → contenido); base de imports y de keySources
   sources: Record<string, string>;
+  // Contenido de archivos .env.example/.env.sample; los .env reales nunca se leen
+  envExamples: Record<string, string>;
 }
 
 // Contrato para un escáner de proyectos, su función principal es escanear un proyecto y devolver sus datos crudos

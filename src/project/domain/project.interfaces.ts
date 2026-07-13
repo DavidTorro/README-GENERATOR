@@ -37,6 +37,13 @@ export interface KeySource {
   code: string;
 }
 
+// Variable documentada por un archivo .env.example, sin conservar nunca su valor
+export interface EnvironmentVariable {
+  source: string;
+  name: string;
+  description?: string;
+}
+
 // ProjectInfo es el contrato central del proyecto
 export interface ProjectInfo {
   name: string;
@@ -56,6 +63,8 @@ export interface ProjectInfo {
   binName?: string;
   // Rutas de todos los ficheros del proyecto (relativas a root)
   files: string[];
+  // Variables declaradas en .env.example/.env.sample, sin sus valores de ejemplo
+  environment: EnvironmentVariable[];
   // Grafo de dependencias interno: fichero → ficheros del proyecto que importa
   imports: Record<string, string[]>;
   // Extractos de los ficheros más informativos, para anclar la IA a código real

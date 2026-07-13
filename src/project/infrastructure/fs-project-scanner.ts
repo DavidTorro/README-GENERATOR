@@ -10,6 +10,7 @@ const DEFAULT_IGNORE = ["**/node_modules/**", "**/dist/**", "**/build/**", "**/.
 const SOURCE_RE = /\.(?:ts|tsx|js|jsx|mjs|cjs)$/;
 // Ficheros de infraestructura: definen la arquitectura de RUNTIME (servicios, puertos, BBDD)
 const INFRA_RE = /(?:^|\/)(?:docker-compose\.ya?ml|compose\.ya?ml|Dockerfile|\.env\.(?:example|sample))$/;
+const ENV_EXAMPLE_RE = /(?:^|\/)\.env(?:\.[^/]+)?\.(?:example|sample)$/;
 // Captura el especificador de `import/export ... from "X"`, `import "X"` e `import("X")`
 const IMPORT_RE = /(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g;
 
@@ -32,7 +33,13 @@ export class FsProjectScanner implements ProjectScannerPort {
   scan(root: string): RawProject {
     const files = this.listFiles(root);
     const sources = this.readSources(root, files);
-    return { pkg: this.readPackageJson(root), files, sources, imports: extractImports(sources) };
+    return {
+      pkg: this.readPackageJson(root),
+      files,
+      sources,
+      envExamples: this.readEnvExamples(root, files),
+      imports: extractImports(sources),
+    };
   }
 
   // Texto de cada fichero fuente: alimenta el grafo de imports Y los extractos que lee la IA
@@ -48,6 +55,20 @@ export class FsProjectScanner implements ProjectScannerPort {
       }
     }
     return sources;
+  }
+
+  // Solo se leen plantillas de configuración: un .env real puede contener secretos.
+  private readEnvExamples(root: string, files: string[]): Record<string, string> {
+    const examples: Record<string, string> = {};
+    for (const file of files) {
+      if (!ENV_EXAMPLE_RE.test(file)) continue;
+      try {
+        examples[file] = readFileSync(join(root, file), "utf8");
+      } catch {
+        // fichero ilegible: lo saltamos, no reventamos el escaneo
+      }
+    }
+    return examples;
   }
 
   private readPackageJson(root: string): PkgJson {

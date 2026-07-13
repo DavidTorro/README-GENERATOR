@@ -138,6 +138,22 @@ const requirements: Section = (info, t) => {
   return `## 📋 ${t.requirements}\n\n${items}`;
 };
 
+const environment: Section = (info, t) => {
+  if (info.environment.length === 0) return null;
+  const multipleSources = new Set(info.environment.map((variable) => variable.source)).size > 1;
+  const cell = (value: string) => value.replaceAll("|", "\\|");
+  const header = multipleSources
+    ? `| ${t.environmentFile} | ${t.environmentVariable} | ${t.environmentDescription} |\n| --- | --- | --- |`
+    : `| ${t.environmentVariable} | ${t.environmentDescription} |\n| --- | --- |`;
+  const rows = info.environment.map((variable) => {
+    const description = variable.description ? cell(variable.description) : "—";
+    return multipleSources
+      ? `| \`${cell(variable.source)}\` | \`${variable.name}\` | ${description} |`
+      : `| \`${variable.name}\` | ${description} |`;
+  });
+  return `## 🔐 ${t.environment}\n\n${[header, ...rows].join("\n")}`;
+};
+
 const author: Section = (info, t) => {
   const links: string[] = [];
   if (info.repositoryUrl) links.push(`[${t.authorRepo}](${info.repositoryUrl})`);
@@ -172,6 +188,7 @@ export const sections: Section[] = [
   testing,
   usage,
   requirements,
+  environment,
   docker,
   author,
   license,
