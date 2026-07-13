@@ -29,6 +29,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc",
     "test": "vitest run",
+    "verify": "npm run typecheck && npm test && npm run build",
     "prepublishOnly": "npm run build",
     "gen": "npm run build && node dist/main.js",
     "gen:all": "npm run build && node dist/main.js banner --ai --force && node dist/main.js --ai --force"
