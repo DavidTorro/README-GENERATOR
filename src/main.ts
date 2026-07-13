@@ -40,15 +40,18 @@ try {
     let design;
     let logoPngBase64;
     if (opts.ai) {
+      const config = loadConfig();
       console.error("🤖 Designing banner with local AI...");
-      design = await new OllamaClient(loadConfig()).bannerDesign(info, opts.lang);
-      console.error("🎨 Generating logo with local image AI (this may take a while)...");
-      const logo = await new OllamaImageClient(loadConfig()).generateImage(
-        buildLogoPrompt(info, hueToColorWord(hashHue(info.name))),
-        256,
-        256,
-      );
-      if (logo) logoPngBase64 = Buffer.from(logo).toString("base64");
+      design = await new OllamaClient(config).bannerDesign(info, opts.lang);
+      if (config.ollamaImageModel) {
+        console.error("🎨 Generating logo with local image AI (this may take a while)...");
+        const logo = await new OllamaImageClient(config).generateImage(
+          buildLogoPrompt(info, hueToColorWord(hashHue(info.name))),
+          256,
+          256,
+        );
+        if (logo) logoPngBase64 = Buffer.from(logo).toString("base64");
+      }
     }
 
     const svg = buildBannerSvg({

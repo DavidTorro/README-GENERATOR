@@ -14,6 +14,30 @@ interface OllamaResponse {
   response: string;
 }
 
+const SPANISH_REPLACEMENTS: [RegExp, string][] = [
+  [/\bAI Services\b/gi, "Servicios de IA"],
+  [/\bAI Service\b/gi, "Servicio de IA"],
+  [/\bAI\b/gi, "IA"],
+  [/\bCLI Tool\b/gi, "Herramienta CLI"],
+  [/\bProject Data\b/gi, "Datos del proyecto"],
+  [/\bProject Scanner\b/gi, "Escaneador de proyecto"],
+  [/\bCLI entrypoint\b/gi, "Punto de entrada CLI"],
+  [/\bREADME Generation\b/gi, "Generación de README"],
+  [/\bHTTP Client\b/gi, "Cliente HTTP"],
+  [/\bImage Model\b/gi, "Modelo de imagen"],
+  [/\bUser\b/gi, "Usuario"],
+  [/\bTests?\b/gi, "Pruebas"],
+  [/\btools\b/gi, "herramientas"],
+];
+
+function localizeGeneratedText(text: string, lang: Lang): string {
+  if (lang !== "es") return text;
+  return SPANISH_REPLACEMENTS.reduce(
+    (localized, [pattern, replacement]) => localized.replace(pattern, replacement),
+    text,
+  );
+}
+
 export class OllamaClient implements AiGeneratorPort {
   constructor(private readonly config: Config) {}
 
@@ -22,7 +46,7 @@ export class OllamaClient implements AiGeneratorPort {
   async enrich(info: ProjectInfo, lang: Lang): Promise<AiEnrichment> {
     const text =
       (await this.tryTask("text", async () =>
-        this.parseTextEnrichment(await this.generate(this.buildTextPrompt(info, lang))),
+        this.parseTextEnrichment(await this.generate(this.buildTextPrompt(info, lang)), lang),
       )) ?? {};
     const tree =
       (await this.tryTask("tree comments", async () =>
@@ -30,12 +54,14 @@ export class OllamaClient implements AiGeneratorPort {
           // la respuesta más larga de todas: un comentario por cada ruta
           await this.generate(this.buildTreePrompt(info, lang), 3000),
           info,
+          lang,
         ),
       )) ?? {};
     const architecture =
       (await this.tryTask("architecture", async () =>
         this.parseArchitectureEnrichment(
           await this.generate(this.buildArchitecturePrompt(info, lang), 2000),
+          lang,
         ),
       )) ?? {};
     return { ...text, ...tree, ...architecture };
@@ -85,6 +111,7 @@ export class OllamaClient implements AiGeneratorPort {
       ...info.keySources.flatMap((s) => [`----- ${s.path} -----`, "```", s.code, "```"]),
       "",
       "RULES:",
+      `- Write EVERY human-readable string in ${language}, including the description, features and blockquote.`,
       "- Ground the description and features in what the SOURCE CODE above actually does (its flags, commands, behaviours), NOT in file names.",
       "- Base everything STRICTLY on the facts and code above. Do NOT invent features, integrations or capabilities they do not support.",
       "- Prefer fewer accurate features over many generic ones.",
@@ -96,23 +123,25 @@ export class OllamaClient implements AiGeneratorPort {
   }
 
   // JSON válido ≠ JSON con la forma esperada: valida campo a campo desde unknown
-  private parseTextEnrichment(raw: string): AiEnrichment {
+  private parseTextEnrichment(raw: string, lang: Lang): AiEnrichment {
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) return {};
     const obj = parsed as Record<string, unknown>;
 
     const enrichment: AiEnrichment = {};
     if (typeof obj.description === "string" && obj.description.trim() !== "") {
-      enrichment.description = obj.description.trim();
+      enrichment.description = localizeGeneratedText(obj.description.trim(), lang);
     }
     if (Array.isArray(obj.features)) {
       const features = obj.features.filter(
         (f): f is string => typeof f === "string" && f.trim() !== "",
       );
-      if (features.length > 0) enrichment.features = features;
+      if (features.length > 0) {
+        enrichment.features = features.map((feature) => localizeGeneratedText(feature, lang));
+      }
     }
     if (typeof obj.blockquote === "string" && obj.blockquote.trim() !== "") {
-      enrichment.blockquote = obj.blockquote.trim();
+      enrichment.blockquote = localizeGeneratedText(obj.blockquote.trim(), lang);
     }
 
     // Listón de calidad: sin descripción la tarea no vale (dispara el reintento)
@@ -144,6 +173,7 @@ export class OllamaClient implements AiGeneratorPort {
       ...this.treePaths(info).map((p) => `- ${p}`),
       "",
       "RULES:",
+      `- Write EVERY comment in ${language}; English prose is forbidden except for technology and file names.`,
       "- Write a short comment (max 8 words) explaining the purpose of each path.",
       "- Base comments ONLY on the path names and the tech stack. If a path is not self-explanatory, write an honest generic comment instead of inventing details.",
       "",
@@ -152,7 +182,7 @@ export class OllamaClient implements AiGeneratorPort {
     ].join("\n");
   }
 
-  private parseTreeEnrichment(raw: string, info: ProjectInfo): AiEnrichment {
+  private parseTreeEnrichment(raw: string, info: ProjectInfo, lang: Lang): AiEnrichment {
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) return {};
 
@@ -163,7 +193,7 @@ export class OllamaClient implements AiGeneratorPort {
     for (const [path, value] of Object.entries(parsed)) {
       const clean = path.replace(/\/+$/, "");
       if (known.has(clean) && typeof value === "string" && value.trim() !== "") {
-        comments[clean] = value.trim().replace(/\s+/g, " ");
+        comments[clean] = localizeGeneratedText(value.trim().replace(/\s+/g, " "), lang);
       }
     }
 
@@ -195,7 +225,13 @@ export class OllamaClient implements AiGeneratorPort {
         { from: "web", to: "api", label: "/api" },
         { from: "api", to: "db", label: "SQL" },
       ],
-      components: [{ name: "backend", tech: "NestJS", detail: "REST API on port 3000" }],
+      components: [
+        {
+          name: "backend",
+          tech: "NestJS",
+          detail: lang === "es" ? "API REST en el puerto 3000" : "REST API on port 3000",
+        },
+      ],
     });
     return [
       `You are a software architect drawing the RUNTIME architecture of the project "${info.name}" for its README, with labels in ${language}.`,
@@ -216,6 +252,10 @@ export class OllamaClient implements AiGeneratorPort {
       '- "components": one row per main component: name, technology, one-line detail.',
       "",
       "RULES:",
+      lang === "es"
+        ? '- Write EVERY subgraph title, node label, edge label and component detail in Spanish. English prose is forbidden: write "Herramienta CLI", not "CLI Tool"; "Punto de entrada CLI", not "CLI entrypoint"; and "Escaneador de proyecto", not "Project Scanner". Technology and file names may stay unchanged.'
+        : "- Write EVERY subgraph title, node label, edge label and component detail in English.",
+      "- Do not claim that a .env file is loaded automatically unless the code explicitly parses it.",
       "- Infer services, PORTS and databases ONLY from the files above (docker-compose/.env/code). NEVER invent ports or services that are not there.",
       "- 2 to 5 tiers, 4 to 9 nodes total. Keep it clean and readable.",
       "",
@@ -225,7 +265,7 @@ export class OllamaClient implements AiGeneratorPort {
   }
 
   // La IA aporta DATOS del grafo; buildMermaid garantiza la sintaxis del mermaid
-  private parseArchitectureEnrichment(raw: string): AiEnrichment {
+  private parseArchitectureEnrichment(raw: string, lang: Lang): AiEnrichment {
     const isRecord = (v: unknown): v is Record<string, unknown> =>
       typeof v === "object" && v !== null;
     const toNodes = (arr: unknown): { id: string; label: string }[] =>
@@ -233,7 +273,7 @@ export class OllamaClient implements AiGeneratorPort {
         .filter(isRecord)
         .flatMap((n) =>
           typeof n.id === "string" && typeof n.label === "string"
-            ? [{ id: n.id, label: n.label }]
+            ? [{ id: n.id, label: localizeGeneratedText(n.label, lang) }]
             : [],
         );
 
@@ -244,7 +284,9 @@ export class OllamaClient implements AiGeneratorPort {
       .filter(isRecord)
       .flatMap((sg) => {
         const nodes = toNodes(sg.nodes);
-        return typeof sg.title === "string" && nodes.length > 0 ? [{ title: sg.title, nodes }] : [];
+        return typeof sg.title === "string" && nodes.length > 0
+          ? [{ title: localizeGeneratedText(sg.title, lang), nodes }]
+          : [];
       });
     const nodes = toNodes(parsed.nodes);
 
@@ -261,7 +303,9 @@ export class OllamaClient implements AiGeneratorPort {
               {
                 from: e.from,
                 to: e.to,
-                ...(typeof e.label === "string" && e.label.trim() ? { label: e.label.trim() } : {}),
+                ...(typeof e.label === "string" && e.label.trim()
+                  ? { label: localizeGeneratedText(e.label.trim(), lang) }
+                  : {}),
               },
             ]
           : [],
@@ -277,7 +321,13 @@ export class OllamaClient implements AiGeneratorPort {
       .filter(isRecord)
       .flatMap((c) =>
         typeof c.name === "string" && typeof c.tech === "string" && typeof c.detail === "string"
-          ? [{ name: c.name.trim(), tech: c.tech.trim(), detail: c.detail.trim() }]
+            ? [
+                {
+                  name: localizeGeneratedText(c.name.trim(), lang),
+                  tech: c.tech.trim(),
+                  detail: localizeGeneratedText(c.detail.trim(), lang),
+                },
+              ]
           : [],
       );
 
@@ -290,7 +340,7 @@ export class OllamaClient implements AiGeneratorPort {
 
   async bannerDesign(info: ProjectInfo, lang: Lang): Promise<BannerDesign | undefined> {
     return this.tryTask("banner design", async () =>
-      this.parseBannerDesign(await this.generate(this.buildBannerDesignPrompt(info, lang))),
+      this.parseBannerDesign(await this.generate(this.buildBannerDesignPrompt(info, lang)), lang),
     );
   }
 
@@ -310,13 +360,14 @@ export class OllamaClient implements AiGeneratorPort {
       `- "tagline": ONE sentence in ${language}, 60 to 130 characters, saying concretely what the project does. No emojis. Do NOT invent capabilities.`,
       "",
       "RULES:",
+      `- Write the tagline in ${language}; do not mix languages.`,
       "- Commit to a design with personality: different projects must get different designs. Do NOT default to safe choices.",
       "",
       'Reply ONLY with a JSON object with exactly these keys: "motif" (string), "density" (string), "tagline" (string).',
     ].join("\n");
   }
 
-  private parseBannerDesign(raw: string): BannerDesign {
+  private parseBannerDesign(raw: string, lang: Lang): BannerDesign {
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) throw new Error("reply was not an object");
     const obj = parsed as Record<string, unknown>;
@@ -331,7 +382,7 @@ export class OllamaClient implements AiGeneratorPort {
     return {
       motif: obj.motif,
       density: obj.density === "lively" ? "lively" : "calm",
-      tagline,
+      tagline: localizeGeneratedText(tagline, lang),
     };
   }
 

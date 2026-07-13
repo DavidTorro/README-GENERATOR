@@ -4,9 +4,9 @@ import type { EnvironmentVariable, HttpEndpoint, PackageManager, ProjectInfo } f
 
 // Detección por lockfile del gestor de paquetes usado en el proyecto
 function detectPackageManager(files: Set<string>): PackageManager {
-  if (files.has("pnpm-lock.yaml")) return "pnpm";
-  if (files.has("yarn.lock")) return "yarn";
-  if (files.has("bun.lock") || files.has("bun.lockb")) return "bun";
+  if ([...files].some((file) => file.endsWith("pnpm-lock.yaml"))) return "pnpm";
+  if ([...files].some((file) => file.endsWith("yarn.lock"))) return "yarn";
+  if ([...files].some((file) => file.endsWith("bun.lock") || file.endsWith("bun.lockb"))) return "bun";
   return "npm";
 }
 
@@ -110,6 +110,17 @@ function detectEndpoints(sources: RawProject["sources"]): HttpEndpoint[] {
   );
 }
 
+function packageDirectories(packages: RawProject["packages"]): string[] {
+  return packages
+    .map(({ path }) => path.split("/").slice(0, -1).join("/"))
+    .filter((directory) => directory !== "");
+}
+
+function nameFromRoot(root: string): string {
+  const name = root.split(/[\\/]/).filter(Boolean).pop();
+  return name || "proyecto";
+}
+
 // Resuelve un import RELATIVO a la ruta real del fichero destino dentro del proyecto.
 // Los imports ESM pueden llevar extensión .js aunque el fuente sea .ts: probamos todas
 // las extensiones de código que escanea el proyecto.
@@ -186,31 +197,36 @@ function selectKeySources(
 export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
   const { pkg, files } = raw;
   const fileSet = new Set(files);
-  const deps = new Set([
-    ...Object.keys(pkg.dependencies ?? {}),
-    ...Object.keys(pkg.devDependencies ?? {}),
-  ]);
+  const manifests = raw.packages.length > 0 ? raw.packages.map((manifest) => manifest.pkg) : [pkg];
+  const dependencies = [...new Set(manifests.flatMap((manifest) => Object.keys(manifest.dependencies ?? {})))].sort();
+  const devDependencies = [...new Set(manifests.flatMap((manifest) => Object.keys(manifest.devDependencies ?? {})))].sort();
+  const deps = new Set([...dependencies, ...devDependencies]);
+  const engines = Object.assign({}, ...manifests.map((manifest) => manifest.engines ?? {}));
 
   const stack = runDetectors({ deps, files, hasFile: (p) => fileSet.has(p) });
   const internalImports = resolveInternalImports(raw.imports, fileSet);
 
   return {
-    name: pkg.name ?? "proyecto",
+    name: pkg.name ?? raw.readmeTitle ?? nameFromRoot(root),
     description: pkg.description ?? "",
     version: pkg.version ?? "0.0.0",
     license: pkg.license,
     scripts: pkg.scripts ?? {},
-    engines: pkg.engines ?? {},
+    engines,
     author: detectAuthor(pkg.author),
     repositoryUrl: detectRepositoryUrl(pkg.repository),
     homepage: pkg.homepage,
-    dependencies: Object.keys(pkg.dependencies ?? {}),
-    devDependencies: Object.keys(pkg.devDependencies ?? {}),
+    dependencies,
+    devDependencies,
     packageManager: detectPackageManager(fileSet),
+    packageDirectories: packageDirectories(raw.packages),
     hasDocker:
-      fileSet.has("Dockerfile") ||
-      fileSet.has("docker-compose.yml") ||
-      fileSet.has("docker-compose.yaml"),
+      [...fileSet].some(
+        (file) =>
+          file.endsWith("Dockerfile") ||
+          file.endsWith("docker-compose.yml") ||
+          file.endsWith("docker-compose.yaml"),
+      ),
     binName: detectBinName(pkg),
     files,
     environment: parseEnvironmentVariables(raw.envExamples),

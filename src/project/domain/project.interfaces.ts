@@ -63,6 +63,8 @@ export interface ProjectInfo {
   dependencies: string[];
   devDependencies: string[];
   packageManager: PackageManager;
+  // Directorios con package.json anidado; vacío en un proyecto de un solo paquete
+  packageDirectories: string[];
   hasDocker: boolean;
   // Nombre del comando si el package expone un bin (⇒ el proyecto es una CLI)
   binName?: string;

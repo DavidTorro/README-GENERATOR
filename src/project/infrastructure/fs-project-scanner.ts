@@ -1,13 +1,18 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import fg from "fast-glob";
-import type { PkgJson, ProjectScannerPort, RawProject } from "../domain/project-scanner.port.js";
+import type {
+  PackageManifest,
+  ProjectScannerPort,
+  RawProject,
+} from "../domain/project-scanner.port.js";
 
 // Ignorados siempre, tenga .gitignore o no el proyecto analizado
 const DEFAULT_IGNORE = ["**/node_modules/**", "**/dist/**", "**/build/**", "**/.git/**"];
 
 // Extensiones que consideramos "código fuente" (para imports y para dar código a la IA)
 const SOURCE_RE = /\.(?:ts|tsx|js|jsx|mjs|cjs)$/;
+const TEST_SOURCE_RE = /\.(?:test|spec)\.[cm]?[jt]sx?$/;
 // Ficheros de infraestructura: definen la arquitectura de RUNTIME (servicios, puertos, BBDD)
 const INFRA_RE = /(?:^|\/)(?:docker-compose\.ya?ml|compose\.ya?ml|Dockerfile|\.env\.(?:example|sample))$/;
 const ENV_EXAMPLE_RE = /(?:^|\/)\.env(?:\.[^/]+)?\.(?:example|sample)$/;
@@ -33,11 +38,14 @@ export class FsProjectScanner implements ProjectScannerPort {
   scan(root: string): RawProject {
     const files = this.listFiles(root);
     const sources = this.readSources(root, files);
+    const packages = this.readPackageManifests(root, files);
     return {
-      pkg: this.readPackageJson(root),
+      pkg: packages.find((manifest) => manifest.path === "package.json")?.pkg ?? {},
       files,
       sources,
       envExamples: this.readEnvExamples(root, files),
+      packages,
+      readmeTitle: this.readReadmeTitle(root),
       imports: extractImports(sources),
     };
   }
@@ -47,6 +55,7 @@ export class FsProjectScanner implements ProjectScannerPort {
     const sources: Record<string, string> = {};
     for (const file of files) {
       if (file.endsWith(".d.ts")) continue;
+      if (TEST_SOURCE_RE.test(file)) continue;
       if (!SOURCE_RE.test(file) && !INFRA_RE.test(file)) continue;
       try {
         sources[file] = readFileSync(join(root, file), "utf8");
@@ -71,15 +80,29 @@ export class FsProjectScanner implements ProjectScannerPort {
     return examples;
   }
 
-  private readPackageJson(root: string): PkgJson {
-    const path = join(root, "package.json");
-    if (!existsSync(path)) return {};
+  private readReadmeTitle(root: string): string | undefined {
+    const path = join(root, "README.md");
+    if (!existsSync(path)) return undefined;
     try {
-      return JSON.parse(readFileSync(path, "utf8")) as PkgJson;
+      const heading = readFileSync(path, "utf8").match(/^#\s+(.+)$/m)?.[1]?.trim();
+      return heading?.replace(/^[^\p{L}\p{N}]+/u, "").trim() || undefined;
     } catch {
-      console.warn("⚠️  Unreadable package.json (invalid JSON), skipping it.");
-      return {};
+      return undefined;
     }
+  }
+
+  private readPackageManifests(root: string, files: string[]): PackageManifest[] {
+    return files
+      .filter((file) => file === "package.json" || file.endsWith("/package.json"))
+      .sort()
+      .flatMap((path) => {
+        try {
+          return [{ path, pkg: JSON.parse(readFileSync(join(root, path), "utf8")) }];
+        } catch {
+          console.warn(`⚠️  Unreadable ${path} (invalid JSON), skipping it.`);
+          return [];
+        }
+      });
   }
 
   // Convierte las líneas del .gitignore en patrones glob para fast-glob

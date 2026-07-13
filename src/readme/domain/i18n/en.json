@@ -1,6 +1,7 @@
 {
   "defaultDescription": "_Project description._",
   "installation": "Installation",
+  "workspaceInstall": "Install dependencies for each package:",
   "requirements": "Requirements",
   "environment": "Environment Variables",
   "environmentVariable": "Variable",

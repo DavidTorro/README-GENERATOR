@@ -3,7 +3,6 @@ import { INSTALL_COMMANDS, RUN_COMMANDS } from "./readme.commands.js";
 import { CATEGORY_ORDER, CATEGORY_EMOJI } from "./readme.categories.js";
 import { buildBadgeLine } from "./readme.badges.js";
 import { buildTree } from "./readme.tree.js";
-import { buildArchitecture } from "./readme.architecture.js";
 
 // Banner del proyecto: solo si existe un assets/banner.(png|jpg|...) real
 const BANNER_PATTERN = /^assets\/banner\.(png|jpe?g|webp|svg)$/i;
@@ -40,20 +39,17 @@ const features: Section = (info, t) => {
   return `## ✨ ${t.features}\n\n${items}`;
 };
 
-// Con --ai: flujo de runtime rico (info.architecture). Sin IA (o si degrada): grafo
-// determinista de imports (readme.architecture.ts). null si el proyecto es demasiado plano.
 const architecture: Section = (info, t) => {
-  const arch = info.architecture ?? buildArchitecture(info);
-  if (!arch) return null;
-  const lines = [`## 🏗️ ${t.architecture}`, "", "```mermaid", arch.mermaid, "```"];
-  if (arch.components.length > 0) {
+  if (!info.architecture) return null;
+  const lines = [`## 🏗️ ${t.architecture}`, "", "```mermaid", info.architecture.mermaid, "```"];
+  if (info.architecture.components.length > 0) {
     // '|' dentro de una celda rompería la tabla markdown: se escapa
     const cell = (s: string) => s.replaceAll("|", "\\|");
     lines.push(
       "",
       `| ${t.archComponent} | ${t.archTech} | ${t.archDetail} |`,
       "| --- | --- | --- |",
-      ...arch.components.map(
+        ...info.architecture.components.map(
         (c) => `| \`${cell(c.name)}\` | ${cell(c.tech)} | ${cell(c.detail)} |`,
       ),
     );
@@ -72,10 +68,22 @@ const projectStructure: Section = (info, t) => {
   return `## 🗂️ ${t.projectStructure}\n\n\`\`\`\n${buildTree(info.name, info.files, info.treeComments)}\n\`\`\``;
 };
 
-const installation: Section = (info, t) =>
-  info.binName
-    ? null // es una CLI: la sección Usage ya cubre cómo instalarla/ejecutarla (npx / -g)
-    : `## 📦 ${t.installation}\n\n\`\`\`bash\n${INSTALL_COMMANDS[info.packageManager]}\n\`\`\``;
+const WORKSPACE_INSTALL_COMMANDS = {
+  npm: (directory: string) => `npm install --prefix ${directory}`,
+  pnpm: (directory: string) => `pnpm --dir ${directory} install`,
+  yarn: (directory: string) => `yarn --cwd ${directory} install`,
+  bun: (directory: string) => `bun --cwd ${directory} install`,
+};
+
+const installation: Section = (info, t) => {
+  if (info.binName) return null; // es una CLI: Usage cubre cómo instalarla/ejecutarla
+  if (info.packageDirectories.length > 0) {
+    const install = WORKSPACE_INSTALL_COMMANDS[info.packageManager];
+    const commands = info.packageDirectories.map((directory) => install(directory)).join("\n");
+    return `## 📦 ${t.installation}\n\n${t.workspaceInstall}\n\n\`\`\`bash\n${commands}\n\`\`\``;
+  }
+  return `## 📦 ${t.installation}\n\n\`\`\`bash\n${INSTALL_COMMANDS[info.packageManager]}\n\`\`\``;
+};
 
 // npm ejecuta solo los hooks de ciclo de vida (prepublishOnly, prepare, postinstall...):
 // nadie los lanza a mano, no pintan en una lista de "scripts que puedes correr"

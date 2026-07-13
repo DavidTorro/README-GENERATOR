@@ -25,6 +25,7 @@ const rawProject: RawProject = {
     ".env.example": "# Database connection\nDATABASE_URL=postgres://example\n\n# Enable detailed logs\nDEBUG=true",
     "backend/.env.example": "# API access token\nAPI_TOKEN=example-token",
   },
+  packages: [],
 };
 
 describe("buildProjectInfo", () => {
@@ -83,5 +84,32 @@ describe("buildProjectInfo", () => {
       { method: "PATCH", path: "/users/:id" },
     ]);
     expect(renderReadme(info, "en")).toContain("| `POST` | `/users` |");
+  });
+
+  it("aggregates nested package manifests for a monorepo", () => {
+    const info = buildProjectInfo(
+      {
+        ...rawProject,
+        pkg: {},
+        readmeTitle: "LinkedFlow",
+        files: ["backend/package.json", "backend/package-lock.json", "frontend/package.json"],
+        packages: [
+          {
+            path: "backend/package.json",
+            pkg: { dependencies: { "@nestjs/core": "1.0.0" }, engines: { node: ">=20" } },
+          },
+          {
+            path: "frontend/package.json",
+            pkg: { dependencies: { react: "1.0.0", vite: "1.0.0" } },
+          },
+        ],
+      },
+      "/projects/LINKEDFLOW",
+    );
+
+    expect(info.name).toBe("LinkedFlow");
+    expect(info.stack.map((tech) => tech.name)).toEqual(["React", "NestJS", "Vite"]);
+    expect(info.packageDirectories).toEqual(["backend", "frontend"]);
+    expect(renderReadme(info, "en")).toContain("npm install --prefix backend");
   });
 });

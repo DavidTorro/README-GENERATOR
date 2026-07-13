@@ -14,6 +14,11 @@ export interface PkgJson {
   homepage?: string;
 }
 
+export interface PackageManifest {
+  path: string;
+  pkg: PkgJson;
+}
+
 // Datos CRUDOS del proyecto
 export interface RawProject {
   pkg: PkgJson;
@@ -25,6 +30,10 @@ export interface RawProject {
   sources: Record<string, string>;
   // Contenido de archivos .env.example/.env.sample; los .env reales nunca se leen
   envExamples: Record<string, string>;
+  // Manifiestos Node del repositorio, incluidos los de paquetes anidados
+  packages: PackageManifest[];
+  // Título de un README existente, si lo hay, para conservar el nombre humano del proyecto
+  readmeTitle?: string;
 }
 
 // Contrato para un escáner de proyectos, su función principal es escanear un proyecto y devolver sus datos crudos
