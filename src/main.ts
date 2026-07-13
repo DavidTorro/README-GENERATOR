@@ -24,10 +24,10 @@ try {
     console.log(pkg.version);
     process.exit(0);
   }
-    if (opts.command === "banner") {
+  if (opts.command === "banner") {
     const bannerPath = resolve(process.cwd(), "assets/banner.svg");
     // Red de seguridad: no pisar un banner existente salvo --force
-    if (existsSync(bannerPath) && !opts.force) {
+    if (!opts.dryRun && existsSync(bannerPath) && !opts.force) {
       console.error("❌ assets/banner.svg already exists. Use --force to overwrite.");
       process.exit(1);
     }
@@ -59,10 +59,24 @@ try {
       seed: Math.floor(Math.random() * 1_000_000_000), // cada corrida, un banner distinto
     });
 
+    if (opts.dryRun) {
+      console.log(svg);
+      process.exit(0);
+    }
+
     mkdirSync(dirname(bannerPath), { recursive: true });
     writeFileSync(bannerPath, svg, "utf8");
     console.error(`✅ assets/banner.svg generated${design ? " (AI design)" : " (default design)"}`);
     process.exit(0);
+  }
+
+  const root = process.cwd();
+  const outputPath = resolve(root, opts.output);
+
+  // Red de seguridad: no invocar IA si el destino no se puede sobrescribir
+  if (!opts.dryRun && existsSync(outputPath) && !opts.force) {
+    console.error(`❌ ${opts.output} already exists. Use --force to overwrite.`);
+    process.exit(1);
   }
 
   // Composition root: el ÚNICO sitio donde se enchufan las capas
@@ -72,21 +86,12 @@ try {
 
   if (opts.ai) console.error("🤖 Enriching with local AI (this may take a while)...");
 
-  const root = process.cwd();
   const markdown = await generateReadme.execute(root, opts.lang);
 
   // --dry-run: el resultado va por stdout y no se toca el disco
   if (opts.dryRun) {
     console.log(markdown);
     process.exit(0);
-  }
-
-  const outputPath = resolve(root, opts.output);
-
-  // Red de seguridad: no pisar un README existente salvo --force
-  if (existsSync(outputPath) && !opts.force) {
-    console.error(`❌ ${opts.output} already exists. Use --force to overwrite.`);
-    process.exit(1);
   }
 
   writeFileSync(outputPath, markdown, "utf8");

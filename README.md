@@ -4,25 +4,15 @@
 
 ![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white) ![tsup](https://img.shields.io/badge/-tsup-0f172a?style=for-the-badge) ![Ollama](https://img.shields.io/badge/-Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
 
-A README.md generator that creates professional and attractive READMEs quickly, with optional local AI enrichment for banner images and content.
+README.md generator for your projects. Creates a professional and attractive README quickly with optional local AI enrichment.
 
-> 🚀 Generates professional READMEs with AI-powered banners and content, all locally and without external dependencies.
+## ⚙️ Stack técnico
 
-## ⚙️ Tech Stack
-
-- 🔤 **Languages**: TypeScript
-- 🤖 **AI**: Ollama
+- 🔤 **Lenguajes**: TypeScript
+- 🤖 **IA**: Ollama
 - 🔧 **Tooling**: tsup
 
-## ✨ Features
-
-- Generates README.md with AI-enhanced banners and content using Ollama for local inference.
-- Supports multiple languages (English and Spanish) with localized translations.
-- Analyzes project structure and metadata from package.json and source files to build a comprehensive README.
-- Includes customizable sections like badges, architecture diagrams, and tech stack categorization.
-- Offers command-line interface (CLI) for generating READMEs with options for AI enrichment and banner customization.
-
-## 🏗️ Architecture
+## 🏗️ Arquitectura
 
 ```mermaid
 %%{init: {
@@ -38,120 +28,116 @@ A README.md generator that creates professional and attractive READMEs quickly, 
 }}%%
 
 flowchart LR
-    subgraph SG0["🧠 AI"]
+    subgraph SG0["cli"]
         direction LR
-        ollama["🤖 Ollama<br/>http://localhost:11434"]
-        image_ollama["🖼️ Ollama Image<br/>http://localhost:11434"]
+        cli["cli"]
     end
-    subgraph SG1["📦 CLI"]
+    subgraph SG1["ai"]
         direction LR
-        cli["CLI<br/>TypeScript"]
+        ai_domain["domain"]
+        ai_infrastructure["infrastructure"]
     end
-    subgraph SG2["🔍 Scan"]
+    subgraph SG2["project"]
         direction LR
-        fs_scanner["📂 FS Scanner<br/>fast-glob"]
+        project_domain["domain"]
+        project_infrastructure["infrastructure"]
     end
-    subgraph SG3["🧠 Logic"]
+    subgraph SG3["readme"]
         direction LR
-        project_builder["🧱 Project Builder<br/>TypeScript"]
-        readme_builder["📝 README Builder<br/>TypeScript"]
+        readme_application["application"]
+        readme_domain["domain"]
     end
-    subgraph SG4["🎨 Render"]
-        direction LR
-        banner_generator["🎨 Banner Generator<br/>SVG + Mermaid"]
-    end
-    user["👤 User"]
-    user --> cli
-    cli --> fs_scanner
-    fs_scanner --> project_builder
-    project_builder --> readme_builder
-    readme_builder --> banner_generator
-    cli --> ollama
-    cli --> image_ollama
+    cli --> readme_domain
+    ai_domain --> project_domain
+    ai_domain --> readme_domain
+    ai_infrastructure --> ai_domain
+    ai_infrastructure --> project_domain
+    ai_infrastructure --> readme_domain
+    project_infrastructure --> project_domain
+    readme_application --> project_domain
+    readme_application --> ai_domain
+    readme_application --> readme_domain
+    readme_domain --> project_domain
 
     classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
-    class ollama,image_ollama g0;
+    class cli g0;
     classDef g1 fill:#111827,stroke:#c084fc,color:#f8fafc,stroke-width:2px;
-    class cli g1;
+    class ai_domain,ai_infrastructure g1;
     classDef g2 fill:#08111f,stroke:#34d399,color:#f8fafc,stroke-width:2px;
-    class fs_scanner g2;
+    class project_domain,project_infrastructure g2;
     classDef g3 fill:#1f2937,stroke:#f472b6,color:#f8fafc,stroke-width:2px;
-    class project_builder,readme_builder g3;
-    classDef g4 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
-    class banner_generator g4;
-    classDef actor fill:#1f2937,stroke:#f59e0b,color:#fff7ed,stroke-width:2px,stroke-dasharray: 5 3;
-    class user actor;
+    class readme_application,readme_domain g3;
     style SG0 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
     style SG1 fill:#0b1220,stroke:#c084fc,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
     style SG2 fill:#0b1220,stroke:#34d399,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
     style SG3 fill:#0b1220,stroke:#f472b6,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG4 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
 ```
 
-| Component | Technology | Details |
+| Componente | Tecnología | Detalle |
 | --- | --- | --- |
-| `CLI` | TypeScript | Command-line interface for generating README |
-| `FS Scanner` | fast-glob | Scans project files and dependencies |
-| `Project Builder` | TypeScript | Builds project metadata from package.json |
-| `README Builder` | TypeScript | Generates README content using i18n and AI |
-| `Banner Generator` | SVG + Mermaid | Generates animated SVG banner with AI-generated logo |
-| `Ollama` | Ollama | Text generation model for content creation |
-| `Ollama Image` | Ollama | Image generation model for logo creation |
+| `ai/domain` | ai | Entities, types and pure business logic |
+| `ai/infrastructure` | ai | Adapters to the outside world (fs, HTTP…) |
+| `cli` | cli | Command-line parsing and help |
+| `main` | — | Composition root — wires every layer |
+| `project/domain` | project | Entities, types and pure business logic |
+| `project/infrastructure` | project | Adapters to the outside world (fs, HTTP…) |
+| `readme/application` | readme | Use cases orchestrating the domain |
+| `readme/domain` | readme | Entities, types and pure business logic |
 
-## 🗂️ Project Structure
+## 🗂️ Estructura del proyecto
 
 ```
 @davidtorro/readme-gen/
-├── assets/                                  # Static assets folder
-│   └── banner.svg                           # Banner SVG image
-├── src/                                     # Source code directory
-│   ├── ai/                                  # AI-related functionality
-│   │   ├── domain/                          # AI domain models and interfaces
-│   │   │   ├── ai-generator.port.ts         # AI generator interface
-│   │   │   ├── banner.prompt.ts             # Banner prompt definitions
-│   │   │   └── image-generator.port.ts      # Image generator interface
-│   │   └── infrastructure/                  # AI infrastructure implementations
-│   │       ├── ai.config.ts                 # AI configuration
-│   │       ├── ollama-image.client.ts       # Ollama image client
-│   │       └── ollama.client.ts             # Ollama client
-│   ├── cli/                                 # Command Line Interface
-│   │   └── cli.parser.ts                    # CLI argument parser
-│   ├── project/                             # Project-related functionality
-│   │   ├── domain/                          # Project domain models and interfaces
-│   │   │   ├── project-scanner.port.ts      # Project scanner interface
-│   │   │   ├── project.builder.ts           # Project builder
-│   │   │   ├── project.detectors.ts         # Project detectors
-│   │   │   └── project.interfaces.ts        # Project interfaces
+├── assets/
+│   └── banner.svg
+├── src/
+│   ├── ai/
+│   │   ├── domain/
+│   │   │   ├── ai-generator.port.ts
+│   │   │   ├── banner.prompt.ts
+│   │   │   └── image-generator.port.ts
 │   │   └── infrastructure/
-│   │       └── fs-project-scanner.ts        # File system project scanner
-│   ├── readme/                              # README generation logic
-│   │   ├── application/                     # README application layer
-│   │   │   └── generate-readme.use-case.ts  # Generate README use case
-│   │   └── domain/                          # README domain models and interfaces
-│   │       ├── i18n/                        # Internationalization files for README
-│   │       │   ├── en.json                  # English i18n for README
-│   │       │   ├── es.json                  # Spanish i18n for README
-│   │       │   └── index.ts                 # i18n file index
-│   │       ├── readme.architecture.ts       # README architecture section
-│   │       ├── readme.badges.ts             # README badges section
-│   │       ├── readme.banner.ts             # README banner section
-│   │       ├── readme.categories.ts         # README categories section
-│   │       ├── readme.commands.ts           # README commands section
-│   │       ├── readme.interfaces.ts         # README interfaces
-│   │       ├── readme.mermaid.ts            # README Mermaid section
-│   │       ├── readme.render.ts             # README rendering logic
-│   │       ├── readme.sections.ts           # README sections management
-│   │       └── readme.tree.ts               # README tree structure
-│   └── main.ts                              # Main application entry point
-├── .env.example                             # Example environment variables
-├── .gitignore                               # Git ignore configuration
-├── LICENSE                                  # Project license file
-├── NOTICE                                   # Project notice file
-├── package-lock.json                        # NPM package lock file
-├── package.json                             # NPM project configuration
-├── README.md                                # Project README file
-├── tsconfig.json                            # TypeScript configuration
-└── tsup.config.ts                           # tsup build configuration
+│   │       ├── ai.config.ts
+│   │       ├── ollama-image.client.ts
+│   │       └── ollama.client.ts
+│   ├── cli/
+│   │   └── cli.parser.ts
+│   ├── project/
+│   │   ├── domain/
+│   │   │   ├── project-scanner.port.ts
+│   │   │   ├── project.builder.ts
+│   │   │   ├── project.detectors.ts
+│   │   │   └── project.interfaces.ts
+│   │   └── infrastructure/
+│   │       └── fs-project-scanner.ts
+│   ├── readme/
+│   │   ├── application/
+│   │   │   └── generate-readme.use-case.ts
+│   │   └── domain/
+│   │       ├── i18n/
+│   │       │   ├── en.json
+│   │       │   ├── es.json
+│   │       │   └── index.ts
+│   │       ├── readme.architecture.ts
+│   │       ├── readme.badges.ts
+│   │       ├── readme.banner.ts
+│   │       ├── readme.categories.ts
+│   │       ├── readme.commands.ts
+│   │       ├── readme.interfaces.ts
+│   │       ├── readme.mermaid.ts
+│   │       ├── readme.render.ts
+│   │       ├── readme.sections.ts
+│   │       └── readme.tree.ts
+│   └── main.ts
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── NOTICE
+├── package-lock.json
+├── package.json
+├── README.md
+├── tsconfig.json
+└── tsup.config.ts
 ```
 
 ## 🛠️ Scripts
@@ -162,25 +148,29 @@ flowchart LR
 - `npm run gen` — `npm run build && node dist/main.js`
 - `npm run gen:all` — `npm run build && node dist/main.js banner --ai --force && node dist/main.js --ai --force`
 
-## 🚀 Usage
+## 🚀 Uso
 
-Run it without installing, using npx:
+Ejecútalo sin instalar, usando npx:
 
 ```bash
 npx @davidtorro/readme-gen
 ```
 
-Or install it globally:
+O instálalo de forma global:
 
 ```bash
 npm install -g @davidtorro/readme-gen
 readme-gen
 ```
 
-## 📋 Requirements
+## 📋 Requisitos
 
 - Node.js `>=20`
 
-## 📄 License
+## 👤 Autor
+
+Hecho por **David Torró**
+
+## 📄 Licencia
 
 Apache-2.0

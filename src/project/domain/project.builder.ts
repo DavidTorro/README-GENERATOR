@@ -38,7 +38,8 @@ function detectRepositoryUrl(repository: PkgJson["repository"]): string | undefi
 }
 
 // Resuelve un import RELATIVO a la ruta real del fichero destino dentro del proyecto.
-// Los imports ESM llevan extensión .js aunque el fuente sea .ts: probamos .ts/.tsx/index.
+// Los imports ESM pueden llevar extensión .js aunque el fuente sea .ts: probamos todas
+// las extensiones de código que escanea el proyecto.
 function resolveImport(fromFile: string, spec: string, fileSet: Set<string>): string | undefined {
   if (!spec.startsWith(".")) return undefined; // paquete externo o node:, no es interno
   const stack = fromFile.split("/").slice(0, -1); // directorio del importador
@@ -48,7 +49,13 @@ function resolveImport(fromFile: string, spec: string, fileSet: Set<string>): st
     else stack.push(part);
   }
   const base = stack.join("/").replace(/\.(?:js|jsx|mjs|cjs)$/, "");
-  for (const candidate of [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, base]) {
+  const extensions = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
+  const candidates = [
+    ...extensions.map((extension) => `${base}${extension}`),
+    ...extensions.map((extension) => `${base}/index${extension}`),
+    base,
+  ];
+  for (const candidate of candidates) {
     if (fileSet.has(candidate)) return candidate;
   }
   return undefined;
@@ -121,6 +128,9 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
     license: pkg.license,
     scripts: pkg.scripts ?? {},
     engines: pkg.engines ?? {},
+    author: detectAuthor(pkg.author),
+    repositoryUrl: detectRepositoryUrl(pkg.repository),
+    homepage: pkg.homepage,
     dependencies: Object.keys(pkg.dependencies ?? {}),
     devDependencies: Object.keys(pkg.devDependencies ?? {}),
     packageManager: detectPackageManager(fileSet),
