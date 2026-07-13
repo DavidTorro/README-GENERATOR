@@ -28,6 +28,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc",
+    "test": "vitest run",
     "prepublishOnly": "npm run build",
     "gen": "npm run build && node dist/main.js",
     "gen:all": "npm run build && node dist/main.js banner --ai --force && node dist/main.js --ai --force"
@@ -35,7 +36,8 @@
   "devDependencies": {
     "@types/node": "^26.1.0",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.7"
   },
   "overrides": {
     "esbuild": "^0.28.1"
