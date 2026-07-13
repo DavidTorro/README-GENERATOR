@@ -1,6 +1,6 @@
 import { runDetectors } from "./project.detectors.js";
 import type { PkgJson, RawProject } from "./project-scanner.port.js";
-import type { EnvironmentVariable, PackageManager, ProjectInfo } from "./project.interfaces.js";
+import type { EnvironmentVariable, HttpEndpoint, PackageManager, ProjectInfo } from "./project.interfaces.js";
 
 // Detección por lockfile del gestor de paquetes usado en el proyecto
 function detectPackageManager(files: Set<string>): PackageManager {
@@ -70,6 +70,44 @@ function parseEnvironmentVariables(envExamples: RawProject["envExamples"]): Envi
     }
   }
   return variables.sort((a, b) => a.source.localeCompare(b.source) || a.name.localeCompare(b.name));
+}
+
+const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "ALL"];
+
+function joinRoute(prefix: string, path: string): string {
+  const parts = [prefix, path].flatMap((part) => part.split("/").filter(Boolean));
+  return parts.length > 0 ? `/${parts.join("/")}` : "/";
+}
+
+// Las rutas se extraen solo de patrones explícitos de NestJS, Express y Fastify.
+function detectEndpoints(sources: RawProject["sources"]): HttpEndpoint[] {
+  const endpoints = new Map<string, HttpEndpoint>();
+  const add = (method: string, path: string) => {
+    const endpoint = { method: method.toUpperCase(), path: joinRoute("", path) };
+    endpoints.set(`${endpoint.method} ${endpoint.path}`, endpoint);
+  };
+
+  for (const source of Object.values(sources)) {
+    const controllers = [...source.matchAll(/@Controller\s*\(\s*(?:["'`]([^"'`]*)["'`])?\s*\)/g)];
+    for (const [index, controller] of controllers.entries()) {
+      const bodyStart = (controller.index ?? 0) + controller[0].length;
+      const bodyEnd = controllers[index + 1]?.index ?? source.length;
+      const prefix = controller[1] ?? "";
+      const body = source.slice(bodyStart, bodyEnd);
+      for (const route of body.matchAll(/@(Get|Post|Put|Patch|Delete|Options|Head|All)\s*\(\s*(?:["'`]([^"'`]*)["'`])?\s*\)/g)) {
+        add(route[1] ?? "GET", joinRoute(prefix, route[2] ?? ""));
+      }
+    }
+
+    for (const route of source.matchAll(/\b(?:app|router|fastify)\.(get|post|put|patch|delete|options|head|all)\s*\(\s*["'`]([^"'`]+)["'`]/gi)) {
+      add(route[1] ?? "GET", route[2] ?? "/");
+    }
+  }
+
+  return [...endpoints.values()].sort(
+    (a, b) =>
+      a.path.localeCompare(b.path) || HTTP_METHODS.indexOf(a.method) - HTTP_METHODS.indexOf(b.method),
+  );
 }
 
 // Resuelve un import RELATIVO a la ruta real del fichero destino dentro del proyecto.
@@ -176,6 +214,7 @@ export function buildProjectInfo(raw: RawProject, root: string): ProjectInfo {
     binName: detectBinName(pkg),
     files,
     environment: parseEnvironmentVariables(raw.envExamples),
+    endpoints: detectEndpoints(raw.sources),
     imports: internalImports,
     keySources: selectKeySources(raw.sources, internalImports),
     root,

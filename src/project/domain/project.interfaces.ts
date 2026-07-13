@@ -44,6 +44,11 @@ export interface EnvironmentVariable {
   description?: string;
 }
 
+export interface HttpEndpoint {
+  method: string;
+  path: string;
+}
+
 // ProjectInfo es el contrato central del proyecto
 export interface ProjectInfo {
   name: string;
@@ -65,6 +70,8 @@ export interface ProjectInfo {
   files: string[];
   // Variables declaradas en .env.example/.env.sample, sin sus valores de ejemplo
   environment: EnvironmentVariable[];
+  // Rutas HTTP detectadas directamente en el código fuente Node.js
+  endpoints: HttpEndpoint[];
   // Grafo de dependencias interno: fichero → ficheros del proyecto que importa
   imports: Record<string, string[]>;
   // Extractos de los ficheros más informativos, para anclar la IA a código real

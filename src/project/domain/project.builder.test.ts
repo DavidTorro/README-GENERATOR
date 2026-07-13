@@ -54,4 +54,34 @@ describe("buildProjectInfo", () => {
     expect(markdown).toContain("backend/.env.example");
     expect(markdown).not.toContain("postgres://example");
   });
+
+  it("detects explicit HTTP routes and renders an endpoint table", () => {
+    const info = buildProjectInfo(
+      {
+        ...rawProject,
+        sources: {
+          "src/users.controller.ts": `
+            @Controller("users")
+            export class UsersController {
+              @Get() list() {}
+              @Post() create() {}
+              @Patch(":id") update() {}
+            }
+          `,
+          "src/routes.ts": 'router.get("/health", handler);',
+          "src/server.ts": 'fastify.delete("/items/:id", handler);',
+        },
+      },
+      "/project",
+    );
+
+    expect(info.endpoints).toEqual([
+      { method: "GET", path: "/health" },
+      { method: "DELETE", path: "/items/:id" },
+      { method: "GET", path: "/users" },
+      { method: "POST", path: "/users" },
+      { method: "PATCH", path: "/users/:id" },
+    ]);
+    expect(renderReadme(info, "en")).toContain("| `POST` | `/users` |");
+  });
 });

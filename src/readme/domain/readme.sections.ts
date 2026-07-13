@@ -61,6 +61,12 @@ const architecture: Section = (info, t) => {
   return lines.join("\n");
 };
 
+const endpoints: Section = (info, t) => {
+  if (info.endpoints.length === 0) return null;
+  const rows = info.endpoints.map((endpoint) => `| \`${endpoint.method}\` | \`${endpoint.path}\` |`);
+  return `## 📡 ${t.endpoints}\n\n${[`| ${t.endpointMethod} | ${t.endpointRoute} |`, "| --- | --- |", ...rows].join("\n")}`;
+};
+
 const projectStructure: Section = (info, t) => {
   if (info.files.length === 0) return null;
   return `## 🗂️ ${t.projectStructure}\n\n\`\`\`\n${buildTree(info.name, info.files, info.treeComments)}\n\`\`\``;
@@ -182,6 +188,7 @@ export const sections: Section[] = [
   techStack,
   features,
   architecture,
+  endpoints,
   projectStructure,
   installation,
   scripts,
