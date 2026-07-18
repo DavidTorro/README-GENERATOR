@@ -3,7 +3,6 @@ import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
 import type { Lang } from "../../readme/domain/i18n/index.js";
 import { buildMermaid } from "../../readme/domain/readme.mermaid.js";
 import { BANNER_MOTIFS } from "../../readme/domain/readme.banner.js";
-import type { BannerDesign, BannerMotif } from "../../readme/domain/readme.banner.js";
 import type { Config } from "./ai.config.js";
 
 // Modelos locales tardan en generar; para un Ollama apagado falla en ms igualmente
@@ -332,58 +331,6 @@ export class OllamaClient implements AiGeneratorPort {
       );
 
     return { architecture: { mermaid: buildMermaid({ subgraphs, nodes, edges }), components } };
-  }
-
-  // ---- Tarea 4: diseño del banner ----
-  // La IA solo TOMA DECISIONES (tono, motivo, densidad, tagline);
-  // el SVG lo dibuja readme.banner.ts con sintaxis garantizada
-
-  async bannerDesign(info: ProjectInfo, lang: Lang): Promise<BannerDesign | undefined> {
-    return this.tryTask("banner design", async () =>
-      this.parseBannerDesign(await this.generate(this.buildBannerDesignPrompt(info, lang)), lang),
-    );
-  }
-
-  private buildBannerDesignPrompt(info: ProjectInfo, lang: Lang): string {
-    const language = lang === "es" ? "Spanish" : "English";
-    return [
-      `You are the art director designing the README banner of the project "${info.name}".`,
-      "",
-      "FACTS about the project (your ONLY source of truth):",
-      `- Current description: ${info.description || "(none)"}`,
-      `- Tech stack: ${info.stack.map((t) => t.name).join(", ") || "(unknown)"}`,
-      `- It is a CLI tool: ${info.binName ? "yes" : "no"}`,
-      "",
-      "Take exactly 3 design decisions:",
-      '- "motif": background theme, one of "aurora" (soft drifting color blobs), "orbits" (rings with orbiting satellites), "waves" (flowing waves).',
-      '- "density": "calm" or "lively" (amount of decoration).',
-      `- "tagline": ONE sentence in ${language}, 60 to 130 characters, saying concretely what the project does. No emojis. Do NOT invent capabilities.`,
-      "",
-      "RULES:",
-      `- Write the tagline in ${language}; do not mix languages.`,
-      "- Commit to a design with personality: different projects must get different designs. Do NOT default to safe choices.",
-      "",
-      'Reply ONLY with a JSON object with exactly these keys: "motif" (string), "density" (string), "tagline" (string).',
-    ].join("\n");
-  }
-
-  private parseBannerDesign(raw: string, lang: Lang): BannerDesign {
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) throw new Error("reply was not an object");
-    const obj = parsed as Record<string, unknown>;
-
-    const isMotif = (v: unknown): v is BannerMotif => BANNER_MOTIFS.includes(v as BannerMotif);
-    const tagline = typeof obj.tagline === "string" ? obj.tagline.trim() : "";
-
-    // Listones de calidad: decisión inválida = no hay diseño (dispara el reintento)
-    if (!isMotif(obj.motif)) throw new Error("invalid motif");
-    if (tagline.length < 20) throw new Error("reply had no usable tagline");
-
-    return {
-      motif: obj.motif,
-      density: obj.density === "lively" ? "lively" : "calm",
-      tagline: localizeGeneratedText(tagline, lang),
-    };
   }
 
   // ---- Transporte común ----

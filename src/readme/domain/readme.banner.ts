@@ -1,7 +1,6 @@
 // Banner animado 100% vectorial, dibujado desde datos (patrón readme.mermaid.ts).
 // Una SEMILLA por corrida abre el espacio de diseño (tono, tema claro/oscuro,
-// degradado, geometría de los motivos, partículas); la IA decide motivo/densidad/
-// tagline y la IA de imagen pinta el logo.
+// degradado, geometría de los motivos y partículas).
 // Solo CSS dentro del SVG: GitHub lo anima aunque lo sirva como <img>
 
 const W = 1280;
@@ -12,18 +11,17 @@ const FONT = `'Helvetica Neue', -apple-system, 'Segoe UI', Arial, sans-serif`;
 export type BannerMotif = "aurora" | "orbits" | "waves";
 export const BANNER_MOTIFS: BannerMotif[] = ["aurora", "orbits", "waves"];
 
-// Las DECISIONES de la IA (o defaultDesign sin IA)
+// Dirección visual local del renderer.
 export interface BannerDesign {
   motif: BannerMotif;
   density: "calm" | "lively"; // cantidad de decoración
-  tagline?: string; // frase en el idioma pedido; si falta, la description
+  tagline?: string; // si falta, se usa la descripción del proyecto
 }
 
 export interface BannerData {
   title: string;
   description: string; // fallback de la tagline
-  design?: BannerDesign; // lo aporta la IA; ausente = defaultDesign
-  logoPngBase64?: string; // logo generado por IA de imagen; sin él, iniciales
+  design?: BannerDesign; // ausente = defaultDesign
   seed?: number; // abre el espacio de diseño; sin semilla, hash (reproducible)
 }
 
@@ -302,9 +300,7 @@ export function buildBannerSvg(data: BannerData): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
   const leftW = Math.round(nameText.length * 9.5) + 88;
   const leftX = 48;
-  const chipInner = data.logoPngBase64
-    ? `<image href="data:image/png;base64,${data.logoPngBase64}" x="${leftX + 14}" y="47" width="30" height="30" clip-path="url(#logoClip)" preserveAspectRatio="xMidYMid slice"/>`
-    : `<text x="${leftX + 29}" y="67" text-anchor="middle" font-size="14" font-weight="800" fill="${p.ink}">${escapeXml(initials.charAt(0))}<tspan fill="${p.accent}">${escapeXml(initials.charAt(1))}</tspan></text>`;
+  const chipInner = `<text x="${leftX + 29}" y="67" text-anchor="middle" font-size="14" font-weight="800" fill="${p.ink}">${escapeXml(initials.charAt(0))}<tspan fill="${p.accent}">${escapeXml(initials.charAt(1))}</tspan></text>`;
   const leftPill = pill(
     leftX,
     40,
@@ -343,7 +339,6 @@ export function buildBannerSvg(data: BannerData): string {
     `    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%">`,
     `      <feDropShadow dx="0" dy="5" stdDeviation="9" flood-color="${p.shadowColor}" flood-opacity="${p.shadowOpacity}"/>`,
     `    </filter>`,
-    `    <clipPath id="logoClip"><rect x="${leftX + 14}" y="47" width="30" height="30" rx="9"/></clipPath>`,
     `    <style>${CSS}</style>`,
     `  </defs>`,
     `  <rect width="${W}" height="${H}" fill="url(#bg)"/>`,

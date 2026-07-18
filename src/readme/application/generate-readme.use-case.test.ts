@@ -16,8 +16,6 @@ const scanner: ProjectScannerPort = {
   scan: () => rawProject,
 };
 
-const noBannerDesign = async () => undefined;
-
 describe("GenerateReadmeUseCase", () => {
   it("adds validated AI enrichment to the deterministic README", async () => {
     const ai: AiGeneratorPort = {
@@ -26,7 +24,6 @@ describe("GenerateReadmeUseCase", () => {
         features: ["Evidence-based feature"],
         blockquote: "Generated from project evidence.",
       }),
-      bannerDesign: noBannerDesign,
     };
 
     const markdown = await new GenerateReadmeUseCase(scanner, ai).execute("/project", "en");
@@ -39,7 +36,6 @@ describe("GenerateReadmeUseCase", () => {
   it("keeps the deterministic README when AI returns no enrichment", async () => {
     const ai: AiGeneratorPort = {
       enrich: async () => ({}),
-      bannerDesign: noBannerDesign,
     };
 
     const markdown = await new GenerateReadmeUseCase(scanner, ai).execute("/project", "en");
