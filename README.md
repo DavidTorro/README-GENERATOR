@@ -157,7 +157,7 @@ flowchart LR
 - `npm run test` — `vitest run`
 - `npm run verify` — `npm run typecheck && npm test && npm run build`
 - `npm run gen` — `npm run build && node dist/main.js`
-- `npm run gen:all` — `npm run build && node dist/main.js banner --ai --force && node dist/main.js --ai --force`
+- `npm run gen:all` — `npm run build && node dist/main.js banner --force && node dist/main.js --ai --force`
 
 ## 🧪 Testing
 
@@ -190,7 +190,6 @@ readme-gen
 
 | Variable | Descripción |
 | --- | --- |
-| `OLLAMA_IMAGE_MODEL` | Modelo generativo de imágenes opcional para el logo del banner (vacío = iniciales SVG) |
 | `OLLAMA_MODEL` | Modelo de Ollama para analizar código y redactar el README |
 | `OLLAMA_URL` | URL del servidor Ollama |
 
