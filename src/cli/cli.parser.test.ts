@@ -14,10 +14,10 @@ describe("parseCliArgs", () => {
   });
 
   it("parses the banner command with its flags", () => {
-    expect(parseCliArgs(["banner", "es", "--ai", "--dry-run", "--force"])).toMatchObject({
+    expect(parseCliArgs(["banner", "es", "--dry-run", "--force"])).toMatchObject({
       command: "banner",
       lang: "es",
-      ai: true,
+      ai: false,
       dryRun: true,
       force: true,
     });

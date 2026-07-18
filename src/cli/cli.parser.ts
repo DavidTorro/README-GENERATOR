@@ -30,13 +30,13 @@ Usage:
 
 Commands:
   readme (default)    generate README.md by analyzing the project
-  banner              generate assets/banner.svg with animated design and local AI logo (Ollama)
+  banner              generate assets/banner.svg with an animated SVG design
 
 Language:
   en (default) | es          also available as flag: --lang es
 
 Options:
-  --ai                use local AI (Ollama) to enrich the content
+  --ai                use local AI (Ollama) to enrich README content
   -l, --lang <en|es>  language of the generated README
   -o, --output <path> output file (default: README.md)
       --dry-run       print the result without writing any file

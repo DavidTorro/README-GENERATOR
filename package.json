@@ -32,7 +32,7 @@
     "verify": "npm run typecheck && npm test && npm run build",
     "prepublishOnly": "npm run build",
     "gen": "npm run build && node dist/main.js",
-    "gen:all": "npm run build && node dist/main.js banner --ai --force && node dist/main.js --ai --force"
+    "gen:all": "npm run build && node dist/main.js banner --force && node dist/main.js --ai --force"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",

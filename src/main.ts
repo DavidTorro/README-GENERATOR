@@ -8,9 +8,7 @@ import { HELP, parseCliArgs } from "./cli/cli.parser.js";
 import { loadConfig } from "./ai/infrastructure/ai.config.js";
 import { OllamaClient } from "./ai/infrastructure/ollama.client.js";
 import { buildProjectInfo } from "./project/domain/project.builder.js";
-import { buildBannerSvg, hashHue } from "./readme/domain/readme.banner.js";
-import { OllamaImageClient } from "./ai/infrastructure/ollama-image.client.js";
-import { buildLogoPrompt, hueToColorWord } from "./ai/domain/banner.prompt.js";
+import { buildBannerSvg } from "./readme/domain/readme.banner.js";
 
 try {
   // slice(2) para ignorar "node" y la ruta del script
@@ -25,6 +23,9 @@ try {
     process.exit(0);
   }
   if (opts.command === "banner") {
+    if (opts.ai) {
+      throw new Error("--ai enriches README content only; banner generation is always local.");
+    }
     const bannerPath = resolve(process.cwd(), "assets/banner.svg");
     // Red de seguridad: no pisar un banner existente salvo --force
     if (!opts.dryRun && existsSync(bannerPath) && !opts.force) {
@@ -35,30 +36,9 @@ try {
     const raw = new FsProjectScanner().scan(process.cwd());
     const info = buildProjectInfo(raw, process.cwd());
 
-    // Con --ai el diseño lo decide la IA y el logo lo pinta la IA de imagen;
-    // sin --ai (o si degradan): defaultDesign + iniciales
-    let design;
-    let logoPngBase64;
-    if (opts.ai) {
-      const config = loadConfig();
-      console.error("🤖 Designing banner with local AI...");
-      design = await new OllamaClient(config).bannerDesign(info, opts.lang);
-      if (config.ollamaImageModel) {
-        console.error("🎨 Generating logo with local image AI (this may take a while)...");
-        const logo = await new OllamaImageClient(config).generateImage(
-          buildLogoPrompt(info, hueToColorWord(hashHue(info.name))),
-          256,
-          256,
-        );
-        if (logo) logoPngBase64 = Buffer.from(logo).toString("base64");
-      }
-    }
-
     const svg = buildBannerSvg({
       title: info.name,
       description: info.description,
-      design,
-      logoPngBase64,
       seed: Math.floor(Math.random() * 1_000_000_000), // cada corrida, un banner distinto
     });
 
@@ -69,7 +49,7 @@ try {
 
     mkdirSync(dirname(bannerPath), { recursive: true });
     writeFileSync(bannerPath, svg, "utf8");
-    console.error(`✅ assets/banner.svg generated${design ? " (AI design)" : " (default design)"}`);
+    console.error("✅ assets/banner.svg generated");
     process.exit(0);
   }
 
