@@ -15,8 +15,15 @@ export class GenerateReadmeUseCase {
     const raw = this.scanner.scan(root);
     let info = buildProjectInfo(raw, root);
 
+    if (lang === "es" && !this.ai) {
+      throw new Error("Spanish generation requires local Ollama to translate project content.");
+    }
+
     if (this.ai) {
       const extra = await this.ai.enrich(info, lang);
+      if (lang === "es" && !extra.description) {
+        throw new Error("Ollama could not translate the project description into Spanish.");
+      }
       // Copia con los aportes de la IA; ?? = si la IA no aportó, se queda lo que había
       info = {
         ...info,

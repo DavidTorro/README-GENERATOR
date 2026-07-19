@@ -43,4 +43,28 @@ describe("renderReadme architecture", () => {
     expect(markdown).toContain("## 🏗️ Architecture");
     expect(markdown).toContain("flowchart LR");
   });
+
+  it("renders Spanish labels without untranslated English section names", () => {
+    const markdown = renderReadme(
+      {
+        ...project,
+        scripts: { test: "vitest run" },
+        endpoints: [{ method: "GET", path: "/health" }],
+        stack: [
+          { name: "Vitest", category: "testing" },
+          { name: "tsup", category: "tooling" },
+          { name: "React", category: "frontend" },
+          { name: "Express", category: "backend" },
+        ],
+      },
+      "es",
+    );
+
+    expect(markdown).toContain("## 📡 Puntos de acceso");
+    expect(markdown).toContain("## 🧪 Pruebas");
+    expect(markdown).toContain("**Herramientas**: tsup");
+    expect(markdown).toContain("**Interfaz**: React");
+    expect(markdown).toContain("**Servidor**: Express");
+    expect(markdown).not.toContain("## 🛠️ Comandos");
+  });
 });

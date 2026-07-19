@@ -85,25 +85,6 @@ const installation: Section = (info, t) => {
   return `## 📦 ${t.installation}\n\n\`\`\`bash\n${INSTALL_COMMANDS[info.packageManager]}\n\`\`\``;
 };
 
-// npm ejecuta solo los hooks de ciclo de vida (prepublishOnly, prepare, postinstall...):
-// nadie los lanza a mano, no pintan en una lista de "scripts que puedes correr"
-const LIFECYCLE_SCRIPTS = new Set([
-  "prepare", "prepublish", "prepublishonly", "prepack", "postpack",
-  "preinstall", "install", "postinstall", "preuninstall", "postuninstall",
-]);
-
-const scripts: Section = (info, t) => {
-  const entries = Object.entries(info.scripts).filter(
-    ([name]) => !LIFECYCLE_SCRIPTS.has(name.toLowerCase()),
-  );
-  if (entries.length === 0) return null;
-  const run = RUN_COMMANDS[info.packageManager];
-  const items = entries
-    .map(([name, command]) => `- \`${run} ${name}\` — \`${command}\``)
-    .join("\n");
-  return `## 🛠️ ${t.scripts}\n\n${items}`;
-};
-
 const testing: Section = (info, t) => {
   const runners = info.stack
     .filter((tech) => tech.category === "testing")
@@ -199,7 +180,6 @@ export const sections: Section[] = [
   endpoints,
   projectStructure,
   installation,
-  scripts,
   testing,
   usage,
   requirements,

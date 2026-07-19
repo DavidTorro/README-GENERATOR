@@ -43,4 +43,28 @@ describe("GenerateReadmeUseCase", () => {
     expect(markdown).toContain("Base description");
     expect(markdown).not.toContain("## ✨ Features");
   });
+
+  it("uses Spanish AI prose when Spanish output is requested", async () => {
+    const ai: AiGeneratorPort = {
+      enrich: async (_info, lang) => {
+        expect(lang).toBe("es");
+        return { description: "Descripción traducida por la IA." };
+      },
+    };
+
+    const markdown = await new GenerateReadmeUseCase(scanner, ai).execute("/project", "es");
+
+    expect(markdown).toContain("Descripción traducida por la IA.");
+    expect(markdown).not.toContain("Base description");
+  });
+
+  it("rejects Spanish output when Ollama cannot provide a translated description", async () => {
+    const ai: AiGeneratorPort = {
+      enrich: async () => ({}),
+    };
+
+    await expect(new GenerateReadmeUseCase(scanner, ai).execute("/project", "es")).rejects.toThrow(
+      "Ollama could not translate the project description into Spanish.",
+    );
+  });
 });

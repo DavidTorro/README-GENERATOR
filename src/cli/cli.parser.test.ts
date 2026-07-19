@@ -14,8 +14,9 @@ describe("parseCliArgs", () => {
   });
 
   it("parses the banner command with its flags", () => {
-    expect(parseCliArgs(["banner", "--dry-run", "--force"])).toMatchObject({
+    expect(parseCliArgs(["banner", "es", "--dry-run", "--force"])).toMatchObject({
       command: "banner",
+      lang: "es",
       ai: false,
       dryRun: true,
       force: true,
@@ -31,8 +32,9 @@ describe("parseCliArgs", () => {
   });
 
   it("rejects options that have no effect on banner generation", () => {
-    expect(() => parseCliArgs(["banner", "es"])).toThrow("banner does not support language selection.");
-    expect(() => parseCliArgs(["banner", "--lang", "es"])).toThrow("banner does not support language selection.");
+    expect(() => parseCliArgs(["banner", "--ai"])).toThrow(
+      "--ai enriches README content only; use 'banner es' for a Spanish tagline.",
+    );
     expect(() => parseCliArgs(["banner", "--output", "custom.svg"])).toThrow(
       "banner always writes to assets/banner.svg; --output is not supported.",
     );
@@ -44,11 +46,12 @@ describe("parseCliArgs", () => {
 
   it("documents command-specific options and explained examples in both languages", () => {
     expect(getHelp("en")).toContain("README options:");
-    expect(getHelp("en")).toContain("Banner accepts only --dry-run and --force.");
+    expect(getHelp("en")).toContain("Banner accepts a language, --dry-run and --force.");
     expect(getHelp("en")).toContain("preview the README in English");
+    expect(getHelp("en")).toContain("Spanish uses local Ollama");
     expect(getHelp("es")).toContain("Opciones de README:");
-    expect(getHelp("es")).toContain("Banner solo acepta --dry-run y --force.");
+    expect(getHelp("es")).toContain("Banner acepta idioma, --dry-run y --force.");
     expect(getHelp("es")).toContain("previsualiza el README en inglés");
-    expect(getHelp("es")).toContain("genera README.md con Ollama y lo sobrescribe si ya existe");
+    expect(getHelp("es")).toContain("genera un README completamente en español con Ollama");
   });
 });

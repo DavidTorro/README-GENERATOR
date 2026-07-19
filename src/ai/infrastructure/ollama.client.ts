@@ -24,6 +24,9 @@ const SPANISH_REPLACEMENTS: [RegExp, string][] = [
   [/\bREADME Generation\b/gi, "Generación de README"],
   [/\bHTTP Client\b/gi, "Cliente HTTP"],
   [/\bImage Model\b/gi, "Modelo de imagen"],
+  [/\bFrontend\b/gi, "Interfaz"],
+  [/\bBackend\b/gi, "Servidor"],
+  [/\bDatabase\b/gi, "Base de datos"],
   [/\bUser\b/gi, "Usuario"],
   [/\bTests?\b/gi, "Pruebas"],
   [/\btools\b/gi, "herramientas"],
@@ -43,10 +46,7 @@ export class OllamaClient implements AiGeneratorPort {
   // Contrato: NUNCA revienta. Cada tarea degrada por separado:
   // si el árbol falla, la descripción y las features sobreviven
   async enrich(info: ProjectInfo, lang: Lang): Promise<AiEnrichment> {
-    const text =
-      (await this.tryTask("text", async () =>
-        this.parseTextEnrichment(await this.generate(this.buildTextPrompt(info, lang)), lang),
-      )) ?? {};
+    const text = (await this.enrichText(info, lang)) ?? {};
     const tree =
       (await this.tryTask("tree comments", async () =>
         this.parseTreeEnrichment(
@@ -64,6 +64,16 @@ export class OllamaClient implements AiGeneratorPort {
         ),
       )) ?? {};
     return { ...text, ...tree, ...architecture };
+  }
+
+  async translateDescription(info: ProjectInfo, lang: Lang): Promise<string | undefined> {
+    return (await this.enrichText(info, lang))?.description;
+  }
+
+  private async enrichText(info: ProjectInfo, lang: Lang): Promise<AiEnrichment | undefined> {
+    return this.tryTask("text", async () =>
+      this.parseTextEnrichment(await this.generate(this.buildTextPrompt(info, lang)), lang),
+    );
   }
 
   // Ejecuta una tarea de IA con un reintento; si falla dos veces, undefined.
@@ -211,14 +221,18 @@ export class OllamaClient implements AiGeneratorPort {
 
   private buildArchitecturePrompt(info: ProjectInfo, lang: Lang): string {
     const language = lang === "es" ? "Spanish" : "English";
+    const exampleLabels =
+      lang === "es"
+        ? { frontend: "🌐 Interfaz", backend: "🧠 Servidor", database: "🗄️ Base de datos", user: "👤 Usuario" }
+        : { frontend: "🌐 Frontend", backend: "🧠 Backend", database: "🗄️ Database", user: "👤 User" };
     // Ejemplo RICO (el modelo imita la forma): app web con front/back/db. Adaptar al proyecto real.
     const example = JSON.stringify({
       subgraphs: [
-        { title: "🌐 Frontend", nodes: [{ id: "web", label: "🖥️ React + TS<br/>Vite" }] },
-        { title: "🧠 Backend", nodes: [{ id: "api", label: "🔌 REST API<br/>:3000" }] },
-        { title: "🗄️ Database", nodes: [{ id: "db", label: "🐘 PostgreSQL" }] },
+        { title: exampleLabels.frontend, nodes: [{ id: "web", label: "🖥️ React + TS<br/>Vite" }] },
+        { title: exampleLabels.backend, nodes: [{ id: "api", label: "🔌 REST API<br/>:3000" }] },
+        { title: exampleLabels.database, nodes: [{ id: "db", label: "🐘 PostgreSQL" }] },
       ],
-      nodes: [{ id: "user", label: "👤 User" }],
+      nodes: [{ id: "user", label: exampleLabels.user }],
       edges: [
         { from: "user", to: "web" },
         { from: "web", to: "api", label: "/api" },

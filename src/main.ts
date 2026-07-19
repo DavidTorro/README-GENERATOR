@@ -24,7 +24,7 @@ try {
   }
   if (opts.command === "banner") {
     if (opts.ai) {
-      throw new Error("--ai enriches README content only; banner generation is always local.");
+      throw new Error("--ai enriches README content only; use 'banner es' for a Spanish tagline.");
     }
     const bannerPath = resolve(process.cwd(), "assets/banner.svg");
     // Red de seguridad: no pisar un banner existente salvo --force
@@ -35,10 +35,17 @@ try {
 
     const raw = new FsProjectScanner().scan(process.cwd());
     const info = buildProjectInfo(raw, process.cwd());
+    let description = info.description;
+    if (opts.lang === "es") {
+      console.error("🤖 Translating the banner tagline with local Ollama...");
+      const translatedDescription = await new OllamaClient(loadConfig()).translateDescription(info, "es");
+      if (!translatedDescription) throw new Error("Ollama could not translate the banner tagline into Spanish.");
+      description = translatedDescription;
+    }
 
     const svg = buildBannerSvg({
       title: info.name,
-      description: info.description,
+      description,
       seed: Math.floor(Math.random() * 1_000_000_000), // cada corrida, un banner distinto
     });
 
@@ -64,10 +71,11 @@ try {
 
   // Composition root: el ÚNICO sitio donde se enchufan las capas
   const scanner = new FsProjectScanner();
-  const ai = opts.ai ? new OllamaClient(loadConfig()) : undefined;
+  const ai = opts.ai || opts.lang === "es" ? new OllamaClient(loadConfig()) : undefined;
   const generateReadme = new GenerateReadmeUseCase(scanner, ai);
 
-  if (opts.ai) console.error("🤖 Enriching with local AI (this may take a while)...");
+  if (opts.lang === "es") console.error("🤖 Translating and enriching Spanish content with local Ollama...");
+  else if (opts.ai) console.error("🤖 Enriching with local AI (this may take a while)...");
 
   const markdown = await generateReadme.execute(root, opts.lang);
 

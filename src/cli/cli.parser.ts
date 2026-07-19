@@ -22,15 +22,15 @@ readme-gen — generate README.md documentation from your project
 
 Usage:
   readme-gen [en|es] [options]
-  readme-gen banner [options]
+  readme-gen banner [en|es] [options]
 
 Commands:
   readme (default)    generate README.md from detected project facts
-  banner              generate assets/banner.svg locally
+  banner              generate assets/banner.svg; Spanish taglines use local Ollama
 
 README options:
-  --ai                enrich content with local Ollama AI
-  -l, --lang <en|es>  generate in English (default) or Spanish
+  --ai                enrich English README content with local Ollama AI
+  -l, --lang <en|es>  generate in English (default) or Spanish; Spanish uses local Ollama
   -o, --output <path> write to a custom path (default: README.md)
 
 Common options:
@@ -39,13 +39,14 @@ Common options:
   -h, --help          show this help
   -v, --version       show version
 
-Banner accepts only --dry-run and --force. It always writes to assets/banner.svg.
+Banner accepts a language, --dry-run and --force. It always writes to assets/banner.svg.
 
 Examples:
   readme-gen --dry-run                                preview the README in English
   readme-gen es --output docs/README.es.md --force    write a Spanish README to a custom path
-  readme-gen --ai --force                             generate README.md with Ollama, overwriting it if present
+  readme-gen es --force                               generate a fully Spanish README with Ollama, overwriting it if present
   readme-gen banner --dry-run                         preview the SVG banner
+  readme-gen banner es --force                        generate a banner with a Spanish tagline
   readme-gen banner --force                           overwrite assets/banner.svg
 `,
   es: `
@@ -53,15 +54,15 @@ readme-gen — genera documentación README.md desde tu proyecto
 
 Uso:
   readme-gen [en|es] [opciones]
-  readme-gen banner [opciones]
+  readme-gen banner [en|es] [opciones]
 
 Comandos:
   readme (predeterminado)  genera README.md con los datos detectados del proyecto
-  banner                   genera assets/banner.svg de forma local
+  banner                   genera assets/banner.svg; los subtítulos en español usan Ollama local
 
 Opciones de README:
-  --ai                mejora el contenido con IA local de Ollama
-  -l, --lang <en|es>  genera en inglés (predeterminado) o español
+  --ai                mejora el contenido del README en inglés con IA local de Ollama
+  -l, --lang <en|es>  genera en inglés (predeterminado) o español; el español usa Ollama local
   -o, --output <ruta> escribe en una ruta personalizada (predeterminada: README.md)
 
 Opciones comunes:
@@ -70,13 +71,14 @@ Opciones comunes:
   -h, --help          muestra esta ayuda
   -v, --version       muestra la versión
 
-Banner solo acepta --dry-run y --force. Siempre escribe en assets/banner.svg.
+Banner acepta idioma, --dry-run y --force. Siempre escribe en assets/banner.svg.
 
 Ejemplos:
   readme-gen --dry-run                                previsualiza el README en inglés
   readme-gen es --output docs/README.es.md --force    escribe un README en español en una ruta personalizada
-  readme-gen --ai --force                             genera README.md con Ollama y lo sobrescribe si ya existe
+  readme-gen es --force                               genera un README completamente en español con Ollama y lo sobrescribe si ya existe
   readme-gen banner --dry-run                         previsualiza el banner SVG
+  readme-gen banner es --force                        genera un banner con subtítulo en español
   readme-gen banner --force                           sobrescribe assets/banner.svg
 `,
 };
@@ -111,8 +113,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
   }
 
   if (command === "banner") {
-    if (values.ai) throw new Error("--ai enriches README content only; banner generation is always local.");
-    if (langPositional || values.lang) throw new Error("banner does not support language selection.");
+    if (values.ai) throw new Error("--ai enriches README content only; use 'banner es' for a Spanish tagline.");
     if (values.output) throw new Error("banner always writes to assets/banner.svg; --output is not supported.");
   }
 
