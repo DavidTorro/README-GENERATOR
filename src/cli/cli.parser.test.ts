@@ -23,6 +23,14 @@ describe("parseCliArgs", () => {
     });
   });
 
+  it("parses the mermaid command with its language", () => {
+    expect(parseCliArgs(["mermaid", "es", "--dry-run"])).toMatchObject({
+      command: "mermaid",
+      lang: "es",
+      dryRun: true,
+    });
+  });
+
   it("gives --lang priority over the positional language", () => {
     expect(parseCliArgs(["es", "--lang", "en"]).lang).toBe("en");
   });
@@ -38,6 +46,9 @@ describe("parseCliArgs", () => {
     expect(() => parseCliArgs(["banner", "--output", "custom.svg"])).toThrow(
       "banner always writes to assets/banner.svg; --output is not supported.",
     );
+    expect(() => parseCliArgs(["mermaid", "--ai"])).toThrow(
+      "mermaid always uses local Ollama; --ai is not needed.",
+    );
   });
 
   it("rejects unexpected positional arguments", () => {
@@ -46,11 +57,11 @@ describe("parseCliArgs", () => {
 
   it("documents command-specific options and explained examples in both languages", () => {
     expect(getHelp("en")).toContain("README options:");
-    expect(getHelp("en")).toContain("Banner accepts a language, --dry-run and --force.");
+    expect(getHelp("en")).toContain("Banner and mermaid accept a language, --dry-run and --force.");
     expect(getHelp("en")).toContain("preview the README in English");
     expect(getHelp("en")).toContain("Spanish uses local Ollama");
     expect(getHelp("es")).toContain("Opciones de README:");
-    expect(getHelp("es")).toContain("Banner acepta idioma, --dry-run y --force.");
+    expect(getHelp("es")).toContain("Los comandos banner y mermaid aceptan idioma, --dry-run y --force.");
     expect(getHelp("es")).toContain("previsualiza el README en inglés");
     expect(getHelp("es")).toContain("genera un README completamente en español con Ollama");
   });

@@ -3,6 +3,7 @@ import { INSTALL_COMMANDS, RUN_COMMANDS } from "./readme.commands.js";
 import { CATEGORY_ORDER, CATEGORY_EMOJI } from "./readme.categories.js";
 import { buildBadgeLine } from "./readme.badges.js";
 import { buildTree } from "./readme.tree.js";
+import { renderArchitectureSection } from "./readme.architecture.js";
 
 // Banner del proyecto: solo si existe un assets/banner.(png|jpg|...) real
 const BANNER_PATTERN = /^assets\/banner\.(png|jpe?g|webp|svg)$/i;
@@ -41,20 +42,7 @@ const features: Section = (info, t) => {
 
 const architecture: Section = (info, t) => {
   if (!info.architecture) return null;
-  const lines = [`## 🏗️ ${t.architecture}`, "", "```mermaid", info.architecture.mermaid, "```"];
-  if (info.architecture.components.length > 0) {
-    // '|' dentro de una celda rompería la tabla markdown: se escapa
-    const cell = (s: string) => s.replaceAll("|", "\\|");
-    lines.push(
-      "",
-      `| ${t.archComponent} | ${t.archTech} | ${t.archDetail} |`,
-      "| --- | --- | --- |",
-        ...info.architecture.components.map(
-        (c) => `| \`${cell(c.name)}\` | ${cell(c.tech)} | ${cell(c.detail)} |`,
-      ),
-    );
-  }
-  return lines.join("\n");
+  return renderArchitectureSection(info.architecture, t);
 };
 
 const endpoints: Section = (info, t) => {

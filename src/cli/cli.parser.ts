@@ -2,8 +2,8 @@ import { parseArgs } from "node:util";
 import type { Lang } from "../readme/domain/i18n/index.js";
 
 // Comandos disponibles: generar el README (defecto) o su banner local.
-export type Command = "readme" | "banner";
-const COMMANDS: Command[] = ["readme", "banner"];
+export type Command = "readme" | "banner" | "mermaid";
+const COMMANDS: Command[] = ["readme", "banner", "mermaid"];
 
 export interface CliOptions {
   command: Command;
@@ -23,10 +23,12 @@ readme-gen — generate README.md documentation from your project
 Usage:
   readme-gen [en|es] [options]
   readme-gen banner [en|es] [options]
+  readme-gen mermaid [en|es] [options]
 
 Commands:
   readme (default)    generate README.md from detected project facts
   banner              generate assets/banner.svg; Spanish taglines use local Ollama
+  mermaid             regenerate only the Mermaid architecture section with local Ollama
 
 README options:
   --ai                enrich English README content with local Ollama AI
@@ -39,7 +41,7 @@ Common options:
   -h, --help          show this help
   -v, --version       show version
 
-Banner accepts a language, --dry-run and --force. It always writes to assets/banner.svg.
+Banner and mermaid accept a language, --dry-run and --force. Mermaid updates README.md only.
 
 Examples:
   readme-gen --dry-run                                preview the README in English
@@ -48,6 +50,8 @@ Examples:
   readme-gen banner --dry-run                         preview the SVG banner
   readme-gen banner es --force                        generate a banner with a Spanish tagline
   readme-gen banner --force                           overwrite assets/banner.svg
+  readme-gen mermaid es --dry-run                     preview only a new Spanish Mermaid section
+  readme-gen mermaid es --force                       replace only the Mermaid section in README.md
 `,
   es: `
 readme-gen — genera documentación README.md desde tu proyecto
@@ -55,10 +59,12 @@ readme-gen — genera documentación README.md desde tu proyecto
 Uso:
   readme-gen [en|es] [opciones]
   readme-gen banner [en|es] [opciones]
+  readme-gen mermaid [en|es] [opciones]
 
 Comandos:
   readme (predeterminado)  genera README.md con los datos detectados del proyecto
   banner                   genera assets/banner.svg; los subtítulos en español usan Ollama local
+  mermaid                  regenera solo la sección Mermaid de arquitectura con Ollama local
 
 Opciones de README:
   --ai                mejora el contenido del README en inglés con IA local de Ollama
@@ -71,7 +77,7 @@ Opciones comunes:
   -h, --help          muestra esta ayuda
   -v, --version       muestra la versión
 
-Banner acepta idioma, --dry-run y --force. Siempre escribe en assets/banner.svg.
+Los comandos banner y mermaid aceptan idioma, --dry-run y --force. Mermaid actualiza solo README.md.
 
 Ejemplos:
   readme-gen --dry-run                                previsualiza el README en inglés
@@ -80,6 +86,8 @@ Ejemplos:
   readme-gen banner --dry-run                         previsualiza el banner SVG
   readme-gen banner es --force                        genera un banner con subtítulo en español
   readme-gen banner --force                           sobrescribe assets/banner.svg
+  readme-gen mermaid es --dry-run                     previsualiza solo una nueva sección Mermaid en español
+  readme-gen mermaid es --force                       sustituye solo la sección Mermaid de README.md
 `,
 };
 
@@ -115,6 +123,10 @@ export function parseCliArgs(argv: string[]): CliOptions {
   if (command === "banner") {
     if (values.ai) throw new Error("--ai enriches README content only; use 'banner es' for a Spanish tagline.");
     if (values.output) throw new Error("banner always writes to assets/banner.svg; --output is not supported.");
+  }
+  if (command === "mermaid") {
+    if (values.ai) throw new Error("mermaid always uses local Ollama; --ai is not needed.");
+    if (values.output) throw new Error("mermaid always updates README.md; --output is not supported.");
   }
 
   // Prioridad del idioma: --lang gana al posicional; defecto "en"

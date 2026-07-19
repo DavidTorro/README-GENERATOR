@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import pkg from "../package.json" with { type: "json" };
 import { GenerateReadmeUseCase } from "./readme/application/generate-readme.use-case.js";
@@ -9,7 +9,8 @@ import { loadConfig } from "./ai/infrastructure/ai.config.js";
 import { OllamaClient } from "./ai/infrastructure/ollama.client.js";
 import { buildProjectInfo } from "./project/domain/project.builder.js";
 import { buildBannerSvg } from "./readme/domain/readme.banner.js";
-import type { Lang } from "./readme/domain/i18n/index.js";
+import { getTranslations, type Lang } from "./readme/domain/i18n/index.js";
+import { renderArchitectureSection, replaceArchitectureSection } from "./readme/domain/readme.architecture.js";
 
 let lang: Lang = "en";
 try {
@@ -23,6 +24,55 @@ try {
   }
   if (opts.version) {
     console.log(pkg.version);
+    process.exit(0);
+  }
+  if (opts.command === "mermaid") {
+    const readmePath = resolve(process.cwd(), "README.md");
+    if (!opts.dryRun && !existsSync(readmePath)) {
+      throw new Error(
+        opts.lang === "es"
+          ? "No existe README.md para actualizar su sección de arquitectura."
+          : "README.md does not exist to update its architecture section.",
+      );
+    }
+    if (!opts.dryRun && !opts.force) {
+      console.error(
+        opts.lang === "es"
+          ? "❌ Usa --force para actualizar solo la sección de arquitectura de README.md."
+          : "❌ Use --force to update only the architecture section of README.md.",
+      );
+      process.exit(1);
+    }
+
+    const raw = new FsProjectScanner().scan(process.cwd());
+    const info = buildProjectInfo(raw, process.cwd());
+    console.error(
+      opts.lang === "es"
+        ? "🤖 Regenerando la arquitectura Mermaid con Ollama local..."
+        : "🤖 Regenerating the Mermaid architecture with local Ollama...",
+    );
+    const architecture = await new OllamaClient(loadConfig()).generateArchitecture(info, opts.lang);
+    if (!architecture) {
+      throw new Error(
+        opts.lang === "es"
+          ? "Ollama no pudo generar una arquitectura Mermaid válida."
+          : "Ollama could not generate a valid Mermaid architecture.",
+      );
+    }
+
+    const section = renderArchitectureSection(architecture, getTranslations(opts.lang));
+    if (opts.dryRun) {
+      console.log(section);
+      process.exit(0);
+    }
+
+    const updated = replaceArchitectureSection(readFileSync(readmePath, "utf8"), section);
+    writeFileSync(readmePath, updated, "utf8");
+    console.error(
+      opts.lang === "es"
+        ? "✅ Sección de arquitectura de README.md actualizada"
+        : "✅ README.md architecture section updated",
+    );
     process.exit(0);
   }
   if (opts.command === "banner") {

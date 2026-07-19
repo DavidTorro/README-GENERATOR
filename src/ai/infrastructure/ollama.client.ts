@@ -57,12 +57,7 @@ export class OllamaClient implements AiGeneratorPort {
         ),
       )) ?? {};
     const architecture =
-      (await this.tryTask("architecture", lang, async () =>
-        this.parseArchitectureEnrichment(
-          await this.generate(this.buildArchitecturePrompt(info, lang), 2000),
-          lang,
-        ),
-      )) ?? {};
+      (await this.enrichArchitecture(info, lang)) ?? {};
     return { ...text, ...tree, ...architecture };
   }
 
@@ -70,9 +65,22 @@ export class OllamaClient implements AiGeneratorPort {
     return (await this.enrichText(info, lang))?.description;
   }
 
+  async generateArchitecture(info: ProjectInfo, lang: Lang): Promise<AiEnrichment["architecture"]> {
+    return (await this.enrichArchitecture(info, lang))?.architecture;
+  }
+
   private async enrichText(info: ProjectInfo, lang: Lang): Promise<AiEnrichment | undefined> {
     return this.tryTask("text", lang, async () =>
       this.parseTextEnrichment(await this.generate(this.buildTextPrompt(info, lang)), lang),
+    );
+  }
+
+  private async enrichArchitecture(info: ProjectInfo, lang: Lang): Promise<AiEnrichment | undefined> {
+    return this.tryTask("architecture", lang, async () =>
+      this.parseArchitectureEnrichment(
+        await this.generate(this.buildArchitecturePrompt(info, lang), 2000),
+        lang,
+      ),
     );
   }
 
