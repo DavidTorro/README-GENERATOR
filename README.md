@@ -4,9 +4,9 @@
 
 ![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white) ![Vitest](https://img.shields.io/badge/-Vitest-6e9f18?style=for-the-badge&logo=vitest&logoColor=white) ![tsup](https://img.shields.io/badge/-tsup-0f172a?style=for-the-badge) ![Ollama](https://img.shields.io/badge/-Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
 
-Generador de README.md profesional y atractivo para proyectos, que puede enriquecer el contenido con IA local mediante Ollama. Detecta automáticamente tecnologías, scripts, dependencias y estructura del proyecto para crear un documento completo y bien organizado.
+Generador de README.md profesional para proyectos Node.js. Analiza automáticamente el código fuente, detecta tecnologías y crea un documento atractivo con secciones estructuradas. Incluye enriquecimiento opcional con IA local usando Ollama para descripciones, características y arquitectura.
 
-> ⚡ Genera README.md profesionales en segundos usando IA local, sin enviar datos a servidores externos.
+> 🚀 Crea README.md profesionales en segundos sin salir de tu terminal
 
 ## ⚙️ Tecnologías
 
@@ -17,12 +17,12 @@ Generador de README.md profesional y atractivo para proyectos, que puede enrique
 
 ## ✨ Características
 
-- ✨ Genera un README.md completo con secciones estructuradas como descripción, características, instalación y arquitectura
-- 🤖 Enriquece el contenido del README usando IA local a través de Ollama, con soporte para múltiples idiomas (español e inglés)
-- 🔍 Escanea automáticamente el proyecto para detectar tecnologías, scripts, dependencias y configuraciones desde package.json y .env.example
-- 📂 Soporta comandos CLI como `banner` para generar un banner SVG o `--IA` para enriquecer el contenido del README
-- 🔧 Configuración flexible mediante variables de entorno (OLLAMA_URL y OLLAMA_MODEL) sin necesidad de archivos de configuración adicionales
-- 🧪 Incluye pruebas unitarias y de integración con Vitest, y está construido con TypeScript para una mejor experiencia de desarrollo
+- ✨ Genera README.md completo con secciones como descripción, características, instalación y uso
+- 🔧 Detecta automáticamente tecnologías y dependencias del proyecto (TypeScript, Vitest, etc.)
+- 🤖 Enriquece el contenido con IA local mediante Ollama para mejorar descripciones y arquitectura
+- 🌐 Soporta múltiples idiomas: inglés y español, con sistema de traducciones escalable
+- 📂 Analiza archivos .env.example para documentar variables de entorno del proyecto
+- 🛠️ Comando CLI para generar banner SVG personalizado con soporte para IA
 
 ## 🏗️ Arquitectura
 
@@ -40,58 +40,49 @@ Generador de README.md profesional y atractivo para proyectos, que puede enrique
 }}%%
 
 flowchart LR
-    subgraph SG0["📌 Entrada CLI"]
+    subgraph SG0["🤖 Motor de IA"]
         direction LR
-        cli["⚙️ Herramienta CLI<br/>main.ts"]
+        ollama["🧠 Ollama<br/>http://localhost:11434"]
     end
-    subgraph SG1["🔍 Escaneo de Proyecto"]
+    subgraph SG1["⚙️ Procesamiento"]
         direction LR
-        scanner["🔍 Escaneador de proyecto<br/>fs-project-scanner.js"]
+        scanner["🔍 Escaneador de proyecto<br/>fs + fast-glob"]
+        builder["🏗️ Constructor de información<br/>project.builder.ts"]
+        ai_client["💬 Cliente IA<br/>ollama.client.ts"]
     end
-    subgraph SG2["🧠 Lógica de Negocio"]
+    subgraph SG2["📄 Generación"]
         direction LR
-        usecase["🧩 Caso de uso<br/>generate-readme.use-case.js"]
-    end
-    subgraph SG3["🤖 Inteligencia Artificial"]
-        direction LR
-        ai["🤖 Motor de IA<br/>Ollama (qwen3-coder:30b)"]
-    end
-    subgraph SG4["📄 Generación README"]
-        direction LR
-        renderer["📝 Renderizador README<br/>readme.template.js"]
+        generator["📝 Generador de README<br/>generate-readme.use-case.ts"]
+        renderer["🎨 Renderizador<br/>readme.banner.js"]
     end
     user["👤 Usuario"]
-    user -- "comando" --> cli
-    cli -- "lectura de archivos" --> scanner
-    scanner -- "info del proyecto" --> usecase
-    usecase -- "solicitud IA" --> ai
-    usecase -- "datos para renderizar" --> renderer
+    user -- "comando CLI" --> scanner
+    scanner -- "datos del proyecto" --> builder
+    builder -- "info + código fuente" --> ai_client
+    ai_client -- "HTTP" --> ollama
+    ai_client -- "enriquecimiento" --> generator
+    generator -- "datos estructurados" --> renderer
 
     classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
-    class cli g0;
+    class ollama g0;
     classDef g1 fill:#111827,stroke:#c084fc,color:#f8fafc,stroke-width:2px;
-    class scanner g1;
+    class scanner,builder,ai_client g1;
     classDef g2 fill:#08111f,stroke:#34d399,color:#f8fafc,stroke-width:2px;
-    class usecase g2;
-    classDef g3 fill:#1f2937,stroke:#f472b6,color:#f8fafc,stroke-width:2px;
-    class ai g3;
-    classDef g4 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
-    class renderer g4;
+    class generator,renderer g2;
     classDef actor fill:#1f2937,stroke:#f59e0b,color:#fff7ed,stroke-width:2px,stroke-dasharray: 5 3;
     class user actor;
     style SG0 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
     style SG1 fill:#0b1220,stroke:#c084fc,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
     style SG2 fill:#0b1220,stroke:#34d399,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG3 fill:#0b1220,stroke:#f472b6,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG4 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
 ```
 
 | Componente | Tecnología | Detalle |
 | --- | --- | --- |
-| `Herramienta CLI` | TypeScript + Vitest + tsup | Punto de entrada principal con análisis de argumentos |
-| `Escaneador de proyecto` | Node.js fs + fast-glob | Detecta archivos, imports, paquetes y variables de entorno |
-| `Motor de IA` | Ollama | Interfaz HTTP para modelos LLM como qwen3-coder:30b |
-| `Generador de README` | Plantillas + Traducciones | Construye el contenido usando datos del proyecto y IA |
+| `Escaneador de proyecto` | fs + fast-glob | Analiza el árbol de archivos del proyecto |
+| `Constructor de información` | project.builder.ts | Construye la estructura de datos del proyecto |
+| `Cliente IA` | ollama.client.ts | Comunica con el servidor Ollama para generar contenido |
+| `Generador de README` | generate-readme.use-case.ts | Orquesta la generación del archivo README.md |
+| `Renderizador` | readme.banner.js | Genera el banner SVG para el README |
 
 ## 🗂️ Estructura del proyecto
 
@@ -102,10 +93,10 @@ flowchart LR
 ├── src/                                          # Código fuente principal
 │   ├── ai/                                       # Lógica de inteligencia artificial
 │   │   ├── domain/                               # Dominio de la IA
-│   │   │   └── ai-generator.port.ts              # Interfaz generadora IA
+│   │   │   └── ai-generator.port.ts              # Interfaz generadora de IA
 │   │   └── infrastructure/                       # Infraestructura de IA
-│   │       ├── ai.config.test.ts                 # Pruebas de configuración IA
-│   │       ├── ai.config.ts                      # Configuración IA
+│   │       ├── ai.config.test.ts                 # Pruebas de configuración de IA
+│   │       ├── ai.config.ts                      # Configuración de IA
 │   │       ├── ollama.client.test.ts             # Pruebas del cliente Ollama
 │   │       └── ollama.client.ts                  # Cliente Ollama
 │   ├── cli/                                      # Interfaz de línea de comandos
@@ -127,8 +118,8 @@ flowchart LR
 │   │   │   └── generate-readme.use-case.ts       # Caso de uso generación README
 │   │   └── domain/                               # Dominio de README
 │   │       ├── i18n/                             # Internacionalización de README
-│   │       │   ├── en.json                       # Traducciones inglés
-│   │       │   ├── es.json                       # Traducciones español
+│   │       │   ├── en.json                       # Traducciones en inglés
+│   │       │   ├── es.json                       # Traducciones en español
 │   │       │   └── index.ts                      # Índice de traducciones
 │   │       ├── readme.badges.ts                  # Badges del README
 │   │       ├── readme.banner.test.ts             # Pruebas del banner README
@@ -136,11 +127,11 @@ flowchart LR
 │   │       ├── readme.categories.ts              # Categorías del README
 │   │       ├── readme.commands.ts                # Comandos del README
 │   │       ├── readme.interfaces.ts              # Interfaces del README
-│   │       ├── readme.mermaid.ts                 # Diagramas Mermaid del README
+│   │       ├── readme.mermaid.ts                 # Diagramas Mermaid
 │   │       ├── readme.render.test.ts             # Pruebas de renderizado README
 │   │       ├── readme.render.ts                  # Renderizado del README
 │   │       ├── readme.sections.ts                # Secciones del README
-│   │       └── readme.tree.ts                    # Árbol del proyecto en README
+│   │       └── readme.tree.ts                    # Árbol del proyecto
 │   └── main.ts                                   # Punto de entrada CLI
 ├── .env.example
 ├── .gitignore

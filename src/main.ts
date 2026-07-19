@@ -9,10 +9,13 @@ import { loadConfig } from "./ai/infrastructure/ai.config.js";
 import { OllamaClient } from "./ai/infrastructure/ollama.client.js";
 import { buildProjectInfo } from "./project/domain/project.builder.js";
 import { buildBannerSvg } from "./readme/domain/readme.banner.js";
+import type { Lang } from "./readme/domain/i18n/index.js";
 
+let lang: Lang = "en";
 try {
   // slice(2) para ignorar "node" y la ruta del script
   const opts = parseCliArgs(process.argv.slice(2));
+  lang = opts.lang;
 
   if (opts.help) {
     console.log(getHelp(opts.lang));
@@ -24,12 +27,20 @@ try {
   }
   if (opts.command === "banner") {
     if (opts.ai) {
-      throw new Error("--ai enriches README content only; use 'banner es' for a Spanish tagline.");
+      throw new Error(
+        opts.lang === "es"
+          ? "--ai solo mejora el contenido del README; usa 'banner es' para un subtítulo en español."
+          : "--ai enriches README content only; use 'banner es' for a Spanish tagline.",
+      );
     }
     const bannerPath = resolve(process.cwd(), "assets/banner.svg");
     // Red de seguridad: no pisar un banner existente salvo --force
     if (!opts.dryRun && existsSync(bannerPath) && !opts.force) {
-      console.error("❌ assets/banner.svg already exists. Use --force to overwrite.");
+      console.error(
+        opts.lang === "es"
+          ? "❌ assets/banner.svg ya existe. Usa --force para sobrescribirlo."
+          : "❌ assets/banner.svg already exists. Use --force to overwrite.",
+      );
       process.exit(1);
     }
 
@@ -37,9 +48,9 @@ try {
     const info = buildProjectInfo(raw, process.cwd());
     let description = info.description;
     if (opts.lang === "es") {
-      console.error("🤖 Translating the banner tagline with local Ollama...");
+      console.error("🤖 Traduciendo el subtítulo del banner con Ollama local...");
       const translatedDescription = await new OllamaClient(loadConfig()).translateDescription(info, "es");
-      if (!translatedDescription) throw new Error("Ollama could not translate the banner tagline into Spanish.");
+      if (!translatedDescription) throw new Error("Ollama no pudo traducir el subtítulo del banner al español.");
       description = translatedDescription;
     }
 
@@ -56,7 +67,7 @@ try {
 
     mkdirSync(dirname(bannerPath), { recursive: true });
     writeFileSync(bannerPath, svg, "utf8");
-    console.error("✅ assets/banner.svg generated");
+    console.error(opts.lang === "es" ? "✅ assets/banner.svg generado" : "✅ assets/banner.svg generated");
     process.exit(0);
   }
 
@@ -65,7 +76,11 @@ try {
 
   // Red de seguridad: no invocar IA si el destino no se puede sobrescribir
   if (!opts.dryRun && existsSync(outputPath) && !opts.force) {
-    console.error(`❌ ${opts.output} already exists. Use --force to overwrite.`);
+    console.error(
+      opts.lang === "es"
+        ? `❌ ${opts.output} ya existe. Usa --force para sobrescribirlo.`
+        : `❌ ${opts.output} already exists. Use --force to overwrite.`,
+    );
     process.exit(1);
   }
 
@@ -74,7 +89,7 @@ try {
   const ai = opts.ai || opts.lang === "es" ? new OllamaClient(loadConfig()) : undefined;
   const generateReadme = new GenerateReadmeUseCase(scanner, ai);
 
-  if (opts.lang === "es") console.error("🤖 Translating and enriching Spanish content with local Ollama...");
+  if (opts.lang === "es") console.error("🤖 Traduciendo y enriqueciendo el contenido en español con Ollama local...");
   else if (opts.ai) console.error("🤖 Enriching with local AI (this may take a while)...");
 
   const markdown = await generateReadme.execute(root, opts.lang);
@@ -86,9 +101,13 @@ try {
   }
 
   writeFileSync(outputPath, markdown, "utf8");
-  console.error(`✅ ${opts.output} generated (lang: ${opts.lang})`);
+  console.error(
+    opts.lang === "es"
+      ? `✅ ${opts.output} generado (idioma: ${opts.lang})`
+      : `✅ ${opts.output} generated (lang: ${opts.lang})`,
+  );
 } catch (err) {
   console.error(`❌ ${err instanceof Error ? err.message : err}`);
-  console.error(`   Try --help`);
+  console.error(lang === "es" ? "   Prueba --help" : "   Try --help");
   process.exit(1);
 }

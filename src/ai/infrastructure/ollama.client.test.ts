@@ -16,7 +16,7 @@ describe("OllamaClient", () => {
       json: async () => ({ response: "not valid JSON" }),
     });
     vi.stubGlobal("fetch", fetchMock);
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     const client = new OllamaClient({
       ollamaUrl: "http://localhost:11434",
@@ -27,8 +27,9 @@ describe("OllamaClient", () => {
       "/project",
     );
 
-    await expect(client.enrich(info, "en")).resolves.toEqual({});
+    await expect(client.enrich(info, "es")).resolves.toEqual({});
     expect(fetchMock).toHaveBeenCalledTimes(6);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining("La tarea de IA «texto» falló en el intento 1"));
   });
 
 });

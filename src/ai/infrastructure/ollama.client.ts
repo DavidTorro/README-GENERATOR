@@ -48,7 +48,7 @@ export class OllamaClient implements AiGeneratorPort {
   async enrich(info: ProjectInfo, lang: Lang): Promise<AiEnrichment> {
     const text = (await this.enrichText(info, lang)) ?? {};
     const tree =
-      (await this.tryTask("tree comments", async () =>
+      (await this.tryTask("tree comments", lang, async () =>
         this.parseTreeEnrichment(
           // la respuesta más larga de todas: un comentario por cada ruta
           await this.generate(this.buildTreePrompt(info, lang), 3000),
@@ -57,7 +57,7 @@ export class OllamaClient implements AiGeneratorPort {
         ),
       )) ?? {};
     const architecture =
-      (await this.tryTask("architecture", async () =>
+      (await this.tryTask("architecture", lang, async () =>
         this.parseArchitectureEnrichment(
           await this.generate(this.buildArchitecturePrompt(info, lang), 2000),
           lang,
@@ -71,22 +71,29 @@ export class OllamaClient implements AiGeneratorPort {
   }
 
   private async enrichText(info: ProjectInfo, lang: Lang): Promise<AiEnrichment | undefined> {
-    return this.tryTask("text", async () =>
+    return this.tryTask("text", lang, async () =>
       this.parseTextEnrichment(await this.generate(this.buildTextPrompt(info, lang)), lang),
     );
   }
 
   // Ejecuta una tarea de IA con un reintento; si falla dos veces, undefined.
   // Genérica: cada llamador decide qué tipo devuelve y cuál es su fallback
-  private async tryTask<T>(name: string, task: () => Promise<T>): Promise<T | undefined> {
+  private async tryTask<T>(name: string, lang: Lang, task: () => Promise<T>): Promise<T | undefined> {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         return await task();
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
+        const taskLabels: Record<string, string> = {
+          text: "texto",
+          "tree comments": "comentarios del árbol",
+          architecture: "arquitectura",
+        };
+        const taskLabel = lang === "es" ? taskLabels[name] ?? name : name;
         console.error(
-          `⚠️  AI ${name} attempt ${attempt} failed (${reason}).` +
-            (attempt === 1 ? " Retrying..." : " Continuing without it."),
+          lang === "es"
+            ? `⚠️  La tarea de IA «${taskLabel}» falló en el intento ${attempt} (${reason}).${attempt === 1 ? " Reintentando..." : " Se continuará sin ella."}`
+            : `⚠️  AI ${name} attempt ${attempt} failed (${reason}).${attempt === 1 ? " Retrying..." : " Continuing without it."}`,
         );
       }
     }

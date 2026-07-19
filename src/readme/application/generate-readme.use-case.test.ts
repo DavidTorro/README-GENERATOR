@@ -64,7 +64,7 @@ describe("GenerateReadmeUseCase", () => {
     };
 
     await expect(new GenerateReadmeUseCase(scanner, ai).execute("/project", "es")).rejects.toThrow(
-      "Ollama could not translate the project description into Spanish.",
+      "Ollama no pudo traducir la descripción del proyecto al español.",
     );
   });
 });
