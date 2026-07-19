@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" font-family="'Helvetica Neue', -apple-system, 'Segoe UI', Arial, sans-serif">
   <defs>
-    <linearGradient id="bg" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0" stop-color="hsl(209, 45%, 8%)"/><stop offset="1" stop-color="hsl(249, 40%, 13%)"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="hsl(252, 45%, 8%)"/><stop offset="1" stop-color="hsl(292, 40%, 13%)"/>
     </linearGradient>
     <filter id="blur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="70"/></filter>
     <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%">
@@ -36,24 +36,24 @@
   </defs>
   <rect width="1280" height="320" fill="url(#bg)"/>
   <g filter="url(#blur)">
-  <circle cx="489" cy="69" r="134" fill="hsl(209, 90%, 62%)" opacity="0.32" class="blob-a"/>
-  <circle cx="276" cy="48" r="201" fill="hsl(254, 85%, 64%)" opacity="0.28" class="blob-b"/>
-  <circle cx="963" cy="43" r="164" fill="hsl(164, 80%, 60%)" opacity="0.24" class="blob-c"/>
+  <circle cx="407" cy="316" r="216" fill="hsl(252, 90%, 62%)" opacity="0.32" class="blob-a"/>
+  <circle cx="987" cy="139" r="213" fill="hsl(297, 85%, 64%)" opacity="0.28" class="blob-b"/>
+  <circle cx="369" cy="248" r="201" fill="hsl(207, 80%, 60%)" opacity="0.24" class="blob-c"/>
   </g>
-  <g><circle cx="377" cy="163" r="1.7" fill="hsl(209, 80%, 70%)" class="dot-a"/><circle cx="271" cy="35" r="3.2" fill="hsl(209, 80%, 70%)" class="dot-b"/><circle cx="797" cy="216" r="2.7" fill="hsl(209, 80%, 70%)" class="dot-c"/><circle cx="540" cy="257" r="3.0" fill="hsl(209, 80%, 70%)" class="dot-a"/><circle cx="870" cy="95" r="2.2" fill="hsl(209, 80%, 70%)" class="dot-b"/><circle cx="936" cy="52" r="2.5" fill="hsl(209, 80%, 70%)" class="dot-c"/><circle cx="357" cy="83" r="2.4" fill="hsl(209, 80%, 70%)" class="dot-a"/><circle cx="1139" cy="136" r="1.3" fill="hsl(209, 80%, 70%)" class="dot-b"/><circle cx="1223" cy="171" r="1.1" fill="hsl(209, 80%, 70%)" class="dot-c"/><circle cx="56" cy="120" r="2.3" fill="hsl(209, 80%, 70%)" class="dot-a"/><circle cx="1019" cy="105" r="1.7" fill="hsl(209, 80%, 70%)" class="dot-b"/><circle cx="978" cy="153" r="1.6" fill="hsl(209, 80%, 70%)" class="dot-c"/><circle cx="1071" cy="155" r="1.9" fill="hsl(209, 80%, 70%)" class="dot-a"/><circle cx="667" cy="122" r="2.8" fill="hsl(209, 80%, 70%)" class="dot-b"/><circle cx="1132" cy="215" r="1.3" fill="hsl(209, 80%, 70%)" class="dot-c"/><circle cx="851" cy="245" r="1.8" fill="hsl(209, 80%, 70%)" class="dot-a"/><circle cx="487" cy="145" r="1.1" fill="hsl(209, 80%, 70%)" class="dot-b"/><circle cx="367" cy="158" r="2.0" fill="hsl(209, 80%, 70%)" class="dot-c"/></g>
+  <g><circle cx="455" cy="191" r="2.3" fill="hsl(252, 80%, 70%)" class="dot-a"/><circle cx="196" cy="229" r="2.9" fill="hsl(252, 80%, 70%)" class="dot-b"/><circle cx="750" cy="75" r="1.8" fill="hsl(252, 80%, 70%)" class="dot-c"/><circle cx="1071" cy="230" r="2.0" fill="hsl(252, 80%, 70%)" class="dot-a"/><circle cx="875" cy="263" r="2.3" fill="hsl(252, 80%, 70%)" class="dot-b"/><circle cx="889" cy="53" r="1.8" fill="hsl(252, 80%, 70%)" class="dot-c"/><circle cx="175" cy="238" r="1.7" fill="hsl(252, 80%, 70%)" class="dot-a"/><circle cx="89" cy="32" r="2.0" fill="hsl(252, 80%, 70%)" class="dot-b"/><circle cx="295" cy="56" r="3.1" fill="hsl(252, 80%, 70%)" class="dot-c"/><circle cx="953" cy="189" r="2.2" fill="hsl(252, 80%, 70%)" class="dot-a"/><circle cx="406" cy="264" r="2.3" fill="hsl(252, 80%, 70%)" class="dot-b"/><circle cx="815" cy="176" r="3.1" fill="hsl(252, 80%, 70%)" class="dot-c"/><circle cx="595" cy="132" r="1.4" fill="hsl(252, 80%, 70%)" class="dot-a"/><circle cx="270" cy="134" r="1.4" fill="hsl(252, 80%, 70%)" class="dot-b"/><circle cx="440" cy="60" r="2.0" fill="hsl(252, 80%, 70%)" class="dot-c"/><circle cx="755" cy="90" r="1.0" fill="hsl(252, 80%, 70%)" class="dot-a"/><circle cx="1078" cy="35" r="2.6" fill="hsl(252, 80%, 70%)" class="dot-b"/><circle cx="299" cy="285" r="1.9" fill="hsl(252, 80%, 70%)" class="dot-c"/><circle cx="87" cy="158" r="1.8" fill="hsl(252, 80%, 70%)" class="dot-a"/><circle cx="893" cy="128" r="2.5" fill="hsl(252, 80%, 70%)" class="dot-b"/><circle cx="998" cy="220" r="3.0" fill="hsl(252, 80%, 70%)" class="dot-c"/><circle cx="311" cy="188" r="3.0" fill="hsl(252, 80%, 70%)" class="dot-a"/><circle cx="1232" cy="83" r="2.0" fill="hsl(252, 80%, 70%)" class="dot-b"/></g>
   <g filter="url(#softShadow)">
-  <rect x="48" y="40" width="183" height="44" rx="22" fill="rgba(255,255,255,0.08)" stroke="hsl(209, 40%, 32%)"/>
+  <rect x="48" y="40" width="183" height="44" rx="22" fill="rgba(255,255,255,0.08)" stroke="hsl(252, 40%, 32%)"/>
   </g>
-  <rect x="62" y="47" width="30" height="30" rx="9" fill="hsl(209, 90%, 62%)" fill-opacity="0.12" stroke="hsl(209, 90%, 62%)" stroke-opacity="0.35"/>
-  <text x="77" y="67" text-anchor="middle" font-size="14" font-weight="800" fill="#ffffff">R<tspan fill="hsl(209, 90%, 62%)">G</tspan></text>
+  <rect x="62" y="47" width="30" height="30" rx="9" fill="hsl(252, 90%, 62%)" fill-opacity="0.12" stroke="hsl(252, 90%, 62%)" stroke-opacity="0.35"/>
+  <text x="77" y="67" text-anchor="middle" font-size="14" font-weight="800" fill="#ffffff">R<tspan fill="hsl(252, 90%, 62%)">G</tspan></text>
   <text x="102" y="67" font-size="16" font-weight="700" fill="#ffffff">Readme Gen</text>
   <g filter="url(#softShadow)">
-  <rect x="1083" y="40" width="149" height="44" rx="22" fill="rgba(255,255,255,0.08)" stroke="hsl(209, 40%, 32%)"/>
+  <rect x="1083" y="40" width="149" height="44" rx="22" fill="rgba(255,255,255,0.08)" stroke="hsl(252, 40%, 32%)"/>
   </g>
   <text x="1157.5" y="67" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">@davidtorro</text>
   <g filter="url(#softShadow)" class="fade-1">
-    <text x="640" y="186" text-anchor="middle" font-size="84" font-weight="800" letter-spacing="-3" fill="#ffffff" class="float-title">README<tspan fill="hsl(209, 90%, 62%)"> GEN</tspan></text>
+    <text x="640" y="186" text-anchor="middle" font-size="84" font-weight="800" letter-spacing="-3" fill="#ffffff" class="float-title">README<tspan fill="hsl(252, 90%, 62%)"> GEN</tspan></text>
   </g>
-  <text x="640" y="232" text-anchor="middle" font-size="19" fill="hsl(209, 25%, 82%)" class="fade-2">README.md generator for your projects. Creates a professional and attractive README</text>
-  <text x="640" y="259" text-anchor="middle" font-size="19" fill="hsl(209, 25%, 82%)" class="fade-2">quickly with optional local AI enrichment.</text>
+  <text x="640" y="232" text-anchor="middle" font-size="19" fill="hsl(252, 25%, 82%)" class="fade-2">README.md generator for your projects. Creates a professional and attractive README</text>
+  <text x="640" y="259" text-anchor="middle" font-size="19" fill="hsl(252, 25%, 82%)" class="fade-2">quickly with optional local AI enrichment.</text>
 </svg>

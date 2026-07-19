@@ -31,8 +31,14 @@
     "test": "vitest run",
     "verify": "npm run typecheck && npm test && npm run build",
     "prepublishOnly": "npm run build",
-    "gen": "npm run build && node dist/main.js",
-    "gen:all": "npm run build && node dist/main.js banner --force && node dist/main.js --ai --force"
+    "banner": "npm run build && node dist/main.js banner --force",
+    "readme": "npm run build && node dist/main.js --force",
+    "readme:ai": "npm run build && node dist/main.js --ai --force",
+    "readme:es": "npm run build && node dist/main.js es --force",
+    "readme:es:ai": "npm run build && node dist/main.js es --ai --force",
+    "all": "npm run banner && npm run readme:ai",
+    "gen": "npm run readme",
+    "gen:all": "npm run all"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",

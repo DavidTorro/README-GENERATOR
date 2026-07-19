@@ -1,55 +1,50 @@
-// Este archivo contiene la lógica de parseo de argumentos de línea de comandos este se encarga de definir 
-// las opciones disponibles, sus valores por defecto y la ayuda que se muestra al usuario además, valida 
-// los argumentos recibidos y devuelve un objeto con las opciones configuradas
-
-import { parseArgs } from "node:util"; // parseArgs es una función nativa de Node.js que permite parsear argumentos de línea de comandos de manera sencilla y robusta
+import { parseArgs } from "node:util";
 import type { Lang } from "../readme/domain/i18n/index.js";
 
-// Comandos disponibles: generar el README (defecto) o generar el banner con IA de imagen
+// Comandos disponibles: generar el README (defecto) o su banner local.
 export type Command = "readme" | "banner";
 const COMMANDS: Command[] = ["readme", "banner"];
 
-// Interfaz que define las opciones de línea de comandos disponibles para el usuario
 export interface CliOptions {
-  command: Command; // qué hace la CLI: "readme" (defecto) o "banner"
-  ai: boolean; // uso de IA local (Ollama)
-  lang: Lang; // idioma del README generado
-  output: string; // ruta del fichero de salida
-  dryRun: boolean; // si se debe hacer un testeo sin escribir ningún fichero
-  force: boolean; // si se debe sobrescribir el README existente sin preguntar
-  help: boolean; // si se debe mostrar la ayuda
-  version: boolean; // si se debe mostrar la versión
+  command: Command;
+  ai: boolean;
+  lang: Lang;
+  output: string;
+  dryRun: boolean;
+  force: boolean;
+  help: boolean;
+  version: boolean;
 }
 
 // Mensaje para el argumento --help
 export const HELP = `
-readme-gen — generate a professional README.md by analyzing your project
+readme-gen — generate README.md documentation from your project
 
 Usage:
-  readme-gen [command] [language] [options]
+  readme-gen [readme] [en|es] [options]
+  readme-gen banner [options]
 
 Commands:
-  readme (default)    generate README.md by analyzing the project
-  banner              generate assets/banner.svg with an animated SVG design
+  readme (default)    generate README.md from detected project facts
+  banner              generate assets/banner.svg locally (no AI)
 
 Language:
-  en (default) | es          also available as flag: --lang es
+  en (default) | es
 
 Options:
-  --ai                use local AI (Ollama) to enrich README content
+  --ai                enrich README content with local Ollama AI; not available for banner
   -l, --lang <en|es>  language of the generated README
   -o, --output <path> output file (default: README.md)
-      --dry-run       print the result without writing any file
-  -f, --force         overwrite an existing README without asking
+      --dry-run       print the result without writing a file
+  -f, --force         overwrite an existing output file
   -h, --help          show this help
   -v, --version       show version
 
 Examples:
-  npx @davidtorro/readme-gen             Generate the README in English (default)
-  npx @davidtorro/readme-gen --ai        Generate the README using local AI (Ollama)
-  npx @davidtorro/readme-gen es --ai     Generate the README in Spanish using local AI (Ollama)
-  npx @davidtorro/readme-gen --lang es   Generate the README in Spanish using the --lang flag
-  npx @davidtorro/readme-gen --dry-run   Generate the README and print it to the console without writing any file
+  readme-gen --force
+  readme-gen es --ai --force
+  readme-gen banner --force
+  readme-gen --output docs/README.md --force
 `;
 
 // Función PURA: recibe argv, devuelve opciones (o lanza con mensaje claro)
@@ -60,7 +55,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
     options: {
       ai: { type: "boolean", default: false },
       lang: { type: "string", short: "l" },
-      output: { type: "string", short: "o", default: "README.md" },
+      output: { type: "string", short: "o" },
       "dry-run": { type: "boolean", default: false },
       force: { type: "boolean", short: "f", default: false },
       help: { type: "boolean", short: "h", default: false },
@@ -72,6 +67,17 @@ export function parseCliArgs(argv: string[]): CliOptions {
   const isCommand = (v: string | undefined): v is Command => COMMANDS.includes(v as Command);
   const command: Command = isCommand(positionals[0]) ? positionals[0] : "readme";
   const langPositional = isCommand(positionals[0]) ? positionals[1] : positionals[0];
+  const remainingPositionals = isCommand(positionals[0]) ? positionals.slice(2) : positionals.slice(1);
+
+  if (remainingPositionals.length > 0) {
+    throw new Error(`Unexpected argument: "${remainingPositionals[0]}".`);
+  }
+
+  if (command === "banner") {
+    if (values.ai) throw new Error("--ai enriches README content only; banner generation is always local.");
+    if (langPositional || values.lang) throw new Error("banner does not support language selection.");
+    if (values.output) throw new Error("banner always writes to assets/banner.svg; --output is not supported.");
+  }
 
   // Prioridad del idioma: --lang gana al posicional; defecto "en"
   const rawLang = values.lang ?? langPositional ?? "en";
@@ -84,7 +90,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
     command,
     ai: values.ai,
     lang: rawLang,
-    output: values.output,
+    output: values.output ?? "README.md",
     dryRun: values["dry-run"],
     force: values.force,
     help: values.help,
