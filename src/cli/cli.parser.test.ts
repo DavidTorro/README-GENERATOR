@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HELP, parseCliArgs } from "./cli.parser.js";
+import { getHelp, parseCliArgs } from "./cli.parser.js";
 
 describe("parseCliArgs", () => {
   it("uses the README command and English defaults", () => {
@@ -42,8 +42,13 @@ describe("parseCliArgs", () => {
     expect(() => parseCliArgs(["en", "extra"])).toThrow('Unexpected argument: "extra".');
   });
 
-  it("documents that AI is limited to README generation", () => {
-    expect(HELP).toContain("not available for banner");
-    expect(HELP).toContain("readme-gen banner --force");
+  it("documents command-specific options and explained examples in both languages", () => {
+    expect(getHelp("en")).toContain("README options:");
+    expect(getHelp("en")).toContain("Banner accepts only --dry-run and --force.");
+    expect(getHelp("en")).toContain("preview the README in English");
+    expect(getHelp("es")).toContain("Opciones de README:");
+    expect(getHelp("es")).toContain("Banner solo acepta --dry-run y --force.");
+    expect(getHelp("es")).toContain("previsualiza el README en inglés");
+    expect(getHelp("es")).toContain("genera README.md con Ollama y lo sobrescribe si ya existe");
   });
 });

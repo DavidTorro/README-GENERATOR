@@ -31,6 +31,7 @@
     "test": "vitest run",
     "verify": "npm run typecheck && npm test && npm run build",
     "prepublishOnly": "npm run build",
+    "cli": "npm run build && node dist/main.js",
     "banner": "npm run build && node dist/main.js banner --force",
     "readme": "npm run build && node dist/main.js --force",
     "readme:ai": "npm run build && node dist/main.js --ai --force",

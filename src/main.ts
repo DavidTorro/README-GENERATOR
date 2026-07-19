@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import pkg from "../package.json" with { type: "json" };
 import { GenerateReadmeUseCase } from "./readme/application/generate-readme.use-case.js";
 import { FsProjectScanner } from "./project/infrastructure/fs-project-scanner.js";
-import { HELP, parseCliArgs } from "./cli/cli.parser.js";
+import { getHelp, parseCliArgs } from "./cli/cli.parser.js";
 import { loadConfig } from "./ai/infrastructure/ai.config.js";
 import { OllamaClient } from "./ai/infrastructure/ollama.client.js";
 import { buildProjectInfo } from "./project/domain/project.builder.js";
@@ -15,7 +15,7 @@ try {
   const opts = parseCliArgs(process.argv.slice(2));
 
   if (opts.help) {
-    console.log(HELP);
+    console.log(getHelp(opts.lang));
     process.exit(0);
   }
   if (opts.version) {
