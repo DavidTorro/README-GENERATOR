@@ -19,7 +19,8 @@
     "readme-gen": "dist/main.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "assets"
   ],
   "engines": {
     "node": ">=20"
@@ -30,7 +31,7 @@
     "typecheck": "tsc",
     "test": "vitest run",
     "verify": "npm run typecheck && npm test && npm run build",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run verify",
     "cli": "npm run build && node dist/main.js"
   },
   "devDependencies": {
