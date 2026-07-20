@@ -1,4 +1,4 @@
-![Banner](./assets/banner.svg)
+![Banner](https://raw.githubusercontent.com/DavidTorro/README-GENERATOR/main/assets/banner.svg)
 
 # 📝 @davidtorro/readme-gen
 
@@ -26,57 +26,7 @@ Generador de README.md para proyectos que crea documentación profesional y atra
 
 ## 🏗️ Arquitectura
 
-```mermaid
-%%{init: {
-    "theme": "base",
-    "flowchart": { "curve": "basis", "nodeSpacing": 60, "rankSpacing": 90 },
-    "themeVariables": {
-        "primaryColor": "#1f2937",
-        "primaryTextColor": "#f9fafb",
-        "primaryBorderColor": "#60a5fa",
-        "lineColor": "#94a3b8",
-        "tertiaryColor": "#0f172a"
-    }
-}}%%
-
-flowchart LR
-    subgraph SG0["🧰 CLI Herramienta"]
-        direction LR
-        cli["🖥️ Herramienta CLI<br/>Entrada principal"]
-    end
-    subgraph SG1["🔍 Escaneador de Proyecto"]
-        direction LR
-        scanner["🔍 Escaneador de proyecto<br/>fs-project-scanner"]
-    end
-    subgraph SG2["🧠 Motor de IA"]
-        direction LR
-        ai["🤖 Ollama<br/>qwen3-coder:30b"]
-    end
-    subgraph SG3["📄 Generador de README"]
-        direction LR
-        generator["📝 Generador de README<br/>generate-readme.use-case"]
-    end
-    user["👤 Usuario"]
-    user -- "Ejecución" --> cli
-    cli -- "Analiza" --> scanner
-    scanner -- "Datos del proyecto" --> ai
-    ai -- "Enriquecimiento" --> generator
-
-    classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
-    class cli g0;
-    classDef g1 fill:#111827,stroke:#c084fc,color:#f8fafc,stroke-width:2px;
-    class scanner g1;
-    classDef g2 fill:#08111f,stroke:#34d399,color:#f8fafc,stroke-width:2px;
-    class ai g2;
-    classDef g3 fill:#1f2937,stroke:#f472b6,color:#f8fafc,stroke-width:2px;
-    class generator g3;
-    classDef actor fill:#1f2937,stroke:#f59e0b,color:#fff7ed,stroke-width:2px,stroke-dasharray: 5 3;
-    class user actor;
-    style SG0 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG1 fill:#0b1220,stroke:#c084fc,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG2 fill:#0b1220,stroke:#34d399,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG3 fill:#0b1220,stroke:#f472b6,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-```
+![Architecture diagram](https://raw.githubusercontent.com/DavidTorro/README-GENERATOR/main/assets/architecture.svg)
 
 | Componente | Tecnología | Detalle |
 | --- | --- | --- |
