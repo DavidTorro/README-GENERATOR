@@ -124,7 +124,7 @@ try {
   const root = process.cwd();
   const outputPath = resolve(root, opts.output);
 
-  // Red de seguridad: no invocar IA si el destino no se puede sobrescribir
+  // Red de seguridad: no invocar IA si el destino no se puede sobrescribir.
   if (!opts.dryRun && existsSync(outputPath) && !opts.force) {
     console.error(
       opts.lang === "es"
@@ -132,6 +132,13 @@ try {
         : `❌ ${opts.output} already exists. Use --force to overwrite.`,
     );
     process.exit(1);
+  }
+  if (!opts.dryRun && existsSync(outputPath) && opts.force && !opts.all) {
+    throw new Error(
+      opts.lang === "es"
+        ? "Regenerar un README completo sobrescribe todo su contenido. Para actualizar solo el diagrama usa 'readme-gen mermaid es --force'; añade --all para confirmar el reemplazo completo."
+        : "Regenerating a complete README overwrites all of its content. To update only the diagram use 'readme-gen mermaid en --force'; add --all to confirm the full replacement.",
+    );
   }
 
   // Composition root: el ÚNICO sitio donde se enchufan las capas

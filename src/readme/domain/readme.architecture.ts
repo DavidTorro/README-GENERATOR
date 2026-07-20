@@ -18,11 +18,12 @@ export function renderArchitectureSection(architecture: Architecture, t: Transla
 }
 
 export function replaceArchitectureSection(markdown: string, section: string): string {
-  const start = markdown.search(/^## 🏗️ [^\n]+/m);
-  if (start === -1) throw new Error("README.md has no architecture section to replace.");
+  const start = markdown.search(/^## (?:🏗️ )?(?:Arquitectura|Architecture)\s*$/m);
+  if (start === -1) return `${markdown.trimEnd()}\n\n${section}\n`;
 
   const afterSection = markdown.slice(start + 1);
   const nextHeading = afterSection.search(/^## /m);
   const end = nextHeading === -1 ? markdown.length : start + 1 + nextHeading;
-  return `${markdown.slice(0, start)}${section}${markdown.slice(end)}`;
+  const updated = `${markdown.slice(0, start)}${section}${markdown.slice(end)}`;
+  return end === markdown.length ? `${updated}\n` : updated;
 }

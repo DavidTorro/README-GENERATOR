@@ -19,9 +19,13 @@ describe("architecture section", () => {
     expect(updated).toContain("## 📄 License\n\nMIT");
   });
 
-  it("refuses to alter a README without an architecture section", () => {
-    expect(() => replaceArchitectureSection("# Demo\n", "replacement")).toThrow(
-      "README.md has no architecture section to replace.",
-    );
+  it("appends the architecture section when it does not exist", () => {
+    expect(replaceArchitectureSection("# Demo\n", "replacement")).toBe("# Demo\n\nreplacement\n");
+  });
+
+  it("replaces a standard Spanish architecture heading", () => {
+    const updated = replaceArchitectureSection("# Demo\n\n## Arquitectura\n\nantiguo\n", "replacement");
+
+    expect(updated).toBe("# Demo\n\nreplacement\n");
   });
 });

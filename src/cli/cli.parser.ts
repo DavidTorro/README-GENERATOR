@@ -12,6 +12,7 @@ export interface CliOptions {
   output: string;
   dryRun: boolean;
   force: boolean;
+  all: boolean;
   help: boolean;
   version: boolean;
 }
@@ -37,7 +38,8 @@ README options:
 
 Common options:
       --dry-run       print the result without writing a file
-  -f, --force         overwrite an existing output file
+  -f, --force         overwrite an existing banner or Mermaid section
+      --all           confirm replacement of a complete existing README
   -h, --help          show this help
   -v, --version       show version
 
@@ -45,8 +47,8 @@ Banner and mermaid accept a language, --dry-run and --force. Mermaid updates REA
 
 Examples:
   readme-gen --dry-run                                preview the README in English
-  readme-gen es --output docs/README.es.md --force    write a Spanish README to a custom path
-  readme-gen es --force                               generate a fully Spanish README with Ollama, overwriting it if present
+  readme-gen es --output docs/README.es.md --force --all write a Spanish README to a custom path
+  readme-gen es --force --all                         generate a fully Spanish README with Ollama, replacing it if present
   readme-gen banner --dry-run                         preview the SVG banner
   readme-gen banner es --force                        generate a banner with a Spanish tagline
   readme-gen banner --force                           overwrite assets/banner.svg
@@ -73,7 +75,8 @@ Opciones de README:
 
 Opciones comunes:
       --dry-run       muestra el resultado sin escribir ningún archivo
-  -f, --force         sobrescribe un archivo de salida existente
+  -f, --force         sobrescribe un banner o una sección Mermaid existente
+      --all           confirma el reemplazo de un README existente completo
   -h, --help          muestra esta ayuda
   -v, --version       muestra la versión
 
@@ -81,8 +84,8 @@ Los comandos banner y mermaid aceptan idioma, --dry-run y --force. Mermaid actua
 
 Ejemplos:
   readme-gen --dry-run                                previsualiza el README en inglés
-  readme-gen es --output docs/README.es.md --force    escribe un README en español en una ruta personalizada
-  readme-gen es --force                               genera un README completamente en español con Ollama y lo sobrescribe si ya existe
+  readme-gen es --output docs/README.es.md --force --all escribe un README en español en una ruta personalizada
+  readme-gen es --force --all                         genera un README completamente en español con Ollama y lo reemplaza si ya existe
   readme-gen banner --dry-run                         previsualiza el banner SVG
   readme-gen banner es --force                        genera un banner con subtítulo en español
   readme-gen banner --force                           sobrescribe assets/banner.svg
@@ -105,6 +108,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
       output: { type: "string", short: "o" },
       "dry-run": { type: "boolean", default: false },
       force: { type: "boolean", short: "f", default: false },
+      all: { type: "boolean", default: false },
       help: { type: "boolean", short: "h", default: false },
       version: { type: "boolean", short: "v", default: false },
     },
@@ -123,6 +127,9 @@ export function parseCliArgs(argv: string[]): CliOptions {
   if (command === "banner") {
     if (values.ai) throw new Error("--ai enriches README content only; use 'banner es' for a Spanish tagline.");
     if (values.output) throw new Error("banner always writes to assets/banner.svg; --output is not supported.");
+  }
+  if (command !== "readme" && values.all) {
+    throw new Error("--all is only supported when generating a complete README.");
   }
   if (command === "mermaid") {
     if (values.ai) throw new Error("mermaid always uses local Ollama; --ai is not needed.");
@@ -143,6 +150,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
     output: values.output ?? "README.md",
     dryRun: values["dry-run"],
     force: values.force,
+    all: values.all,
     help: values.help,
     version: values.version,
   };

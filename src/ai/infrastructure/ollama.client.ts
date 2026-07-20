@@ -1,5 +1,5 @@
 import type { AiEnrichment, AiGeneratorPort } from "../domain/ai-generator.port.js";
-import type { ProjectInfo } from "../../project/domain/project.interfaces.js";
+import type { Architecture, ProjectInfo } from "../../project/domain/project.interfaces.js";
 import type { Lang } from "../../readme/domain/i18n/index.js";
 import { buildMermaid } from "../../readme/domain/readme.mermaid.js";
 import { BANNER_MOTIFS } from "../../readme/domain/readme.banner.js";
@@ -56,9 +56,8 @@ export class OllamaClient implements AiGeneratorPort {
           lang,
         ),
       )) ?? {};
-    const architecture =
-      (await this.enrichArchitecture(info, lang)) ?? {};
-    return { ...text, ...tree, ...architecture };
+    const architecture = await this.generateArchitecture(info, lang);
+    return { ...text, ...tree, ...(architecture ? { architecture } : {}) };
   }
 
   async translateDescription(info: ProjectInfo, lang: Lang): Promise<string | undefined> {
@@ -66,7 +65,7 @@ export class OllamaClient implements AiGeneratorPort {
   }
 
   async generateArchitecture(info: ProjectInfo, lang: Lang): Promise<AiEnrichment["architecture"]> {
-    return (await this.enrichArchitecture(info, lang))?.architecture;
+    return (await this.enrichArchitecture(info, lang))?.architecture ?? this.buildFallbackArchitecture(info, lang);
   }
 
   private async enrichText(info: ProjectInfo, lang: Lang): Promise<AiEnrichment | undefined> {
@@ -76,17 +75,26 @@ export class OllamaClient implements AiGeneratorPort {
   }
 
   private async enrichArchitecture(info: ProjectInfo, lang: Lang): Promise<AiEnrichment | undefined> {
-    return this.tryTask("architecture", lang, async () =>
-      this.parseArchitectureEnrichment(
-        await this.generate(this.buildArchitecturePrompt(info, lang), 2000),
-        lang,
-      ),
+    return this.tryTask(
+      "architecture",
+      lang,
+      async () =>
+        this.parseArchitectureEnrichment(
+          await this.generate(this.buildArchitecturePrompt(info, lang), 2000),
+          lang,
+        ),
+      false,
     );
   }
 
   // Ejecuta una tarea de IA con un reintento; si falla dos veces, undefined.
   // Genérica: cada llamador decide qué tipo devuelve y cuál es su fallback
-  private async tryTask<T>(name: string, lang: Lang, task: () => Promise<T>): Promise<T | undefined> {
+  private async tryTask<T>(
+    name: string,
+    lang: Lang,
+    task: () => Promise<T>,
+    logFailures = true,
+  ): Promise<T | undefined> {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         return await task();
@@ -98,11 +106,13 @@ export class OllamaClient implements AiGeneratorPort {
           architecture: "arquitectura",
         };
         const taskLabel = lang === "es" ? taskLabels[name] ?? name : name;
-        console.error(
-          lang === "es"
-            ? `⚠️  La tarea de IA «${taskLabel}» falló en el intento ${attempt} (${reason}).${attempt === 1 ? " Reintentando..." : " Se continuará sin ella."}`
-            : `⚠️  AI ${name} attempt ${attempt} failed (${reason}).${attempt === 1 ? " Retrying..." : " Continuing without it."}`,
-        );
+        if (logFailures) {
+          console.error(
+            lang === "es"
+              ? `⚠️  La tarea de IA «${taskLabel}» falló en el intento ${attempt} (${reason}).${attempt === 1 ? " Reintentando..." : " Se continuará sin ella."}`
+              : `⚠️  AI ${name} attempt ${attempt} failed (${reason}).${attempt === 1 ? " Retrying..." : " Continuing without it."}`,
+          );
+        }
       }
     }
     return undefined;
@@ -285,7 +295,9 @@ export class OllamaClient implements AiGeneratorPort {
         : "- Write EVERY subgraph title, node label, edge label and component detail in English.",
       "- Do not claim that a .env file is loaded automatically unless the code explicitly parses it.",
       "- Infer services, PORTS and databases ONLY from the files above (docker-compose/.env/code). NEVER invent ports or services that are not there.",
-      "- 2 to 5 tiers, 4 to 9 nodes total. Keep it clean and readable.",
+       "- Return EXACTLY 4 to 9 declared nodes and at least 3 edges. A graph with fewer than 4 nodes or 3 edges is rejected.",
+       "- If the project has no separate runtime services, use four concrete pipeline stages from the supplied code (actor, entry point, application logic, output/data) rather than omitting nodes.",
+       "- Keep it clean and readable: 2 to 5 tiers.",
       "",
       "Reply ONLY with a JSON object of EXACTLY this shape, adapting the CONTENT to THIS project:",
       example,
@@ -360,6 +372,62 @@ export class OllamaClient implements AiGeneratorPort {
       );
 
     return { architecture: { mermaid: buildMermaid({ subgraphs, nodes, edges }), components } };
+  }
+
+  // Respaldo determinista cuando el modelo no respeta el contrato del grafo.
+  private buildFallbackArchitecture(info: ProjectInfo, lang: Lang): Architecture {
+    const isSpanish = lang === "es";
+    const primaryTech =
+      info.stack.find((tech) => tech.category === "frontend" || tech.category === "backend")?.name ??
+      info.stack.find((tech) => tech.category === "language")?.name ??
+      "Application";
+    const entryLabel = info.binName
+      ? isSpanish
+        ? `⌨️ ${info.binName}<br/>Herramienta CLI`
+        : `⌨️ ${info.binName}<br/>CLI tool`
+      : isSpanish
+        ? `🖥️ ${primaryTech}<br/>Punto de entrada`
+        : `🖥️ ${primaryTech}<br/>Entry point`;
+    const logicLabel = isSpanish ? "⚙️ Lógica de aplicación" : "⚙️ Application logic";
+    const dataLabel = isSpanish ? "📦 Datos del proyecto" : "📦 Project data";
+
+    return {
+      mermaid: buildMermaid({
+        subgraphs: [
+          {
+            title: isSpanish ? "🧠 Aplicación" : "🧠 Application",
+            nodes: [
+              { id: "entry", label: entryLabel },
+              { id: "logic", label: logicLabel },
+              { id: "data", label: dataLabel },
+            ],
+          },
+        ],
+        nodes: [{ id: "user", label: isSpanish ? "👤 Usuario" : "👤 User" }],
+        edges: [
+          { from: "user", to: "entry" },
+          { from: "entry", to: "logic" },
+          { from: "logic", to: "data" },
+        ],
+      }),
+      components: [
+        {
+          name: isSpanish ? "Entrada" : "Entry point",
+          tech: primaryTech,
+          detail: isSpanish ? "Inicia la aplicación" : "Starts the application",
+        },
+        {
+          name: isSpanish ? "Lógica" : "Logic",
+          tech: primaryTech,
+          detail: isSpanish ? "Procesa el flujo principal" : "Processes the main flow",
+        },
+        {
+          name: isSpanish ? "Datos" : "Data",
+          tech: "Project files",
+          detail: isSpanish ? "Entrada o salida del proyecto" : "Project input or output",
+        },
+      ],
+    };
   }
 
   // ---- Transporte común ----

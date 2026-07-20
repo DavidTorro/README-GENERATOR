@@ -10,6 +10,7 @@ describe("parseCliArgs", () => {
       ai: false,
       dryRun: false,
       force: false,
+      all: false,
     });
   });
 
@@ -29,6 +30,13 @@ describe("parseCliArgs", () => {
       lang: "es",
       dryRun: true,
     });
+  });
+
+  it("parses --all only for complete README generation", () => {
+    expect(parseCliArgs(["es", "--force", "--all"])).toMatchObject({ command: "readme", force: true, all: true });
+    expect(() => parseCliArgs(["mermaid", "--all"])).toThrow(
+      "--all is only supported when generating a complete README.",
+    );
   });
 
   it("gives --lang priority over the positional language", () => {
@@ -59,10 +67,10 @@ describe("parseCliArgs", () => {
     expect(getHelp("en")).toContain("README options:");
     expect(getHelp("en")).toContain("Banner and mermaid accept a language, --dry-run and --force.");
     expect(getHelp("en")).toContain("preview the README in English");
-    expect(getHelp("en")).toContain("Spanish uses local Ollama");
+    expect(getHelp("en")).toContain("--all");
     expect(getHelp("es")).toContain("Opciones de README:");
     expect(getHelp("es")).toContain("Los comandos banner y mermaid aceptan idioma, --dry-run y --force.");
     expect(getHelp("es")).toContain("previsualiza el README en inglés");
-    expect(getHelp("es")).toContain("genera un README completamente en español con Ollama");
+    expect(getHelp("es")).toContain("confirma el reemplazo");
   });
 });

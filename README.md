@@ -4,9 +4,9 @@
 
 ![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white) ![Vitest](https://img.shields.io/badge/-Vitest-6e9f18?style=for-the-badge&logo=vitest&logoColor=white) ![tsup](https://img.shields.io/badge/-tsup-0f172a?style=for-the-badge) ![Ollama](https://img.shields.io/badge/-Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
 
-Generador de README.md profesional para proyectos Node.js. Analiza automáticamente el código fuente, detecta tecnologías y crea un documento atractivo con secciones estructuradas. Incluye enriquecimiento opcional con IA local usando Ollama para descripciones, características y arquitectura.
+Generador de README.md para proyectos que crea documentación profesional y atractiva de forma rápida, con la opción de enriquecimiento local mediante inteligencia artificial. Utiliza Ollama para analizar el código y sugerir contenido, y soporta múltiples idiomas.
 
-> 🚀 Crea README.md profesionales en segundos sin salir de tu terminal
+> ⚡ Crea documentación profesional en segundos, sin salir de tu máquina ni compartir datos sensibles.
 
 ## ⚙️ Tecnologías
 
@@ -17,12 +17,12 @@ Generador de README.md profesional para proyectos Node.js. Analiza automáticame
 
 ## ✨ Características
 
-- ✨ Genera README.md completo con secciones como descripción, características, instalación y uso
-- 🔧 Detecta automáticamente tecnologías y dependencias del proyecto (TypeScript, Vitest, etc.)
-- 🤖 Enriquece el contenido con IA local mediante Ollama para mejorar descripciones y arquitectura
-- 🌐 Soporta múltiples idiomas: inglés y español, con sistema de traducciones escalable
-- 📂 Analiza archivos .env.example para documentar variables de entorno del proyecto
-- 🛠️ Comando CLI para generar banner SVG personalizado con soporte para IA
+- ✨ Genera un README.md completo basado en el análisis del proyecto y sus dependencias
+- 🤖 Enriquece el contenido con IA local usando Ollama para descripciones, características y arquitectura
+- 🌐 Soporta internacionalización en inglés y español con archivos de traducción integrados
+- 📁 Detecta automáticamente tecnologías, scripts, imports y variables de entorno desde el código fuente
+- 🛠️ Incluye comandos CLI para ejecutar el generador directamente desde la terminal
+- 🔧 Configurable mediante variables de entorno, con valores por defecto optimizados para desarrollo local
 
 ## 🏗️ Arquitectura
 
@@ -40,28 +40,27 @@ Generador de README.md profesional para proyectos Node.js. Analiza automáticame
 }}%%
 
 flowchart LR
-    subgraph SG0["🔧 Punto de entrada"]
+    subgraph SG0["🧰 CLI Herramienta"]
         direction LR
-        cli["🖥️ Herramienta CLI<br/>node src/main.ts"]
+        cli["🖥️ Herramienta CLI<br/>Entrada principal"]
     end
-    subgraph SG1["🔍 Escaneador de proyecto"]
+    subgraph SG1["🔍 Escaneador de Proyecto"]
         direction LR
-        scanner["🔍 Escaneador de proyecto<br/>fs-project-scanner.js"]
+        scanner["🔍 Escaneador de proyecto<br/>fs-project-scanner"]
     end
     subgraph SG2["🧠 Motor de IA"]
         direction LR
-        ai["🤖 Ollama<br/>http://localhost:11434"]
+        ai["🤖 Ollama<br/>qwen3-coder:30b"]
     end
     subgraph SG3["📄 Generador de README"]
         direction LR
-        generator["📝 Generador de README<br/>generate-readme.use-case.js"]
+        generator["📝 Generador de README<br/>generate-readme.use-case"]
     end
     user["👤 Usuario"]
-    user -- "ejecutar" --> cli
-    cli -- "analizar" --> scanner
-    scanner -- "info proyecto" --> generator
-    cli -- "consultar" --> ai
-    ai -- "enriquecer" --> generator
+    user -- "Ejecución" --> cli
+    cli -- "Analiza" --> scanner
+    scanner -- "Datos del proyecto" --> ai
+    ai -- "Enriquecimiento" --> generator
 
     classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
     class cli g0;
@@ -81,10 +80,74 @@ flowchart LR
 
 | Componente | Tecnología | Detalle |
 | --- | --- | --- |
-| `Herramienta CLI` | TypeScript + Node.js | Punto de entrada principal del generador de README |
-| `Escaneador de proyecto` | fast-glob + fs | Analiza el árbol de archivos y dependencias del proyecto |
-| `Motor de IA` | Ollama + modelo qwen3-coder:30b | Servicio de lenguaje para generar contenido del README |
-| `Generador de README` | TypeScript | Construye el archivo README.md con datos analizados y generados por IA |## 🧪 Pruebas
+| `Punto de entrada CLI` | TypeScript | src/main.ts - Punto de entrada del CLI |
+| `Escaneador de proyecto` | fast-glob | src/project/infrastructure/fs-project-scanner.js - Escanea archivos del proyecto |
+| `Motor de IA` | Ollama | src/IA/infrastructure/ollama.client.js - Comunica con el modelo Ollama |
+| `Generador de README` | TypeScript | src/readme/application/generate-readme.use-case.js - Genera el contenido final |
+
+## 🗂️ Estructura del proyecto
+
+```
+@davidtorro/readme-gen/
+├── assets/                                       # Recursos del proyecto
+│   └── banner.svg                                # Banner del proyecto
+├── src/                                          # Código fuente principal
+│   ├── ai/                                       # Lógica de inteligencia artificial
+│   │   ├── domain/                               # Dominio de la IA
+│   │   │   └── ai-generator.port.ts              # Interfaz generadora IA
+│   │   └── infrastructure/                       # Infraestructura de IA
+│   │       ├── ai.config.test.ts                 # Pruebas de configuración IA
+│   │       ├── ai.config.ts                      # Configuración IA
+│   │       ├── ollama.client.test.ts             # Pruebas cliente Ollama
+│   │       └── ollama.client.ts                  # Cliente Ollama
+│   ├── cli/                                      # Interfaz de línea de comandos
+│   │   ├── cli.parser.test.ts                    # Pruebas del parser CLI
+│   │   └── cli.parser.ts                         # Parser de comandos CLI
+│   ├── project/                                  # Lógica del proyecto
+│   │   ├── domain/                               # Dominio del proyecto
+│   │   │   ├── project-scanner.port.ts           # Interfaz escaneadora proyecto
+│   │   │   ├── project.builder.test.ts           # Pruebas constructor proyecto
+│   │   │   ├── project.builder.ts                # Constructor de proyecto
+│   │   │   ├── project.detectors.ts              # Detectores de proyecto
+│   │   │   └── project.interfaces.ts             # Interfaces del proyecto
+│   │   └── infrastructure/                       # Infraestructura del proyecto
+│   │       ├── fs-project-scanner.test.ts        # Pruebas escaneador FS
+│   │       └── fs-project-scanner.ts             # Escaneador de sistema FS
+│   ├── readme/                                   # Generación de README
+│   │   ├── application/                          # Casos de uso de README
+│   │   │   ├── generate-readme.use-case.test.ts  # Pruebas caso de uso README
+│   │   │   └── generate-readme.use-case.ts       # Caso de uso generar README
+│   │   └── domain/                               # Dominio de README
+│   │       ├── i18n/                             # Internacionalización de README
+│   │       │   ├── en.json                       # Traducciones inglés
+│   │       │   ├── es.json                       # Traducciones español
+│   │       │   └── index.ts                      # Módulo de internacionalización
+│   │       ├── readme.architecture.test.ts       # Pruebas arquitectura README
+│   │       ├── readme.architecture.ts            # Arquitectura README
+│   │       ├── readme.badges.ts                  # Badges del README
+│   │       ├── readme.banner.test.ts             # Pruebas banner README
+│   │       ├── readme.banner.ts                  # Banner del README
+│   │       ├── readme.categories.ts              # Categorías del README
+│   │       ├── readme.commands.ts                # Comandos del README
+│   │       ├── readme.interfaces.ts              # Interfaces del README
+│   │       ├── readme.mermaid.ts                 # Diagramas Mermaid
+│   │       ├── readme.render.test.ts             # Pruebas renderizado README
+│   │       ├── readme.render.ts                  # Renderizado del README
+│   │       ├── readme.sections.ts                # Secciones del README
+│   │       └── readme.tree.ts                    # Árbol de archivos README
+│   └── main.ts                                   # Punto de entrada CLI
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── NOTICE
+├── package-lock.json
+├── package.json
+├── README.md
+├── tsconfig.json
+└── tsup.config.ts
+```
+
+## 🧪 Pruebas
 
 Este proyecto incluye pruebas con Vitest.
 
