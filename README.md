@@ -1,140 +1,184 @@
-![Banner](https://raw.githubusercontent.com/DavidTorro/README-GENERATOR/main/assets/banner.svg)
+![Banner](./assets/banner.svg)
 
 # 📝 @davidtorro/readme-gen
 
 ![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white) ![Vitest](https://img.shields.io/badge/-Vitest-6e9f18?style=for-the-badge&logo=vitest&logoColor=white) ![tsup](https://img.shields.io/badge/-tsup-0f172a?style=for-the-badge) ![Ollama](https://img.shields.io/badge/-Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
 
-Generador de README.md para proyectos que crea documentación profesional y atractiva de forma rápida, con la opción de enriquecimiento local mediante inteligencia artificial. Utiliza Ollama para analizar el código y sugerir contenido, y soporta múltiples idiomas.
+A CLI tool that generates professional README.md files for your projects by analyzing source code and package metadata. It supports optional AI enrichment using local Ollama models to enhance content like descriptions, features, and architecture diagrams.
 
-> ⚡ Crea documentación profesional en segundos, sin salir de tu máquina ni compartir datos sensibles.
+> ⚡ Generates professional READMEs quickly with optional local AI enrichment, no internet required.
 
-## ⚙️ Tecnologías
+## ⚙️ Tech Stack
 
-- 🔤 **Lenguajes**: TypeScript
-- 🧪 **Pruebas**: Vitest
-- 🤖 **IA**: Ollama
-- 🔧 **Herramientas**: tsup
+- 🔤 **Languages**: TypeScript
+- 🧪 **Testing**: Vitest
+- 🤖 **AI**: Ollama
+- 🔧 **Tooling**: tsup
 
-## ✨ Características
+## ✨ Features
 
-- ✨ Genera un README.md completo basado en el análisis del proyecto y sus dependencias
-- 🤖 Enriquece el contenido con IA local usando Ollama para descripciones, características y arquitectura
-- 🌐 Soporta internacionalización en inglés y español con archivos de traducción integrados
-- 📁 Detecta automáticamente tecnologías, scripts, imports y variables de entorno desde el código fuente
-- 🛠️ Incluye comandos CLI para ejecutar el generador directamente desde la terminal
-- 🔧 Configurable mediante variables de entorno, con valores por defecto optimizados para desarrollo local
+- ✨ Analyzes project structure, dependencies, and source code to build a comprehensive README
+- 🤖 Optionally enriches content with AI powered by local Ollama instance
+- 📁 Supports multiple package managers (npm, pnpm, yarn, bun) and detects tech stack automatically
+- 🎨 Generates architecture diagrams in Mermaid format from real imports and code analysis
+- 🌐 Internationalized with English and Spanish support for UI strings and documentation
+- 🛠️ Fully typed with TypeScript and tested using Vitest for reliability
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
-![Architecture diagram](https://raw.githubusercontent.com/DavidTorro/README-GENERATOR/main/assets/architecture.svg)
+```mermaid
+%%{init: {
+    "theme": "base",
+    "flowchart": { "curve": "basis", "nodeSpacing": 60, "rankSpacing": 90 },
+    "themeVariables": {
+        "primaryColor": "#1f2937",
+        "primaryTextColor": "#f9fafb",
+        "primaryBorderColor": "#60a5fa",
+        "lineColor": "#94a3b8",
+        "tertiaryColor": "#0f172a"
+    }
+}}%%
 
-| Componente | Tecnología | Detalle |
+flowchart LR
+    subgraph SG0["🚀 CLI Tool"]
+        direction LR
+        cli["🖥️ CLI Tool<br/>@davidtorro/readme-gen"]
+    end
+    subgraph SG1["🧠 AI Service"]
+        direction LR
+        ai["🤖 Ollama<br/>http://localhost:11434"]
+    end
+    subgraph SG2["📁 Project Data"]
+        direction LR
+        project["📂 Project Files<br/>scan, parse, build"]
+    end
+    user["👤 User"]
+    user -- "run" --> cli
+    cli -- "scan" --> project
+    cli -- "HTTP" --> ai
+
+    classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
+    class cli g0;
+    classDef g1 fill:#111827,stroke:#c084fc,color:#f8fafc,stroke-width:2px;
+    class ai g1;
+    classDef g2 fill:#08111f,stroke:#34d399,color:#f8fafc,stroke-width:2px;
+    class project g2;
+    classDef actor fill:#1f2937,stroke:#f59e0b,color:#fff7ed,stroke-width:2px,stroke-dasharray: 5 3;
+    class user actor;
+    style SG0 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
+    style SG1 fill:#0b1220,stroke:#c084fc,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
+    style SG2 fill:#0b1220,stroke:#34d399,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
+```
+
+| Component | Technology | Details |
 | --- | --- | --- |
-| `Punto de entrada CLI` | TypeScript | src/main.ts - Punto de entrada del CLI |
-| `Escaneador de proyecto` | fast-glob | src/project/infrastructure/fs-project-scanner.js - Escanea archivos del proyecto |
-| `Motor de IA` | Ollama | src/IA/infrastructure/ollama.client.js - Comunica con el modelo Ollama |
-| `Generador de README` | TypeScript | src/readme/application/generate-readme.use-case.js - Genera el contenido final |
+| `CLI Entry Point` | TypeScript + Node.js | Main CLI script that parses args and orchestrates the flow. |
+| `Project Scanner` | fast-glob | Scans project files and extracts metadata from package.json and source code. |
+| `AI Generator` | Ollama + qwen3-coder:30b | Generates README content using local LLM via HTTP API. |
+| `Translation Engine` | i18n JSON files | Provides localized messages for CLI output and generated README. |
 
-## 🗂️ Estructura del proyecto
+## 🗂️ Project Structure
 
 ```
 @davidtorro/readme-gen/
-├── assets/                                       # Recursos del proyecto
-│   └── banner.svg                                # Banner del proyecto
-├── src/                                          # Código fuente principal
-│   ├── ai/                                       # Lógica de inteligencia artificial
-│   │   ├── domain/                               # Dominio de la IA
-│   │   │   └── ai-generator.port.ts              # Interfaz generadora IA
-│   │   └── infrastructure/                       # Infraestructura de IA
-│   │       ├── ai.config.test.ts                 # Pruebas de configuración IA
-│   │       ├── ai.config.ts                      # Configuración IA
-│   │       ├── ollama.client.test.ts             # Pruebas cliente Ollama
-│   │       └── ollama.client.ts                  # Cliente Ollama
-│   ├── cli/                                      # Interfaz de línea de comandos
-│   │   ├── cli.parser.test.ts                    # Pruebas del parser CLI
-│   │   └── cli.parser.ts                         # Parser de comandos CLI
-│   ├── project/                                  # Lógica del proyecto
-│   │   ├── domain/                               # Dominio del proyecto
-│   │   │   ├── project-scanner.port.ts           # Interfaz escaneadora proyecto
-│   │   │   ├── project.builder.test.ts           # Pruebas constructor proyecto
-│   │   │   ├── project.builder.ts                # Constructor de proyecto
-│   │   │   ├── project.detectors.ts              # Detectores de proyecto
-│   │   │   └── project.interfaces.ts             # Interfaces del proyecto
-│   │   └── infrastructure/                       # Infraestructura del proyecto
-│   │       ├── fs-project-scanner.test.ts        # Pruebas escaneador FS
-│   │       └── fs-project-scanner.ts             # Escaneador de sistema FS
-│   ├── readme/                                   # Generación de README
-│   │   ├── application/                          # Casos de uso de README
-│   │   │   ├── generate-readme.use-case.test.ts  # Pruebas caso de uso README
-│   │   │   └── generate-readme.use-case.ts       # Caso de uso generar README
-│   │   └── domain/                               # Dominio de README
-│   │       ├── i18n/                             # Internacionalización de README
-│   │       │   ├── en.json                       # Traducciones inglés
-│   │       │   ├── es.json                       # Traducciones español
-│   │       │   └── index.ts                      # Módulo de internacionalización
-│   │       ├── readme.architecture.test.ts       # Pruebas arquitectura README
-│   │       ├── readme.architecture.ts            # Arquitectura README
-│   │       ├── readme.badges.ts                  # Badges del README
-│   │       ├── readme.banner.test.ts             # Pruebas banner README
-│   │       ├── readme.banner.ts                  # Banner del README
-│   │       ├── readme.categories.ts              # Categorías del README
-│   │       ├── readme.commands.ts                # Comandos del README
-│   │       ├── readme.interfaces.ts              # Interfaces del README
-│   │       ├── readme.mermaid.ts                 # Diagramas Mermaid
-│   │       ├── readme.render.test.ts             # Pruebas renderizado README
-│   │       ├── readme.render.ts                  # Renderizado del README
-│   │       ├── readme.sections.ts                # Secciones del README
-│   │       └── readme.tree.ts                    # Árbol de archivos README
-│   └── main.ts                                   # Punto de entrada CLI
-├── .env.example
-├── .gitignore
-├── LICENSE
-├── NOTICE
-├── package-lock.json
-├── package.json
-├── README.md
-├── tsconfig.json
-└── tsup.config.ts
+├── assets/                                       # Project assets directory
+│   ├── architecture.mmd                          # Architecture diagram source
+│   ├── architecture.svg                          # Architecture diagram image
+│   └── banner.svg                                # Project banner image
+├── src/                                          # Source code root
+│   ├── ai/                                       # AI-related modules
+│   │   ├── domain/                               # AI domain interfaces
+│   │   │   └── ai-generator.port.ts              # AI generation interface
+│   │   └── infrastructure/                       # AI infrastructure implementations
+│   │       ├── ai.config.test.ts                 # AI config unit tests
+│   │       ├── ai.config.ts                      # AI configuration loader
+│   │       ├── ollama.client.test.ts             # Ollama client tests
+│   │       └── ollama.client.ts                  # Ollama API client
+│   ├── cli/                                      # Command-line interface
+│   │   ├── cli.parser.test.ts                    # CLI parser unit tests
+│   │   └── cli.parser.ts                         # CLI argument parsing
+│   ├── project/                                  # Project scanning and analysis
+│   │   ├── domain/                               # Project domain logic
+│   │   │   ├── project-scanner.port.ts           # Project scanner interface
+│   │   │   ├── project.builder.test.ts           # Project builder tests
+│   │   │   ├── project.builder.ts                # Project data builder
+│   │   │   ├── project.detectors.ts              # Project file detectors
+│   │   │   └── project.interfaces.ts             # Project domain interfaces
+│   │   └── infrastructure/                       # Project scanning implementations
+│   │       ├── fs-project-scanner.test.ts        # File system scanner tests
+│   │       └── fs-project-scanner.ts             # File system project scanner
+│   ├── readme/                                   # README generation components
+│   │   ├── application/                          # Use cases for README generation
+│   │   │   ├── generate-readme.use-case.test.ts  # Use case unit tests
+│   │   │   └── generate-readme.use-case.ts       # Generate README use case
+│   │   └── domain/                               # README domain logic
+│   │       ├── i18n/                             # Internationalization files
+│   │       │   ├── en.json                       # English translations
+│   │       │   ├── es.json                       # Spanish translations
+│   │       │   └── index.ts                      # I18n export module
+│   │       ├── readme.architecture.test.ts       # Architecture rendering tests
+│   │       ├── readme.architecture.ts            # Architecture diagram generator
+│   │       ├── readme.badges.ts                  # README badges handling
+│   │       ├── readme.banner.test.ts             # Banner rendering tests
+│   │       ├── readme.banner.ts                  # README banner component
+│   │       ├── readme.categories.ts              # Project categories logic
+│   │       ├── readme.commands.ts                # Command usage section
+│   │       ├── readme.interfaces.ts              # README domain interfaces
+│   │       ├── readme.mermaid.ts                 # Mermaid diagram rendering
+│   │       ├── readme.render.test.ts             # README rendering tests
+│   │       ├── readme.render.ts                  # README markdown renderer
+│   │       ├── readme.sections.ts                # README sections logic
+│   │       └── readme.tree.ts                    # Project file tree display
+│   └── main.ts                                   # CLI entry point
+├── .env.example                                  # Environment variables example
+├── .gitignore                                    # Git ignore rules
+├── LICENSE                                       # Project license file
+├── NOTICE                                        # Legal notices
+├── package-lock.json                             # Dependency lock file
+├── package.json                                  # Project metadata and scripts
+├── README.md                                     # Main project documentation
+├── tsconfig.json                                 # TypeScript configuration
+└── tsup.config.ts                                # Build configuration
 ```
 
-## 🧪 Pruebas
+## 🧪 Testing
 
-Este proyecto incluye pruebas con Vitest.
+This project includes testing configuration with Vitest.
 
 ```bash
 npm run test
 ```
 
-## 🚀 Uso
+## 🚀 Usage
 
-Ejecútalo sin instalarlo con npx:
+Run it without installing, using npx:
 
 ```bash
 npx @davidtorro/readme-gen
 ```
 
-O instálalo de forma global:
+Or install it globally:
 
 ```bash
 npm install -g @davidtorro/readme-gen
 readme-gen
 ```
 
-## 📋 Requisitos
+## 📋 Requirements
 
 - Node.js `>=20`
 
-## 🔐 Variables de entorno
+## 🔐 Environment Variables
 
-| Variable | Descripción |
+| Variable | Description |
 | --- | --- |
 | `OLLAMA_MODEL` | Modelo de Ollama para analizar código y redactar el README |
 | `OLLAMA_URL` | URL del servidor Ollama |
 
-## 👤 Autor
+## 👤 Author
 
-Hecho por **David Torró**
+Made by **David Torró**
 
-## 📄 Licencia
+## 📄 License
 
 Apache-2.0
