@@ -1,4 +1,4 @@
-![Banner](./assets/banner.svg)
+![Banner](https://raw.githubusercontent.com/DavidTorro/README-GENERATOR/main/assets/banner.svg)
 
 # 📝 @davidtorro/readme-gen
 
@@ -26,56 +26,7 @@ A CLI tool that generates professional README.md files for your projects by anal
 
 ## 🏗️ Architecture
 
-```mermaid
-%%{init: {
-    "theme": "base",
-    "flowchart": { "curve": "basis", "nodeSpacing": 60, "rankSpacing": 90 },
-    "themeVariables": {
-        "primaryColor": "#1f2937",
-        "primaryTextColor": "#f9fafb",
-        "primaryBorderColor": "#60a5fa",
-        "lineColor": "#94a3b8",
-        "tertiaryColor": "#0f172a"
-    }
-}}%%
-
-flowchart LR
-    subgraph SG0["🚀 CLI Tool"]
-        direction LR
-        cli["🖥️ CLI Tool<br/>@davidtorro/readme-gen"]
-    end
-    subgraph SG1["🧠 AI Service"]
-        direction LR
-        ai["🤖 Ollama<br/>http://localhost:11434"]
-    end
-    subgraph SG2["📁 Project Data"]
-        direction LR
-        project["📂 Project Files<br/>scan, parse, build"]
-    end
-    user["👤 User"]
-    user -- "run" --> cli
-    cli -- "scan" --> project
-    cli -- "HTTP" --> ai
-
-    classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
-    class cli g0;
-    classDef g1 fill:#111827,stroke:#c084fc,color:#f8fafc,stroke-width:2px;
-    class ai g1;
-    classDef g2 fill:#08111f,stroke:#34d399,color:#f8fafc,stroke-width:2px;
-    class project g2;
-    classDef actor fill:#1f2937,stroke:#f59e0b,color:#fff7ed,stroke-width:2px,stroke-dasharray: 5 3;
-    class user actor;
-    style SG0 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG1 fill:#0b1220,stroke:#c084fc,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG2 fill:#0b1220,stroke:#34d399,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-```
-
-| Component | Technology | Details |
-| --- | --- | --- |
-| `CLI Entry Point` | TypeScript + Node.js | Main CLI script that parses args and orchestrates the flow. |
-| `Project Scanner` | fast-glob | Scans project files and extracts metadata from package.json and source code. |
-| `AI Generator` | Ollama + qwen3-coder:30b | Generates README content using local LLM via HTTP API. |
-| `Translation Engine` | i18n JSON files | Provides localized messages for CLI output and generated README. |
+![Architecture diagram](https://raw.githubusercontent.com/DavidTorro/README-GENERATOR/main/assets/architecture.svg)
 
 ## 🗂️ Project Structure
 
