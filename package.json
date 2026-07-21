@@ -24,6 +24,7 @@
   "bugs": {
     "url": "https://github.com/DavidTorro/README-GENERATOR/issues"
   },
+  "homepage": "https://readme-gen.davidtorro.com",
   "type": "module",
   "bin": {
     "readme-gen": "dist/main.js"
