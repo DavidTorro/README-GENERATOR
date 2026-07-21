@@ -18,6 +18,8 @@ En un destino personalizado se aplica la misma regla cuando esa ruta existe:
 readme-gen es --output docs/README.es.md --force --all
 ```
 
+El CLI crea los directorios padre que falten para una ruta de salida personalizada.
+
 ## Actualizar solo la arquitectura
 
 Usa `mermaid` si solo necesitas actualizar la sección de arquitectura. No reemplaza el README completo:

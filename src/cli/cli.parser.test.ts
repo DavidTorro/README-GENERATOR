@@ -57,6 +57,9 @@ describe("parseCliArgs", () => {
     expect(() => parseCliArgs(["mermaid", "--ai"])).toThrow(
       "mermaid always uses local Ollama; --ai is not needed.",
     );
+    expect(() => parseCliArgs(["banner", "es", "--output", "custom.svg"])).toThrow(
+      "banner siempre escribe en assets/banner.svg; --output no es compatible.",
+    );
   });
 
   it("rejects unexpected positional arguments", () => {

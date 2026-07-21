@@ -124,22 +124,51 @@ export function parseCliArgs(argv: string[]): CliOptions {
     throw new Error(`Unexpected argument: "${remainingPositionals[0]}".`);
   }
 
-  if (command === "banner") {
-    if (values.ai) throw new Error("--ai enriches README content only; use 'banner es' for a Spanish tagline.");
-    if (values.output) throw new Error("banner always writes to assets/banner.svg; --output is not supported.");
-  }
-  if (command !== "readme" && values.all) {
-    throw new Error("--all is only supported when generating a complete README.");
-  }
-  if (command === "mermaid") {
-    if (values.ai) throw new Error("mermaid always uses local Ollama; --ai is not needed.");
-    if (values.output) throw new Error("mermaid always updates README.md; --output is not supported.");
-  }
-
   // Prioridad del idioma: --lang gana al posicional; defecto "en"
   const rawLang = values.lang ?? langPositional ?? "en";
   if (rawLang !== "en" && rawLang !== "es") {
     throw new Error(`Unsupported language: "${rawLang}". Use "en" or "es".`);
+  }
+  const isSpanish = rawLang === "es";
+
+  if (command === "banner") {
+    if (values.ai) {
+      throw new Error(
+        isSpanish
+          ? "--ai solo mejora el contenido del README; usa 'banner es' para un subtítulo en español."
+          : "--ai enriches README content only; use 'banner es' for a Spanish tagline.",
+      );
+    }
+    if (values.output) {
+      throw new Error(
+        isSpanish
+          ? "banner siempre escribe en assets/banner.svg; --output no es compatible."
+          : "banner always writes to assets/banner.svg; --output is not supported.",
+      );
+    }
+  }
+  if (command !== "readme" && values.all) {
+    throw new Error(
+      isSpanish
+        ? "--all solo es compatible al generar un README completo."
+        : "--all is only supported when generating a complete README.",
+    );
+  }
+  if (command === "mermaid") {
+    if (values.ai) {
+      throw new Error(
+        isSpanish
+          ? "mermaid siempre usa Ollama local; --ai no es necesario."
+          : "mermaid always uses local Ollama; --ai is not needed.",
+      );
+    }
+    if (values.output) {
+      throw new Error(
+        isSpanish
+          ? "mermaid siempre actualiza README.md; --output no es compatible."
+          : "mermaid always updates README.md; --output is not supported.",
+      );
+    }
   }
 
   // Devuelve un objeto con las opciones configuradas

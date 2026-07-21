@@ -18,6 +18,8 @@ For a custom destination, the same rule applies when that path exists:
 readme-gen es --output docs/README.es.md --force --all
 ```
 
+The CLI creates missing parent directories for a custom output path.
+
 ## Targeted architecture update
 
 Use `mermaid` when you only need to refresh the architecture section. It does not replace the complete README:

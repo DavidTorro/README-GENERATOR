@@ -8,6 +8,10 @@ A CLI tool that generates professional README.md files for your projects by anal
 
 > ⚡ Generates professional READMEs quickly with optional local AI enrichment, no internet required.
 
+## 📚 Documentation
+
+Read the complete documentation at [readme-gen.davidtorro.com](https://readme-gen.davidtorro.com), including installation, commands, Ollama setup, safe overwrites, examples, and troubleshooting.
+
 ## ⚙️ Tech Stack
 
 - 🔤 **Languages**: TypeScript
@@ -102,18 +106,26 @@ npm run test
 
 ## 🚀 Usage
 
-Run it without installing, using npx:
+Preview the generated README before writing any files:
 
 ```bash
-npx @davidtorro/readme-gen
+npx @davidtorro/readme-gen --dry-run
 ```
 
-Or install it globally:
+To write a new `README.md`, remove `--dry-run`. If a README already exists, replacing it requires an explicit confirmation:
+
+```bash
+npx @davidtorro/readme-gen en --force --all
+```
+
+Or install the CLI globally:
 
 ```bash
 npm install -g @davidtorro/readme-gen
-readme-gen
+readme-gen --dry-run
 ```
+
+Spanish output and Mermaid architecture generation require a local Ollama instance. See the [documentation](https://readme-gen.davidtorro.com) for all commands and safety rules.
 
 ## 📋 Requirements
 

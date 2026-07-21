@@ -13,7 +13,7 @@ Opciones relevantes:
 | Opción | Significado |
 | --- | --- |
 | `--ai` | Enriquece un README en inglés con Ollama local. |
-| `-l, --lang <en/es>` | Selecciona el idioma de salida. |
+| `-l, --lang <en|es>` | Selecciona el idioma de salida. |
 | `-o, --output <path>` | Escribe en una ruta personalizada en vez de `README.md`. |
 | `--dry-run` | Imprime el resultado sin escribir. |
 | `-f, --force` | Permite reemplazar una salida existente. |
@@ -38,7 +38,7 @@ readme-gen banner es --force
 readme-gen mermaid [en|es] [options]
 ```
 
-Este comando siempre usa Ollama local y reemplaza solo la sección de arquitectura Mermaid de `README.md`. Necesita un `README.md` existente salvo con `--dry-run`, y requiere `--force` para escribir.
+Este comando siempre usa Ollama local y actualiza solo un bloque Mermaid generado previamente por `readme-gen` en `README.md`. Necesita un README generado existente salvo con `--dry-run`, y requiere `--force` para escribir. Se detiene en lugar de reemplazar una sección de arquitectura manual.
 
 ```bash
 readme-gen mermaid es --dry-run

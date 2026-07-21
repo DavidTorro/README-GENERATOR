@@ -67,6 +67,13 @@ try {
     }
 
     const updated = replaceArchitectureSection(readFileSync(readmePath, "utf8"), section);
+    if (!updated) {
+      throw new Error(
+        opts.lang === "es"
+          ? "README.md no contiene un bloque Mermaid de arquitectura generado por readme-gen. Ejecuta primero la generación completa del README o usa --dry-run para revisar el nuevo bloque."
+          : "README.md does not contain a readme-gen architecture Mermaid block. Generate the complete README first, or use --dry-run to review the new block.",
+      );
+    }
     writeFileSync(readmePath, updated, "utf8");
     console.error(
       opts.lang === "es"
@@ -157,6 +164,7 @@ try {
     process.exit(0);
   }
 
+  mkdirSync(dirname(outputPath), { recursive: true });
   writeFileSync(outputPath, markdown, "utf8");
   console.error(
     opts.lang === "es"
