@@ -42,12 +42,16 @@
     "test": "vitest run",
     "verify": "npm run typecheck && npm test && npm run build",
     "prepublishOnly": "npm run verify",
-    "cli": "npm run build && node dist/main.js"
+    "cli": "npm run build && node dist/main.js",
+    "docs:dev": "vitepress dev website",
+    "docs:build": "vitepress build website",
+    "docs:preview": "vitepress preview website"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
+    "vitepress": "^1.6.4",
     "vitest": "^3.2.7"
   },
   "overrides": {

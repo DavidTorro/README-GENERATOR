@@ -1,0 +1,48 @@
+# Commands
+
+The CLI has three commands. `readme` is the default command, so it is normally omitted.
+
+## Generate a README
+
+```bash
+readme-gen [en|es] [options]
+```
+
+Useful options:
+
+| Option | Meaning |
+| --- | --- |
+| `--ai` | Enrich an English README with local Ollama. |
+| `-l, --lang <en|es>` | Select the output language. |
+| `-o, --output <path>` | Write to a custom path instead of `README.md`. |
+| `--dry-run` | Print the result without writing. |
+| `-f, --force` | Allow replacing an existing output. |
+| `--all` | Confirm replacement of a complete existing README. |
+
+## Generate a banner
+
+```bash
+readme-gen banner [en|es] [options]
+```
+
+This writes `assets/banner.svg`. `--dry-run` prints the SVG instead. Existing banners require `--force`. A Spanish banner uses Ollama to translate the subtitle; `--ai` and `--output` are not supported for this command.
+
+```bash
+readme-gen banner --dry-run
+readme-gen banner es --force
+```
+
+## Regenerate Mermaid architecture
+
+```bash
+readme-gen mermaid [en|es] [options]
+```
+
+This command always uses local Ollama and replaces only the Mermaid architecture section in `README.md`. It needs an existing `README.md` unless `--dry-run` is used, and it requires `--force` to write.
+
+```bash
+readme-gen mermaid es --dry-run
+readme-gen mermaid en --force
+```
+
+`--ai`, `--output`, and `--all` are not supported by `mermaid`.
