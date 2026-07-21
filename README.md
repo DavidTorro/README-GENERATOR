@@ -4,6 +4,8 @@
 
 ![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white) ![Vitest](https://img.shields.io/badge/-Vitest-6e9f18?style=for-the-badge&logo=vitest&logoColor=white) ![tsup](https://img.shields.io/badge/-tsup-0f172a?style=for-the-badge) ![Ollama](https://img.shields.io/badge/-Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
 
+![npm version](https://img.shields.io/npm/v/%40davidtorro/readme-gen?style=for-the-badge&logo=npm&logoColor=white) ![License](https://img.shields.io/github/license/DavidTorro/README-GENERATOR?style=for-the-badge&logo=spdx&logoColor=white)
+
 A CLI tool that generates professional README.md files for your projects by analyzing source code and package metadata. It supports optional AI enrichment using local Ollama models to enhance content like descriptions, features, and architecture diagrams.
 
 > ⚡ Generates professional READMEs quickly with optional local AI enrichment, no internet required.

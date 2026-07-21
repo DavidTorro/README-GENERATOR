@@ -1,6 +1,6 @@
 {
   "name": "@davidtorro/readme-gen",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "description": "Generate polished README.md files from local project analysis with optional Ollama AI enrichment and Mermaid architecture diagrams.",
   "keywords": [
     "readme-generator",

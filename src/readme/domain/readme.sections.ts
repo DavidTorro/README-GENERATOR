@@ -1,7 +1,7 @@
 import type { Section } from "./readme.interfaces.js";
 import { INSTALL_COMMANDS, RUN_COMMANDS } from "./readme.commands.js";
 import { CATEGORY_ORDER, CATEGORY_EMOJI } from "./readme.categories.js";
-import { buildBadgeLine } from "./readme.badges.js";
+import { buildBadgeLine, buildProjectBadgeLine } from "./readme.badges.js";
 import { buildTree } from "./readme.tree.js";
 import { renderArchitectureSection } from "./readme.architecture.js";
 
@@ -15,8 +15,11 @@ const banner: Section = (info) => {
 
 const title: Section = (info) => `# 📝 ${info.name}`;
 
-const badges: Section = (info) =>
-  info.stack.length === 0 ? null : buildBadgeLine(info.stack.map((tech) => tech.name));
+const badges: Section = (info) => {
+  const stackBadges = buildBadgeLine(info.stack.map((tech) => tech.name));
+  const projectBadges = buildProjectBadgeLine(info.version, info.license);
+  return stackBadges ? `${stackBadges}\n\n${projectBadges}` : projectBadges;
+};
 
 const description: Section = (info, t) => info.description || t.defaultDescription;
 

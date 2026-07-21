@@ -28,6 +28,20 @@ describe("renderReadme architecture", () => {
     expect(renderReadme(project, "en")).not.toContain("## 🏗️ Architecture");
   });
 
+  it("renders version and license badges from project metadata", () => {
+    const markdown = renderReadme(
+      { ...project, license: "Apache-2.0", stack: [{ name: "TypeScript", category: "language" }] },
+      "en",
+    );
+
+    expect(markdown).toContain("![Version](https://img.shields.io/badge/version-1.0.0-4b61c9?style=for-the-badge)");
+    expect(markdown).toContain(
+      "![License](https://img.shields.io/badge/license-Apache--2.0-555555?style=for-the-badge&logo=spdx&logoColor=white)",
+    );
+    expect(markdown).toContain("![TypeScript]");
+    expect(markdown.indexOf("![TypeScript]")).toBeLessThan(markdown.indexOf("![Version]"));
+  });
+
   it("adds a localized readme-gen signature at the end", () => {
     expect(renderReadme(project, "en")).toMatch(
       /---\n\nGenerated with \[readme-gen\]\(https:\/\/readme-gen\.davidtorro\.com\)\.\n$/,

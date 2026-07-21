@@ -34,11 +34,13 @@ const BADGE_CATALOG: Record<string, BadgeStyle> = {
 // Fallback para tecnologías sin entrada en el catálogo
 const DEFAULT_STYLE: BadgeStyle = { color: "555555" };
 
+const encodeBadgeValue = (value: string): string => encodeURIComponent(value.replace(/-/g, "--"));
+
 // Genera el markdown de un badge shields.io
 export function buildBadge(tech: string): string {
   const style = BADGE_CATALOG[tech] ?? DEFAULT_STYLE;
   // '-' es separador en shields.io: un guion literal se escapa como '--'
-  const label = encodeURIComponent(tech.replace(/-/g, "--"));
+  const label = encodeBadgeValue(tech);
   let url = `https://img.shields.io/badge/-${label}-${style.color}?style=for-the-badge`;
   if (style.logo) url += `&logo=${style.logo}`;
   if (style.logoColor) url += `&logoColor=${style.logoColor}`;
@@ -48,4 +50,16 @@ export function buildBadge(tech: string): string {
 // Una línea con todos los badges del stack, separados por espacio
 export function buildBadgeLine(techs: string[]): string {
   return techs.map(buildBadge).join(" ");
+}
+
+export function buildProjectBadgeLine(version: string, license: string | undefined): string {
+  const badges = [
+    `![Version](https://img.shields.io/badge/version-${encodeBadgeValue(version)}-4b61c9?style=for-the-badge)`,
+  ];
+  if (license) {
+    badges.push(
+      `![License](https://img.shields.io/badge/license-${encodeBadgeValue(license)}-555555?style=for-the-badge&logo=spdx&logoColor=white)`,
+    );
+  }
+  return badges.join(" ");
 }
