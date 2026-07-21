@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="RG">
+  <defs>
+    <linearGradient id="background" x1="1" y1="0" x2="0" y2="1">
+      <stop stop-color="#182349"/>
+      <stop offset="1" stop-color="#30204e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" x2="1">
+      <stop stop-color="#7497ff"/>
+      <stop offset="1" stop-color="#b87aff"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="14" fill="url(#background)"/>
+  <rect x="1" y="1" width="46" height="46" rx="13" fill="none" stroke="#91a8ff" stroke-opacity=".45"/>
+  <text x="24" y="31" fill="#fff" font-family="Arial, sans-serif" font-size="19" font-weight="800" text-anchor="middle">R<tspan fill="url(#accent)">G</tspan></text>
+</svg>

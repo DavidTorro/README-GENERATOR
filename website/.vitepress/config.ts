@@ -47,12 +47,13 @@ export default defineConfig({
       title: "readme-gen",
       description: "Documentación técnica para @davidtorro/readme-gen.",
       themeConfig: {
+        logo: { src: "/logo.svg", alt: "RG" },
         nav: [
           { text: "Documentación", link: "/es/guide/installation" },
           { text: "npm", link: "https://www.npmjs.com/package/@davidtorro/readme-gen" },
           { text: "GitHub", link: "https://github.com/DavidTorro/README-GENERATOR" },
         ],
-        sidebar: spanishGuideSidebar,
+        sidebar: { "/es/guide/": spanishGuideSidebar },
         search: { provider: "local" },
         socialLinks: [{ icon: "github", link: "https://github.com/DavidTorro/README-GENERATOR" }],
         footer: {
@@ -71,12 +72,13 @@ export default defineConfig({
     },
   },
   themeConfig: {
+    logo: { src: "/logo.svg", alt: "RG" },
     nav: [
       { text: "Documentation", link: "/guide/installation" },
       { text: "npm", link: "https://www.npmjs.com/package/@davidtorro/readme-gen" },
       { text: "GitHub", link: "https://github.com/DavidTorro/README-GENERATOR" },
     ],
-    sidebar: guideSidebar,
+    sidebar: { "/guide/": guideSidebar },
     search: { provider: "local" },
     socialLinks: [{ icon: "github", link: "https://github.com/DavidTorro/README-GENERATOR" }],
     footer: {

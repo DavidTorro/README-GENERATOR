@@ -1,10 +1,13 @@
 ---
-layout: home
+layout: ReadmeHome
 
 hero:
-  name: readme-gen
-  text: README documentation from your project
-  tagline: Generate a polished README.md from local project analysis, with optional Ollama enrichment.
+  name: "@davidtorro/readme-gen"
+  text: Your project already knows its README.
+  tagline: Turn local code, package metadata, and scripts into documentation you can review before a single file changes.
+  image:
+    src: /terminal.svg
+    alt: readme-gen terminal workflow
   actions:
     - theme: brand
       text: Read the documentation
@@ -14,20 +17,17 @@ hero:
       link: https://www.npmjs.com/package/@davidtorro/readme-gen
 
 features:
-  - title: Local analysis
-    details: Detect project structure, package metadata, scripts, dependencies, and source files.
-  - title: Optional local AI
-    details: Use a local Ollama instance to enrich README content, translate it to Spanish, or generate Mermaid architecture data.
-  - title: Safe by default
-    details: Existing files are never replaced unless the required confirmation flags are explicit.
+  - label: Start
+    title: Install and run
+    details: Use npx for an instant preview or install the CLI globally.
+    link: /guide/installation
+  - label: Learn
+    title: Explore commands
+    details: Generate READMEs, SVG banners, and Mermaid architecture sections.
+    link: /guide/commands
+  - label: Protect
+    title: Write safely
+    details: Understand --dry-run, --force, and --all before replacing files.
+    link: /guide/safe-overwrites
+featureAction: Read guide
 ---
-
-## Start here
-
-Run the CLI in the project you want to document:
-
-```bash
-npx @davidtorro/readme-gen --dry-run
-```
-
-The dry run prints the generated README without writing files. Continue with [installation](/guide/installation) for all options.

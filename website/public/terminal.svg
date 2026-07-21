@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 510" role="img" aria-labelledby="title description">
+  <title id="title">readme-gen workflow</title>
+  <desc id="description">A terminal command generates README documentation from a project folder.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#111a31"/><stop offset="1" stop-color="#202c4e"/></linearGradient>
+    <linearGradient id="accent" x1="0" x2="1"><stop stop-color="#5c86ff"/><stop offset="1" stop-color="#b16cff"/></linearGradient>
+  </defs>
+  <rect width="760" height="510" rx="20" fill="url(#panel)"/>
+  <rect x="1" y="1" width="758" height="508" rx="19" fill="none" stroke="#6478aa" stroke-opacity=".45"/>
+  <path d="M0 54h760" stroke="#6478aa" stroke-opacity=".4"/>
+  <circle cx="32" cy="27" r="7" fill="#ff6f75"/><circle cx="56" cy="27" r="7" fill="#ffce63"/><circle cx="80" cy="27" r="7" fill="#56d39b"/>
+  <text x="380" y="32" fill="#c4d1f5" font-family="ui-monospace, monospace" font-size="15" text-anchor="middle">project / documentation</text>
+  <text x="44" y="103" fill="#7ff0b7" font-family="ui-monospace, monospace" font-size="19">$</text>
+  <text x="70" y="103" fill="#f1f4ff" font-family="ui-monospace, monospace" font-size="19">npx @davidtorro/readme-gen --dry-run</text>
+  <path d="M44 138h672" stroke="#6478aa" stroke-opacity=".4"/>
+  <text x="44" y="180" fill="#94a8d6" font-family="ui-monospace, monospace" font-size="15">ANALYZING PROJECT</text>
+  <rect x="44" y="197" width="292" height="13" rx="6.5" fill="#334264"/><rect x="44" y="197" width="250" height="13" rx="6.5" fill="url(#accent)"/>
+  <g font-family="ui-monospace, monospace" font-size="17"><text x="44" y="254" fill="#eaf0ff">package.json</text><text x="495" y="254" fill="#7ff0b7">detected</text><text x="44" y="290" fill="#eaf0ff">src/</text><text x="495" y="290" fill="#7ff0b7">scanned</text><text x="44" y="326" fill="#eaf0ff">scripts + dependencies</text><text x="495" y="326" fill="#7ff0b7">mapped</text></g>
+  <path d="M44 363h672" stroke="#6478aa" stroke-opacity=".4"/>
+  <text x="44" y="408" fill="#94a8d6" font-family="ui-monospace, monospace" font-size="15">OUTPUT PREVIEW</text>
+  <text x="44" y="448" fill="#bfcdf5" font-family="ui-monospace, monospace" font-size="17">README.md</text><text x="495" y="448" fill="#90aaff" font-family="ui-monospace, monospace" font-size="17">no files written</text>
+</svg>
