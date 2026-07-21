@@ -61,6 +61,12 @@ export default defineConfig({
         },
         outlineTitle: "En esta página",
         docFooter: { prev: "Página anterior", next: "Página siguiente" },
+        notFound: {
+          title: "PÁGINA NO ENCONTRADA",
+          quote: "La ruta que buscas no forma parte de esta documentación.",
+          linkLabel: "Volver a inicio",
+          linkText: "Ir a la documentación",
+        },
       },
     },
   },
@@ -79,5 +85,11 @@ export default defineConfig({
     },
     outlineTitle: "On this page",
     docFooter: { prev: "Previous page", next: "Next page" },
+    notFound: {
+      title: "PAGE NOT FOUND",
+      quote: "The route you requested is not part of this documentation.",
+      linkLabel: "Return home",
+      linkText: "Go to documentation",
+    },
   },
 });
