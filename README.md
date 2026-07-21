@@ -145,3 +145,7 @@ Made by **David Torró**
 ## 📄 License
 
 Apache-2.0
+
+---
+
+Generated with [readme-gen](https://readme-gen.davidtorro.com).

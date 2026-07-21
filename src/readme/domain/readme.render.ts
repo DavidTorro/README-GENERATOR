@@ -8,5 +8,5 @@ export const renderReadme = (info: ProjectInfo, lang: Lang): string => {
   const blocks = sections
     .map((section) => section(info, t))
     .filter((block): block is string => block !== null);
-  return blocks.join("\n\n") + "\n";
+  return `${blocks.join("\n\n")}\n\n---\n\n${t.generatedWith}\n`;
 };

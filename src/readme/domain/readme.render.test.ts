@@ -28,6 +28,15 @@ describe("renderReadme architecture", () => {
     expect(renderReadme(project, "en")).not.toContain("## 🏗️ Architecture");
   });
 
+  it("adds a localized readme-gen signature at the end", () => {
+    expect(renderReadme(project, "en")).toMatch(
+      /---\n\nGenerated with \[readme-gen\]\(https:\/\/readme-gen\.davidtorro\.com\)\.\n$/,
+    );
+    expect(renderReadme(project, "es")).toMatch(
+      /---\n\nGenerado con \[readme-gen\]\(https:\/\/readme-gen\.davidtorro\.com\)\.\n$/,
+    );
+  });
+
   it("renders architecture only when AI provides it", () => {
     const markdown = renderReadme(
       {

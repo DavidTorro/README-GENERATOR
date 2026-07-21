@@ -30,6 +30,7 @@
   "authorBy": "Hecho por",
   "authorRepo": "Repositorio",
   "authorHomepage": "Sitio web",
+  "generatedWith": "Generado con [readme-gen](https://readme-gen.davidtorro.com).",
   "categories": {
     "language": "Lenguajes",
     "frontend": "Interfaz",

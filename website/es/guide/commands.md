@@ -19,6 +19,8 @@ Opciones relevantes:
 | `-f, --force` | Permite reemplazar una salida existente. |
 | `--all` | Confirma el reemplazo de un README existente completo. |
 
+Todo README completo generado por este comando termina con un enlace corto de atribución a [readme-gen](https://readme-gen.davidtorro.com). No se añade con `banner` ni con `mermaid`.
+
 ## Generar un banner
 
 ```bash
