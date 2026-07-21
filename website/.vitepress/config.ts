@@ -34,7 +34,29 @@ export default defineConfig({
   description: "Technical documentation for @davidtorro/readme-gen.",
   base: "/",
   cleanUrls: true,
-  head: [["meta", { name: "theme-color", content: "#3178c6" }]],
+  head: [
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }],
+    ["meta", { name: "theme-color", content: "#4b61c9" }],
+    ["meta", { name: "robots", content: "index, follow" }],
+    ["meta", { property: "og:site_name", content: "readme-gen" }],
+    ["meta", { property: "og:type", content: "website" }],
+    ["meta", { name: "twitter:card", content: "summary" }],
+    [
+      "script",
+      { type: "application/ld+json" },
+      JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "readme-gen",
+        applicationCategory: "DeveloperApplication",
+        operatingSystem: "Node.js",
+        url: "https://readme-gen.davidtorro.com",
+        codeRepository: "https://github.com/DavidTorro/README-GENERATOR",
+        downloadUrl: "https://www.npmjs.com/package/@davidtorro/readme-gen",
+        description: "Generate README documentation from local project analysis.",
+      }),
+    ],
+  ],
   vite: {
     build: { target: "esnext" },
   },
@@ -46,6 +68,7 @@ export default defineConfig({
       link: "/es/",
       title: "readme-gen",
       description: "Documentación técnica para @davidtorro/readme-gen.",
+      head: [["meta", { property: "og:locale", content: "es_ES" }]],
       themeConfig: {
         logo: { src: "/logo.svg", alt: "RG" },
         nav: [
